@@ -1,0 +1,39 @@
+version=0.1
+
+[default.build.parameters]
+beta_features = true
+[default.sync.parameters]
+beta_features = true
+
+[default.deploy.parameters]
+stack_name = "di-one-login-home-stubs"
+region = "eu-west-2"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-44r43ey3knwx"
+s3_prefix = "di-one-login-home-stubs"
+capabilities = "CAPABILITY_NAMED_IAM"
+confirm_changeset = true
+tags = "project=\"di-one-login-home-stubs\" stage=\"dev\""
+parameter_overrides = Environment=\"dev\" VpcStackName=\"vpc-enhanced\" CodeSigningConfigArn=\"none\" PermissionsBoundary=\"none\""
+image_repositories = []
+
+[dev.deploy.parameters]
+stack_name = "di-one-login-home-stubs"
+region = "eu-west-2"
+capabilities = "CAPABILITY_NAMED_IAM"
+tags = "project=\"di-one-login-home-stubs\" stage=\"dev\""
+parameter_overrides=[
+    "Environment=dev",
+    "CodeSigningConfigArn=none",
+    "PermissionsBoundary=none"
+]
+
+[build.deploy.parameters]
+stack_name = "di-one-login-home-stubs"
+region = "eu-west-2"
+capabilities = "CAPABILITY_NAMED_IAM"
+tags = "project=\"di-one-login-home-stubs\" stage=\"build\""
+parameter_overrides=[
+    "Environment=build",
+    "CodeSigningConfigArn=none",
+    "PermissionsBoundary=none"
+]
