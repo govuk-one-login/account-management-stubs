@@ -1,2 +1,2 @@
 # di-one-login-home-stubs
-Stub repository for account management 
+Repository to store stubs for services that OneLogin Home integrates with
