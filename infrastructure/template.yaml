@@ -27,6 +27,11 @@ Parameters:
       The ARN of the permissions boundary to apply to any role created by the template
     Default: "none"
 
+Mappings:
+  TxmaDummyInputQueue:
+    build:
+      QueueArn: "arn:aws:sqs:eu-west-2:301577035144:account-mgmt-backend-TxMAInputDummyQueue-yWYwdmAuecBo"
+      KeyArn: "arn:aws:kms:eu-west-2:301577035144:key/844ec710-0c1b-4455-8532-c5c7658298e3" # not sure this is correct or needed
 
 Conditions:
   UseCodeSigning:
@@ -53,6 +58,67 @@ Globals:
       - !Ref AWS::NoValue
 
 Resources:
+
+  ######################################
+  # Encryption
+  ######################################
+  LambdaKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action:
+              - "kms:*"
+            Resource:
+              - "*"
+          - Effect: "Allow"
+            Principal:
+              Service: "lambda.amazonaws.com"
+            Action:
+              - "kms:Decrypt"
+            Resource: "*"
+
+  LambdaKMSKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/LambdaKMSKey"
+      TargetKeyId: !Ref LambdaKMSKey
+
+  LoggingKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action:
+              - kms:*
+            Resource: "*"
+          - Effect: Allow
+            Principal:
+              Service: !Sub "logs.${AWS::Region}.amazonaws.com"
+            Action:
+              - "kms:Encrypt*"
+              - "kms:Decrypt*"
+              - "kms:ReEncrypt*"
+              - "kms:GenerateDataKey*"
+              - "kms:Describe*"
+            Resource: "*"
+            Condition:
+              ArnLike:
+                "kms:EncryptionContext:aws:logs:arn": !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+
+  ######################################
+  # Account Management API Stub
+  ######################################
   AccountManagementStubFunction:
     Type: AWS::Serverless::Function
     DependsOn:
@@ -144,29 +210,99 @@ Resources:
       Type: String
       Value: !GetAtt AccountManagementStubApi.ApiEndpoint
 
-  LambdaKMSKey:
-    Type: AWS::KMS::Key
+  ######################################
+  # OIDC Authorization API Stub
+  ######################################
+  OidcAuthorizeApiStubFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - OidcAuthorizeApiStubFunctionLogGroup
     Properties:
-      EnableKeyRotation: true
-      KeyPolicy:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-stub-authorize
+      Architectures: ["arm64"]
+      CodeUri: ../lambda/stubs/oidc/authorize/
+      Handler: oidc-authorize-stub.handler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 128
+      ReservedConcurrentExecutions: 5
+      Runtime: nodejs18.x
+      Role: !GetAtt OidcAuthorizeApiStubFunctionRole.Arn
+      Timeout: 5
+      Environment:
+        Variables:
+          DUMMY_TXMA_QUEUE: !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueArn]
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - oidc-stub-authorize.ts
+
+  OidcAuthorizeApiStubFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Effect: "Allow"
+          - Effect: Allow
             Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+              Service:
+                - lambda.amazonaws.com
             Action:
-              - "kms:*"
-            Resource:
-              - "*"
-          - Effect: "Allow"
-            Principal:
-              Service: "lambda.amazonaws.com"
-            Action:
-              - "kms:Decrypt"
-            Resource: "*"
-
-  LambdaKMSKeyAlias:
-    Type: AWS::KMS::Alias
+              - "sts:AssumeRole"
+  
+  OidcAuthorizeApiStubFunctionApi:
+    Type: AWS::ApiGatewayV2::Api
     Properties:
-      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/LambdaKMSKey"
-      TargetKeyId: !Ref LambdaKMSKey
+      Name: OidcAuthorizeApiStubFunctionApi
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - GET
+          - HEAD
+          - OPTIONS
+          - POST
+      Target: !GetAtt OidcAuthorizeApiStubFunction.Arn
+
+  OidcAuthorizeApiStubPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !Ref OidcAuthorizeApiStubFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${OidcAuthorizeApiStubFunctionApi}/*"
+
+  OidcAuthorizeApiStubFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-authorize-api-stub"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  OidcAuthorizeApiStubEndpoint:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: The API Gateway endpoint for the Account Management stub
+      Name: !Sub "/${AWS::StackName}/Stub/OIDC/authorize"
+      Type: String
+      Value: !GetAtt OidcAuthorizeApiStubFunctionApi.ApiEndpoint

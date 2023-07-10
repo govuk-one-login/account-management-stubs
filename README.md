@@ -1,2 +1,2 @@
-# di-one-login-home-stubs
-Repository to store stubs for services that OneLogin Home integrates with
+# di-account-management-stubs
+Repository to store stubs for services that Gov.UK OneLogin Account Managemet integrates with
