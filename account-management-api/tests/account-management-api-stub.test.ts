@@ -1,4 +1,4 @@
-import { handler, Response } from "../account-management-api";
+import { handler, Response } from "../account-management-api-stub";
 
 describe("handler", () => {
   test("returns status code 204", async () => {

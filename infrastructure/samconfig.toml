@@ -6,21 +6,21 @@ beta_features = true
 beta_features = true
 
 [default.deploy.parameters]
-stack_name = "di-one-login-home-stubs"
+stack_name = "account-mgmt-stubs"
 region = "eu-west-2"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-44r43ey3knwx"
-s3_prefix = "di-one-login-home-stubs"
+s3_prefix = "account-mgmt-stubs"
 capabilities = "CAPABILITY_NAMED_IAM"
 confirm_changeset = true
-tags = "project=\"di-one-login-home-stubs\" stage=\"dev\""
-parameter_overrides = Environment=\"dev\" VpcStackName=\"vpc-enhanced\" CodeSigningConfigArn=\"none\" PermissionsBoundary=\"none\""
+tags = "project=\"account-mgmt-stubs\" stage=\"dev\""
+parameter_overrides = "Environment=\"dev\" VpcStackName=\"vpc-enhanced\" CodeSigningConfigArn=\"none\" PermissionsBoundary=\"none\""
 image_repositories = []
 
 [dev.deploy.parameters]
-stack_name = "di-one-login-home-stubs"
+stack_name = "account-mgmt-stubs"
 region = "eu-west-2"
 capabilities = "CAPABILITY_NAMED_IAM"
-tags = "project=\"di-one-login-home-stubs\" stage=\"dev\""
+tags = "project=\"account-mgmt-stubs\" stage=\"dev\""
 parameter_overrides=[
     "Environment=dev",
     "CodeSigningConfigArn=none",
@@ -28,10 +28,10 @@ parameter_overrides=[
 ]
 
 [build.deploy.parameters]
-stack_name = "di-one-login-home-stubs"
+stack_name = "account-mgmt-stubs"
 region = "eu-west-2"
 capabilities = "CAPABILITY_NAMED_IAM"
-tags = "project=\"di-one-login-home-stubs\" stage=\"build\""
+tags = "project=\"account-mgmt-stubs\" stage=\"build\""
 parameter_overrides=[
     "Environment=build",
     "CodeSigningConfigArn=none",
