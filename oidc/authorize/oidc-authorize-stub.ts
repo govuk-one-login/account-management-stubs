@@ -1,11 +1,11 @@
-import { TxmaEvent } from "./models";
-
 import { v4 as uuid } from "uuid";
 import {
   SendMessageCommand,
   SendMessageRequest,
   SQSClient,
 } from "@aws-sdk/client-sqs";
+
+import { TxmaEvent } from "./models";
 
 export interface Response {
   statusCode: number;
@@ -43,7 +43,7 @@ export const handler = async () => {
   return {
     statusCode: 302,
     headers: {
-      Location: 'home.build.account.gov.uk',
-    }
+      Location: "home.build.account.gov.uk",
+    },
   };
 };
