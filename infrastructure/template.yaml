@@ -126,7 +126,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-account-management-api-stub
       Architectures: ["arm64"]
-      CodeUri: ../lambda/stubs/account-management-api/
+      CodeUri: ../account-management-api/
       Handler: account-management-api-stub.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
