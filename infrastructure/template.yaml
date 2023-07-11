@@ -220,7 +220,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-stub-authorize
       Architectures: ["arm64"]
-      CodeUri: ../lambda/stubs/oidc/authorize/
+      CodeUri: ../oidc/authorize/
       Handler: oidc-authorize-stub.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
