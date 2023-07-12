@@ -29,6 +29,8 @@ Parameters:
 
 Mappings:
   TxmaDummyInputQueue:
+    dev:
+      QueueArn: "arn:aws:sqs:eu-west-2:985326104449:account-mgmt-backend-TxMAInputDummyQueue-2nXfeOxQGy3g"
     build:
       QueueArn: "arn:aws:sqs:eu-west-2:301577035144:account-mgmt-backend-TxMAInputDummyQueue-yWYwdmAuecBo"
       KeyArn: "arn:aws:kms:eu-west-2:301577035144:key/844ec710-0c1b-4455-8532-c5c7658298e3" # not sure this is correct or needed
