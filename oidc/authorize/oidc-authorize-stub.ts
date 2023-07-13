@@ -17,7 +17,7 @@ const newTxmaEvent = (): TxmaEvent => ({
   event_name: "AUTH_AUTH_CODE_ISSUED",
   client_id: "vehicleOperatorLicense",
   user: {
-    user_id: "iser_id",
+    user_id: "user_id",
     session_id: uuid(),
   },
 });
@@ -37,9 +37,11 @@ export const sendSqsMessage = async (
 };
 
 export const handler = async () => {
+  console.log("DEBUG request recieved");
   const { DUMMY_TXMA_QUEUE } = process.env;
+  console.log(DUMMY_TXMA_QUEUE);
   sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE);
-
+  console.log("Sent SQS message")
   return {
     statusCode: 302,
     headers: {
