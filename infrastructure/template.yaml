@@ -320,9 +320,7 @@ Resources:
         Statement:
           - Effect: Allow
             Action:
-              - sqs:ReceiveMessage
-              - sqs:DeleteMessage
-              - sqs:GetQueueAttributes
+              - sqs:SendMessage
             Resource: !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueArn]
           - Effect: Allow
             Action:
