@@ -45,7 +45,7 @@ export const handler = async () => {
   return {
     statusCode: 302,
     headers: {
-      Location: "home.build.account.gov.uk",
+      Location: "https://home.build.account.gov.uk",
     },
   };
 };
