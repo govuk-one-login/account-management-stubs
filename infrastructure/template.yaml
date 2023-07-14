@@ -308,3 +308,22 @@ Resources:
       Name: !Sub "/${AWS::StackName}/Stub/OIDC/authorize"
       Type: String
       Value: !GetAtt OidcAuthorizeApiStubFunctionApi.ApiEndpoint
+  
+  OidcAuthorizeApiStubPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - sqs:ReceiveMessage
+              - sqs:DeleteMessage
+              - sqs:GetQueueAttributes
+            Resource: !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueArn]
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Resource: !FindInMap [TxmaDummyInputQueue, !Ref Environment, KeyArn]
