@@ -247,7 +247,7 @@ Resources:
       Description: The API Gateway endpoint for the Account Management stub
       Name: !Sub "/${AWS::StackName}/Stub/AccountManagement/Endpoint"
       Type: String
-      Value: !GetAtt AccountManagementStubApi.ApiEndpoint
+      Value: !Sub am-stub.home.${Environment}.account.gov.uk
 
   ######################################
   # OIDC Authorization API Stub
