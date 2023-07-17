@@ -278,7 +278,7 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - "sts:AssumeRole"
-  
+
   OidcAuthorizeApiStubFunctionApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
@@ -318,7 +318,7 @@ Resources:
       Name: !Sub "/${AWS::StackName}/Stub/OIDC/authorize"
       Type: String
       Value: !GetAtt OidcAuthorizeApiStubFunctionApi.ApiEndpoint
-  
+
   OidcAuthorizeApiStubPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -335,3 +335,97 @@ Resources:
               - kms:GenerateDataKey*
               - kms:ReEncrypt*
             Resource: !FindInMap [TxmaDummyInputQueue, !Ref Environment, KeyArn]
+
+  ######################################
+  # OIDC UserInfo API Stub
+  ######################################
+  OidcUserInfoApiStubFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - OidcUserInfoApiStubFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-userinfo-stub
+      Architectures: ["arm64"]
+      CodeUri: ../oidc/userinfo/
+      Handler: oidc-userinfo-stub.handler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 128
+      ReservedConcurrentExecutions: 5
+      Runtime: nodejs18.x
+      Role: !GetAtt OidcUserInfoApiStubFunctionRole.Arn
+      Timeout: 5
+      Events:
+        userinfo:
+          Type: Api
+          Properties:
+            Path: /userinfo
+            Method: GET
+            RestApiId:
+              Ref: RestApi
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - oidc-userinfo-stub.ts
+
+  OidcUserInfoApiStubFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref OidcAuthorizeApiStubPolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+
+  OidcUserInfoApiStubFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-userinfo-api-stub"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  RestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Description: HTTP API to emulate a token issuer for authorization in non-prod environments
+      StageName: !Ref Environment
+      CacheClusterEnabled: true
+      CacheClusterSize: '0.5'
+      MethodSettings:
+        - HttpMethod: '*'
+          CachingEnabled: true
+          ResourcePath: /*
+      TracingEnabled: true
+      AccessLogSetting:
+        DestinationArn: !GetAtt ApiGatewayApiLogGroup.Arn
+
+  ApiGatewayApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/apigateway/${RestApi}"
+      RetentionInDays: 1
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
