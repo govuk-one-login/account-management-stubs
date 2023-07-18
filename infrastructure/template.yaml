@@ -212,13 +212,42 @@ Resources:
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
+  AccountManagementStubCustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Sub am-stub.home.${Environment}.account.gov.uk
+      DomainNameConfigurations:
+        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/HostedZone/Certificate/Home/ARN}}"
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
+
+  AccountManagementStubDnsRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Sub am-stub.home.${Environment}.account.gov.uk
+      Type: A
+      HostedZoneId: !Sub "{{resolve:ssm:/${Environment}/Platform/Route53/HostedZone/Home}}"
+      AliasTarget:
+        DNSName: !GetAtt AccountManagementStubCustomDomain.RegionalDomainName
+        HostedZoneId: !GetAtt AccountManagementStubCustomDomain.RegionalHostedZoneId
+        EvaluateTargetHealth: true
+
+  ApiGatewayMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      DomainName: !Sub am-stub.home.${Environment}.account.gov.uk
+      ApiId: !Ref AccountManagementStubApi
+      Stage: "$default"
+    DependsOn:
+      - AccountManagementStubCustomDomain
+
   AccountManagementStubApiEndpoint:
     Type: AWS::SSM::Parameter
     Properties:
       Description: The API Gateway endpoint for the Account Management stub
       Name: !Sub "/${AWS::StackName}/Stub/AccountManagement/Endpoint"
       Type: String
-      Value: !GetAtt AccountManagementStubApi.ApiEndpoint
+      Value: !Sub am-stub.home.${Environment}.account.gov.uk
 
   ######################################
   # OIDC Authorization API Stub
