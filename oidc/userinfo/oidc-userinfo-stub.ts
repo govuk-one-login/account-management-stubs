@@ -12,12 +12,12 @@ const newUserInfo = (): UserInfo => ({
   email_verified: true,
   phone: "1234567890",
   phone_verified: true,
-  updated_at: Date.now.toString(),
+  updated_at: Date.now().toString(),
 });
 
 export const handler = async () => {
   return {
     statusCode: 200,
-    body: newUserInfo(),
+    body: JSON.stringify(newUserInfo()),
   };
 };

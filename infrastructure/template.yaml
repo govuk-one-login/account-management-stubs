@@ -9,6 +9,7 @@ Parameters:
     AllowedValues:
       - "dev"
       - "build"
+    Default: dev
     ConstraintDescription: must be dev or build
   VpcStackName:
     Description: >
