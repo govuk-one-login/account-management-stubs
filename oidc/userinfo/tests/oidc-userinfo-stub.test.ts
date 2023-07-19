@@ -1,4 +1,3 @@
-
 import { handler, Response } from "../oidc-userinfo-stub";
 
 describe("handler", () => {

@@ -1,9 +1,9 @@
-import { UserInfo } from "./models";
 import { v4 as uuid } from "uuid";
+import { UserInfo } from "./models";
 
 export interface Response {
   statusCode: number;
-  body: UserInfo;
+  body: string;
 }
 
 const newUserInfo = (): UserInfo => ({
