@@ -3,7 +3,7 @@ import { UserInfo } from "./models";
 
 export interface Response {
   statusCode: number;
-  body: UserInfo;
+  body: string;
 }
 
 const newUserInfo = (): UserInfo => ({
