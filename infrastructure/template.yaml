@@ -409,6 +409,9 @@ Resources:
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
+  ######################################
+  # OIDC API Stub API Gateway
+  ######################################
   OidcStubsRestApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -431,6 +434,9 @@ Resources:
       RetentionInDays: 1
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
+  ######################################
+  # OIDC API Stub Domain
+  ######################################
   CustomDomain:
     Type: AWS::ApiGatewayV2::DomainName
     Properties:
