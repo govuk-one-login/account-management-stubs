@@ -272,10 +272,16 @@ Resources:
       Timeout: 5
       Environment:
         Variables:
-          DUMMY_TXMA_QUEUE_URL:
-            !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueUrl]
-          ACCOUNT_MANAGEMENT_URL:
-            !FindInMap [AccountManagementUI, !Ref Environment, url]
+          DUMMY_TXMA_QUEUE_URL: !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueUrl]
+          ACCOUNT_MANAGEMENT_URL: !FindInMap [AccountManagementUI, !Ref Environment, url]
+      Events:
+        userinfo:
+          Type: Api
+          Properties:
+            Path: /authorize
+            Method: GET
+            RestApiId:
+              Ref: OidcStubsRestApi
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
@@ -312,29 +318,6 @@ Resources:
             Action:
               - "sts:AssumeRole"
 
-  OidcAuthorizeApiStubFunctionApi:
-    Type: AWS::ApiGatewayV2::Api
-    Properties:
-      Name: OidcAuthorizeApiStubFunctionApi
-      ProtocolType: HTTP
-      CorsConfiguration:
-        AllowOrigins:
-          - "*"
-        AllowMethods:
-          - GET
-          - HEAD
-          - OPTIONS
-          - POST
-      Target: !GetAtt OidcAuthorizeApiStubFunction.Arn
-
-  OidcAuthorizeApiStubPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: "lambda:InvokeFunction"
-      FunctionName: !Ref OidcAuthorizeApiStubFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${OidcAuthorizeApiStubFunctionApi}/*"
-
   OidcAuthorizeApiStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     DeletionPolicy: Delete
@@ -350,7 +333,8 @@ Resources:
       Description: The API Gateway endpoint for the Account Management stub
       Name: !Sub "/${AWS::StackName}/Stub/OIDC/authorize"
       Type: String
-      Value: !GetAtt OidcAuthorizeApiStubFunctionApi.ApiEndpoint
+      Value: !Sub oidc-stub.home.${Environment}.account.gov.uk
+
 
   OidcAuthorizeApiStubPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -442,6 +426,14 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-userinfo-api-stub"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  OidcUserInfoApiStubEndpoint:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: The API Gateway endpoint for the OIDC userinfo stub
+      Name: !Sub "/${AWS::StackName}/Stub/OIDC/userinfo"
+      Type: String
+      Value: !Sub oidc-stub.home.${Environment}.account.gov.uk
 
   ######################################
   # OIDC API Stub API Gateway
