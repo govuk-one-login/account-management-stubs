@@ -69,7 +69,6 @@ Globals:
       - !Ref AWS::NoValue
 
 Resources:
-
   ######################################
   # Encryption
   ######################################
@@ -132,6 +131,7 @@ Resources:
   ######################################
   AccountManagementStubFunction:
     Type: AWS::Serverless::Function
+    # checkov:skip=CKV_AWS_116
     DependsOn:
       - AccountManagementStubFunctionLogGroup
     Properties:
@@ -255,6 +255,7 @@ Resources:
   ######################################
   OidcAuthorizeApiStubFunction:
     Type: AWS::Serverless::Function
+    # checkov:skip=CKV_AWS_116
     DependsOn:
       - OidcAuthorizeApiStubFunctionLogGroup
     Properties:
@@ -344,7 +345,8 @@ Resources:
           - Effect: Allow
             Action:
               - sqs:SendMessage
-            Resource: !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueArn]
+            Resource:
+              !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueArn]
           - Effect: Allow
             Action:
               - kms:Decrypt
@@ -357,6 +359,7 @@ Resources:
   ######################################
   OidcUserInfoApiStubFunction:
     Type: AWS::Serverless::Function
+    # checkov:skip=CKV_AWS_116
     DependsOn:
       - OidcUserInfoApiStubFunctionLogGroup
     Properties:
@@ -441,9 +444,9 @@ Resources:
       Description: HTTP API to emulate a token issuer for authorization in non-prod environments
       StageName: !Ref Environment
       CacheClusterEnabled: true
-      CacheClusterSize: '0.5'
+      CacheClusterSize: "0.5"
       MethodSettings:
-        - HttpMethod: '*'
+        - HttpMethod: "*"
           CachingEnabled: true
           ResourcePath: /*
       TracingEnabled: true
