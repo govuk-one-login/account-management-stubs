@@ -492,10 +492,10 @@ Resources:
         EvaluateTargetHealth: true
 
   ApiMapping:
-    Type: AWS::ApiGatewayV2::ApiMapping
+    Type: AWS::ApiGateway::BasePathMapping
     Properties:
-      DomainName: !Sub oidc-stub.home.${Environment}.account.gov.uk
-      ApiId: !Ref OidcStubsRestApi
+      DomainName: !Ref CustomDomain
       Stage: !Ref Environment
+      RestApiId: !Ref OidcStubsRestApi
     DependsOn:
-      - CustomDomain
+      - OidcStubsRestApiStage  # This resource is created as part of the OidcStubsRestApi resource
