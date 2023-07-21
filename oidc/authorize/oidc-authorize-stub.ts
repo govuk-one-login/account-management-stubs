@@ -9,6 +9,9 @@ import { TxmaEvent } from "./models";
 
 export interface Response {
   statusCode: number;
+  headers: {
+    Location: string;
+  };
 }
 
 const newTxmaEvent = (): TxmaEvent => ({
@@ -36,9 +39,19 @@ export const sendSqsMessage = async (
   return result.MessageId;
 };
 
-export const handler = async () => {
+export const handler = async (): Promise<Response> => {
   const { DUMMY_TXMA_QUEUE_URL } = process.env;
   const { ACCOUNT_MANAGEMENT_URL } = process.env;
+
+  if (
+    typeof DUMMY_TXMA_QUEUE_URL === "undefined" ||
+    typeof ACCOUNT_MANAGEMENT_URL === "undefined"
+  ) {
+    throw new Error(
+      "TXMA Queue URL or Frontend URL environemnt variables is null"
+    );
+  }
+
   sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
   return {
     statusCode: 302,
