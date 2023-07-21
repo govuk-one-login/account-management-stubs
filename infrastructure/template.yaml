@@ -327,15 +327,6 @@ Resources:
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
-  OidcAuthorizeApiStubEndpoint:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Description: The API Gateway endpoint for the Account Management stub
-      Name: !Sub "/${AWS::StackName}/Stub/OIDC/authorize"
-      Type: String
-      Value: !Sub oidc-stub.home.${Environment}.account.gov.uk
-
-
   OidcAuthorizeApiStubPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -427,13 +418,7 @@ Resources:
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
-  OidcUserInfoApiStubEndpoint:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Description: The API Gateway endpoint for the OIDC userinfo stub
-      Name: !Sub "/${AWS::StackName}/Stub/OIDC/userinfo"
-      Type: String
-      Value: !Sub oidc-stub.home.${Environment}.account.gov.uk
+
 
   ######################################
   # OIDC API Stub API Gateway
@@ -492,6 +477,13 @@ Resources:
     DependsOn:
       - OidcStubsRestApiStage  # This resource is created as part of the OidcStubsRestApi resource
 
+  OidcStubEndpoint:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: The API Gateway endpoint for the OIDC  stub
+      Name: !Sub "/${AWS::StackName}/Stub/OIDC"
+      Type: String
+      Value: !Sub oidc-stub.home.${Environment}.account.gov.uk
   ######################################
   # OIDC Configuration Stub
   ######################################
