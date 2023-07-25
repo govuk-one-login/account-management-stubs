@@ -14,6 +14,8 @@ export interface Response {
   };
 }
 
+const redirectReturnPath = "/auth/callback";
+
 const newTxmaEvent = (): TxmaEvent => ({
   event_id: uuid(),
   timestamp: Date.now(),
@@ -56,7 +58,7 @@ export const handler = async (): Promise<Response> => {
   return {
     statusCode: 302,
     headers: {
-      Location: ACCOUNT_MANAGEMENT_URL,
+      Location: `${ACCOUNT_MANAGEMENT_URL}${redirectReturnPath}`,
     },
   };
 };
