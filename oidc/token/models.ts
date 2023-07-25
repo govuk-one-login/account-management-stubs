@@ -5,8 +5,3 @@ export interface TokenResponse {
   expires_in: number;
   id_token: string;
 }
-
-export interface Response {
-  statusCode: number;
-  body: string;
-}
