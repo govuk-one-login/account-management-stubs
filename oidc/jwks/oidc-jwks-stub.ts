@@ -7,14 +7,14 @@ export const handler = async () => {
   const data = {
     keys: [
       {
-        kty: "EC",
-        use: "sig",
-        crv: "P-256",
-        kid: "f02aec21220ef7b502e6396304345a7b87cffbdc4239ed09a136b164c6cf8e30",
-        x: "qBwa5L5ZA33RortEjaQ8_lwrVd-EE2eVsgOC84VwyVQ",
-        y: "ONF88GoP9xQJtq8RRV6zquggcd7xtggzZ20yW-PljHE",
-        alg: "ES256",
-      },
+        "kty": "EC",
+        "use": "sig",
+        "crv": "P-256",
+        "kid": "B-QMUxdJOJ8ubkmArc4i1SGmfZnNNlM-va9h0HJ0jCo",
+        "x": "YrTTzbuUwQhWyaj11w33k-K8bFydLfQssVqr8mx6AVE",
+        "y": "8UQcw-6Wp0bp8iIIkRw8PW2RSSjmj1I_8euyKEDtWRk",
+        "alg": "ES256"
+    },
     ],
   };
 
