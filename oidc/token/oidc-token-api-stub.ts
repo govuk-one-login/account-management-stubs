@@ -1,9 +1,14 @@
 import { v4 as uuid } from "uuid";
-import { Response, TokenResponse } from "./models";
 import { importJWK, JWTHeaderParameters, JWTPayload, SignJWT } from "jose";
+import { Response, TokenResponse } from "./models";
 
-const newClaims = (OIDC_CLIENT_ID: string): JWTPayload => ({
-  sub: "urn:fdc:gov.uk:2022:" + uuid(),
+const epochDateNow = (): number => Math.round(Date.now() / 1000);
+
+const newClaims = (
+  OIDC_CLIENT_ID: string,
+  randomString: string
+): JWTPayload => ({
+  sub: `urn:fdc:gov.uk:2022:${randomString}`,
   iss: "https://oidc-stub.home.account.gov.uk",
   aud: OIDC_CLIENT_ID,
   exp: epochDateNow() + 3600,
@@ -21,6 +26,7 @@ const jwk = {
   y: "8UQcw-6Wp0bp8iIIkRw8PW2RSSjmj1I_8euyKEDtWRk",
   alg: "ES256",
 };
+
 const algorithm = "ES256";
 
 const newJwtHeader = (): JWTHeaderParameters => ({
@@ -28,21 +34,15 @@ const newJwtHeader = (): JWTHeaderParameters => ({
   alg: algorithm,
 });
 
-const epochDateNow = (): number => Math.round(Date.now() / 1000);
-
 export const handler = async (): Promise<Response> => {
   const { OIDC_CLIENT_ID } = process.env;
-
   if (typeof OIDC_CLIENT_ID === "undefined") {
     throw new Error("OIDC_CLIENT_ID environemnt variable is null");
   }
-
   const privateKey = await importJWK(jwk, algorithm);
-
-  const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID))
+  const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID, uuid()))
     .setProtectedHeader(newJwtHeader())
     .sign(privateKey);
-
   const tokenResponse = (): TokenResponse => ({
     access_token: "123ABC",
     refresh_token: "456DEF",
@@ -50,7 +50,6 @@ export const handler = async (): Promise<Response> => {
     expires_in: 3600,
     id_token: jwt,
   });
-
   return {
     statusCode: 200,
     body: JSON.stringify(tokenResponse()),
