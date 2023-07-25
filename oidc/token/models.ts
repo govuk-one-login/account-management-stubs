@@ -15,6 +15,27 @@ export interface TokenResponse {
   id_token: string;
 }
 
+export interface Claims {
+  sub: string;
+  iss: string;
+  nonce: string;
+  aud: string;
+  exp: number;
+  iat: number;
+  sid: string;
+}
+
+export interface JwtHeader {
+  kid: string;
+  alg: string;
+}
+
+
+export interface LambdaResponse {
+  statusCode: number;
+  body: string;
+}
+
 export interface IdToken {
   sub: string;
   iss: string;
@@ -23,4 +44,9 @@ export interface IdToken {
   exp: number;
   iat: number;
   sid: string;
+}
+
+export interface Response {
+  statusCode: number;
+  body: string;
 }

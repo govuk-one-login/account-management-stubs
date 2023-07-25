@@ -561,116 +561,119 @@ Resources:
   # OIDC JWKS Stub
   ###################################### 
   OidcJWKSStubFunction:
-   Type: AWS::Serverless::Function
-   # checkov:skip=CKV_AWS_116
-   DependsOn:
-     - OidcJWKSStubFunctionLogGroup
-   Properties:
-     FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-jwks-stub
-     Architectures: ["arm64"]
-     CodeUri: ../oidc/jwks/
-     Handler: oidc-jwks-stub.handler
-     KmsKeyArn: !GetAtt LambdaKMSKey.Arn
-     PackageType: Zip
-     MemorySize: 128
-     ReservedConcurrentExecutions: 5
-     Runtime: nodejs18.x
-     Role: !GetAtt OidcJWKSStubFunctionRole.Arn
-     Timeout: 5
-     Events:
-       userinfo:
-         Type: Api
-         Properties:
-           Path: /.well-known/jwks.json
-           Method: GET
-           RestApiId:
-             Ref: OidcStubsRestApi
-     VpcConfig:
-       SubnetIds:
-         - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-         - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-       SecurityGroupIds:
-         - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-   Metadata:
-     BuildMethod: esbuild
-     BuildProperties:
-       Minify: true
-       Target: "es2020"
-       Sourcemap: true
-       EntryPoints:
-         - oidc-jwks-stub.ts
+    Type: AWS::Serverless::Function
+    # checkov:skip=CKV_AWS_116
+    DependsOn:
+      - OidcJWKSStubFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-jwks-stub
+      Architectures: ["arm64"]
+      CodeUri: ../oidc/jwks/
+      Handler: oidc-jwks-stub.handler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 128
+      ReservedConcurrentExecutions: 5
+      Runtime: nodejs18.x
+      Role: !GetAtt OidcJWKSStubFunctionRole.Arn
+      Timeout: 5
+      Events:
+        userinfo:
+          Type: Api
+          Properties:
+            Path: /.well-known/jwks.json
+            Method: GET
+            RestApiId:
+              Ref: OidcStubsRestApi
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - oidc-jwks-stub.ts
 
   OidcJWKSStubFunctionRole:
-   Type: AWS::IAM::Role
-   Properties:
-     PermissionsBoundary: !If
-       - UsePermissionsBoundary
-       - !Ref PermissionsBoundary
-       - !Ref AWS::NoValue
-     ManagedPolicyArns:
-       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-       - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-     AssumeRolePolicyDocument:
-       Version: "2012-10-17"
-       Statement:
-         - Effect: Allow
-           Principal:
-             Service:
-               - lambda.amazonaws.com
-           Action:
-             - "sts:AssumeRole"
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
 
   OidcJWKSStubFunctionLogGroup:
-   Type: AWS::Logs::LogGroup
-   DeletionPolicy: Delete
-   UpdateReplacePolicy: Delete
-   Properties:
-     LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-jwks-stub"
-     RetentionInDays: 30
-     KmsKeyId: !GetAtt LoggingKmsKey.Arn
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-jwks-stub"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
   
   ######################################
   # OIDC Token API Stub
   ######################################
   OidcTokenApiStubFunction:
-   Type: AWS::Serverless::Function
+    Type: AWS::Serverless::Function
    # checkov:skip=CKV_AWS_116
-   DependsOn:
-     - OidcTokenApiStubFunctionLogGroup
-   Properties:
-     FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token-api-stub
-     Architectures: ["arm64"]
-     CodeUri: ../oidc/token/
-     Handler: oidc-token-api-stub.handler
-     KmsKeyArn: !GetAtt LambdaKMSKey.Arn
-     PackageType: Zip
-     MemorySize: 128
-     ReservedConcurrentExecutions: 5
-     Runtime: nodejs18.x
-     Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
-     Timeout: 5
-     Events:
-       userinfo:
-         Type: Api
-         Properties:
-           Path: /token
-           Method: GET
-           RestApiId:
-             Ref: OidcStubsRestApi
-     VpcConfig:
-       SubnetIds:
-         - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-         - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-       SecurityGroupIds:
-         - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-   Metadata:
-     BuildMethod: esbuild
-     BuildProperties:
-       Minify: true
-       Target: "es2020"
-       Sourcemap: true
-       EntryPoints:
-         - oidc-token-api-stub.ts
+    DependsOn:
+      - OidcTokenApiStubFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token-api-stub
+      Architectures: ["arm64"]
+      CodeUri: ../oidc/token/
+      Handler: oidc-token-api-stub.handler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 128
+      ReservedConcurrentExecutions: 5
+      Runtime: nodejs18.x
+      Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
+      Timeout: 5
+      Events:
+        userinfo:
+          Type: Api
+          Properties:
+            Path: /token
+            Method: GET
+            RestApiId:
+              Ref: OidcStubsRestApi
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:   
+          OIDC_CLIENT_ID: !Sub "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - oidc-token-api-stub.ts
 
   OidcTokenApiStubFunctionRole:
    Type: AWS::IAM::Role
