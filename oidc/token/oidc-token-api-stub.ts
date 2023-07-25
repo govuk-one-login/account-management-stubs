@@ -6,8 +6,7 @@ import {
   TokenResponse,
   UserInfo,
 } from "./models";
-import * as jwt from "jsonwebtoken";
-const { sign } = jwt;
+import { sign } from "jsonwebtoken";
 
 // const newUserInfo = (): UserInfo => ({
 //   sub: uuid(),
