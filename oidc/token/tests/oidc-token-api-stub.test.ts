@@ -1,5 +1,5 @@
-import { Response, TokenResponse } from "../models";
-import { handler } from "../oidc-token-api-stub";
+import { TokenResponse } from "../models";
+import { Response, handler } from "../oidc-token-api-stub";
 
 describe("handler", () => {
   beforeEach(() => {
