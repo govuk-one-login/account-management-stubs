@@ -666,6 +666,7 @@ Resources:
       Environment:
         Variables:   
           OIDC_CLIENT_ID: "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
+          OIDC_SIGNING_KEY: !Sub "{{resolve:secretsmanager:/${AWS::StackName}/Config/Oidc/Signing/Key}}"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -703,3 +704,15 @@ Resources:
      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-token-api-stub"
      RetentionInDays: 30
      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  OidcTokenApiStubPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "secretsmanager:GetSecretValue"
+            Resource:
+              - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:/${AWS::StackName}/Config/Oidc/Signing/Key"
