@@ -665,7 +665,7 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
       Environment:
         Variables:   
-          OIDC_CLIENT_ID: !Sub "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
+          OIDC_CLIENT_ID: "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
