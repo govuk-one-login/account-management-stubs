@@ -558,7 +558,7 @@ Resources:
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
   ######################################
-  # OIDC JWKS Stub
+  # OIDC JWKS API Stub
   ###################################### 
   OidcJWKSStubFunction:
     Type: AWS::Serverless::Function
@@ -634,7 +634,7 @@ Resources:
   ######################################
   OidcTokenApiStubFunction:
     Type: AWS::Serverless::Function
-   # checkov:skip=CKV_AWS_116
+    # checkov:skip=CKV_AWS_116
     DependsOn:
       - OidcTokenApiStubFunctionLogGroup
     Properties:
