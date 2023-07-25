@@ -1,4 +1,4 @@
-import { Response } from "../models";
+import { Response, TokenResponse } from "../models";
 import { handler } from "../oidc-token-api-stub";
 
 
@@ -7,8 +7,11 @@ describe("handler", () => {
     process.env.OIDC_CLIENT_ID = "12345";
   });
 
-  test("sends message to TXMA Queue and returns a redirect", async () => {
+  test("returns 200 OK response including body with access token", async () => {
     const result: Response = await handler();
-    expect(result.statusCode).toEqual(302);
+    const body: TokenResponse = JSON.parse(result.body);
+    expect(result.statusCode).toEqual(200);
+    expect(body.id_token).toContain("eyJraWQiOiJCLVFNVXhkSk9KOHVia21BcmM0aTFTR21mWm5OTmxNLXZhOWgwSEowakNvIiwiYWxnIjoiRVMyNTYifQ");
+
   });
 });
