@@ -21,9 +21,11 @@ describe("handler", () => {
   });
 
   test("sends message to TXMA Queue and returns a redirect", async () => {
+    const redirectReturnUrl = `${frontendUrl}/auth/callback`;
+
     const result: Response = await handler();
     expect(result.statusCode).toEqual(302);
-    expect(result.headers.Location).toEqual(frontendUrl);
+    expect(result.headers.Location).toEqual(redirectReturnUrl);
     expect(sqsMock.commandCalls(SendMessageCommand).length).toEqual(1);
   });
 });
