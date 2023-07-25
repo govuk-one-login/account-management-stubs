@@ -1,6 +1,11 @@
 import { v4 as uuid } from "uuid";
 import { importJWK, JWTHeaderParameters, JWTPayload, SignJWT } from "jose";
-import { Response, TokenResponse } from "./models";
+import { TokenResponse } from "./models";
+
+export interface Response {
+  statusCode: number;
+  body: string;
+}
 
 const epochDateNow = (): number => Math.round(Date.now() / 1000);
 
