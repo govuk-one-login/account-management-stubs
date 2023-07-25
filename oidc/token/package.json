@@ -1,8 +1,8 @@
 {
-  "name": "oidc-token-stub",
+  "name": "oidc-token-api-stub",
   "version": "1.0.0",
   "description": "A Lambda function to stub calls to the OIDC Token API",
-  "main": "index.js",
+  "main": "oidc-token-api-stub.js",
   "scripts": {
     "test": "jest",
     "lint": "eslint . --ext .ts",
@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@types/aws-lambda": "^8.10.106",
-    "@types/uuid": "^9.0.2"
+    "@types/uuid": "^9.0.2",
+    "@types/jsonwebtoken": "^9.0.1"
   }
 }

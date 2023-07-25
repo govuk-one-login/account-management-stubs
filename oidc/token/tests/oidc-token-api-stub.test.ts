@@ -1,11 +1,14 @@
-export interface Response {
-  statusCode: number;
+import { Response } from "../models";
+import { handler } from "../oidc-token-api-stub";
 
-}
 
-export const handler = async () => {
+describe("handler", () => {
+  beforeEach(() => {
+    process.env.OIDC_CLIENT_ID = "12345";
+  });
 
-  return {
-    statusCode: 200,
-  };
-};
+  test("sends message to TXMA Queue and returns a redirect", async () => {
+    const result: Response = await handler();
+    expect(result.statusCode).toEqual(302);
+  });
+});
