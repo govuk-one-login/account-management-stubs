@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
-import { importJWK, JWTHeaderParameters, JWTPayload, SignJWT } from "jose";
+import { JWTHeaderParameters, JWTPayload } from "jose";
+import { KMSClient, SignCommand } from "@aws-sdk/client-kms";
 import { TokenResponse } from "./models";
 
 export interface Response {
@@ -21,39 +22,60 @@ const newClaims = (
   sid: uuid(),
 });
 
-const jwk = {
-  kty: "EC",
-  d: "Ob4_qMu1nkkBLEw97u--PHVsShP3xOKOJ6z0WsdU0Xw",
-  use: "sig",
-  crv: "P-256",
-  kid: "B-QMUxdJOJ8ubkmArc4i1SGmfZnNNlM-va9h0HJ0jCo",
-  x: "YrTTzbuUwQhWyaj11w33k-K8bFydLfQssVqr8mx6AVE",
-  y: "8UQcw-6Wp0bp8iIIkRw8PW2RSSjmj1I_8euyKEDtWRk",
+const newJwtHeader = (keyId: string): JWTHeaderParameters => ({
+  kid: keyId,
   alg: "ES256",
-};
-
-const algorithm = "ES256";
-
-const newJwtHeader = (): JWTHeaderParameters => ({
-  kid: "B-QMUxdJOJ8ubkmArc4i1SGmfZnNNlM-va9h0HJ0jCo",
-  alg: algorithm,
 });
+
+const signJwtViaKms = async (
+  header: JWTHeaderParameters,
+  payload: JWTPayload,
+  keyId: string
+) => {
+  const kmsClient = new KMSClient({});
+  const jwtParts = {
+    header: Buffer.from(JSON.stringify(header)).toString("base64url"),
+    payload: Buffer.from(JSON.stringify(payload)).toString("base64url"),
+    signature: "",
+  };
+  const message = Buffer.from(jwtParts.header + "." + jwtParts.payload);
+  const signCommand = new SignCommand({
+    Message: message,
+    MessageType: "RAW",
+    KeyId: keyId,
+    SigningAlgorithm: "ECDSA_SHA_256",
+  });
+  const response = await kmsClient.send(signCommand);
+  if (!response.Signature) {
+    throw new Error(`Failed to sign JWT with KMS key ${keyId}`);
+  }
+  jwtParts.signature = Buffer.from(response.Signature).toString("base64url");
+  return jwtParts.header + "." + jwtParts.payload + "." + jwtParts.signature;
+};
 
 export const handler = async (): Promise<Response> => {
   const { OIDC_CLIENT_ID } = process.env;
-  if (typeof OIDC_CLIENT_ID === "undefined") {
-    throw new Error("OIDC_CLIENT_ID environemnt variable is null");
+  const { SIGNING_KEY_ID } = process.env;
+  if (
+    typeof OIDC_CLIENT_ID === "undefined" ||
+    typeof SIGNING_KEY_ID === "undefined"
+  ) {
+    throw new Error(
+      `environemnt variable OIDC_CLIENT_ID ${OIDC_CLIENT_ID} or SIGNING_KEY_ID ${SIGNING_KEY_ID} is null`
+    );
   }
-  const privateKey = await importJWK(jwk, algorithm);
-  const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID, uuid()))
-    .setProtectedHeader(newJwtHeader())
-    .sign(privateKey);
+  const signedJwt = await signJwtViaKms(
+    newJwtHeader(SIGNING_KEY_ID),
+    newClaims(OIDC_CLIENT_ID, uuid()),
+    SIGNING_KEY_ID
+  );
+
   const tokenResponse = (): TokenResponse => ({
     access_token: "123ABC",
     refresh_token: "456DEF",
     token_type: "Bearer",
     expires_in: 3600,
-    id_token: jwt,
+    id_token: signedJwt,
   });
   return {
     statusCode: 200,

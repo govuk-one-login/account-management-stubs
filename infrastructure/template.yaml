@@ -684,6 +684,7 @@ Resources:
         Variables:   
           OIDC_CLIENT_ID: "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
           OIDC_SIGNING_KEY: !Sub "{{resolve:secretsmanager:/${AWS::StackName}/Config/Oidc/Signing/Key}}"
+          SIGNING_KEY_ID: !GetAtt OidcTokenSigningKey.Arn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -782,3 +783,9 @@ Resources:
           Value: !Ref OwnerTagValue
         - Key: Source
           Value: !Ref SourceTagValue
+  
+  # OidcTokenSigningKeyAlias:
+  #   Type: AWS::KMS::Alias
+  #   Properties:
+  #     AliasName: !Sub "alias/${AWS::StackName}-ToeknSigningKmsKey"
+  #     TargetKeyId: !GetAtt OidcTokenSigningKey.Arn
