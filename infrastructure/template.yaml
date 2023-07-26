@@ -27,6 +27,22 @@ Parameters:
     Description: >
       The ARN of the permissions boundary to apply to any role created by the template
     Default: "none"
+  ProductTagValue:
+    Description: Value for the Product Tag
+    Type: String
+    Default: GOV.UK Sign In
+  OwnerTagValue:
+    Description: Value for the Owner Tag
+    Type: String
+    Default: govuk-accounts-tech@digital.cabinet-office.gov.uk
+  SourceTagValue:
+    Description: Value for the Source Tag
+    Type: String
+    Default: alphagov/di-account-management-frontend/deploy/template.yaml
+  SystemTagValue:
+    Description: Value for the System Tag
+    Type: String
+    Default: Accounts
 
 Mappings:
   AccountManagementUI:
@@ -483,6 +499,7 @@ Resources:
       Name: !Sub "/${AWS::StackName}/Stub/OIDC"
       Type: String
       Value: !Sub oidc-stub.home.${Environment}.account.gov.uk
+  
   ######################################
   # OIDC Configuration Stub
   ######################################
@@ -677,33 +694,34 @@ Resources:
           - oidc-token-api-stub.ts
 
   OidcTokenApiStubFunctionRole:
-   Type: AWS::IAM::Role
-   Properties:
-     PermissionsBoundary: !If
-       - UsePermissionsBoundary
-       - !Ref PermissionsBoundary
-       - !Ref AWS::NoValue
-     ManagedPolicyArns:
-       - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-       - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-     AssumeRolePolicyDocument:
-       Version: "2012-10-17"
-       Statement:
-         - Effect: Allow
-           Principal:
-             Service:
-               - lambda.amazonaws.com
-           Action:
-             - "sts:AssumeRole"
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref OidcTokenApiStubPolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
 
   OidcTokenApiStubFunctionLogGroup:
-   Type: AWS::Logs::LogGroup
-   DeletionPolicy: Delete
-   UpdateReplacePolicy: Delete
-   Properties:
-     LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-token-api-stub"
-     RetentionInDays: 30
-     KmsKeyId: !GetAtt LoggingKmsKey.Arn
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-token-api-stub"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
   OidcTokenApiStubPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -716,3 +734,51 @@ Resources:
               - "secretsmanager:GetSecretValue"
             Resource:
               - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:/${AWS::StackName}/Config/Oidc/Signing/Key"
+          - Effect: Allow
+            Action:
+              - "kms:Sign"
+            Resource:
+              -!Ref OidcTokenSigningKey
+  
+  OidcTokenSigningKey:
+    Type: AWS::KMS::Key
+    Properties: 
+      Description: KMS key using ES256 algorithm for signing JWTs for the OIDC stub
+      EnableKeyRotation: False
+      KeyPolicy:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action:
+              - kms:*
+            Resource: "*"
+          - Effect: Allow
+            Principal:
+              AWS: !Ref OidcTokenApiStubFunction
+            Action:
+              - kms:sign
+            Resource: "*"
+          - Effect: Allow
+            Principal:
+              AWS: !Ref OidcJWKSStubFunction
+            Action: 
+              - kms:GetPublicKey
+            Resource: "*"
+      KeySpec: "ECC_NIST_P256"
+      KeyUsage: "SIGN_VERIFY"
+      MultiRegion: False
+      Tags: 
+        - Key: Product
+          Value: !Ref ProductTagValue
+        - Key: System
+          Value: !Ref SystemTagValue
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-LoggingKmsKey"
+        - Key: Owner
+          Value: !Ref OwnerTagValue
+        - Key: Source
+          Value: !Ref SourceTagValue
