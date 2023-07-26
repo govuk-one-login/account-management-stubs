@@ -1,5 +1,9 @@
 import { v4 as uuid } from "uuid";
 import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyEventQueryStringParameters,
+} from "aws-lambda";
+import {
   SendMessageCommand,
   SendMessageRequest,
   SQSClient,
@@ -41,7 +45,12 @@ export const sendSqsMessage = async (
   return result.MessageId;
 };
 
-export const handler = async (): Promise<Response> => {
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<Response> => {
+  const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
+    event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
+  const { state } = queryStringParameters;
   const { DUMMY_TXMA_QUEUE_URL } = process.env;
   const { ACCOUNT_MANAGEMENT_URL } = process.env;
 
@@ -58,7 +67,7 @@ export const handler = async (): Promise<Response> => {
   return {
     statusCode: 302,
     headers: {
-      Location: `${ACCOUNT_MANAGEMENT_URL}${redirectReturnPath}`,
+      Location: `${ACCOUNT_MANAGEMENT_URL}${redirectReturnPath}/?state=${state}`,
     },
   };
 };
