@@ -1,8 +1,8 @@
 import { TokenResponse } from "../models";
-import { Response, handler } from "../oidc-token-api-stub";
 import { KMSClient, SignCommand } from "@aws-sdk/client-kms";
 import { mockClient } from "aws-sdk-client-mock";
 import "aws-sdk-client-mock-jest";
+import { Response, handler } from "../oidc-token-api-stub";
 
 const kmsMock = mockClient(KMSClient);
 
