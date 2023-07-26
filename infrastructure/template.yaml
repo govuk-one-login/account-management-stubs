@@ -735,6 +735,11 @@ Resources:
               - "secretsmanager:GetSecretValue"
             Resource:
               - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:/${AWS::StackName}/Config/Oidc/Signing/Key"
+          - Effect: Allow
+            Action:
+              - "kms:Sign"
+            Resource:
+              -!Ref OidcTokenSigningKey
   
   OidcTokenSigningKey:
     Type: AWS::KMS::Key
@@ -749,18 +754,6 @@ Resources:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
             Action:
               - kms:*
-            Resource: "*"
-          - Effect: Allow
-            Principal:
-              AWS: !Ref OidcTokenApiStubFunction
-            Action:
-              - kms:sign
-            Resource: "*"
-          - Effect: Allow
-            Principal:
-              AWS: !Ref OidcJWKSStubFunction
-            Action: 
-              - kms:GetPublicKey
             Resource: "*"
       KeySpec: "ECC_NIST_P256"
       KeyUsage: "SIGN_VERIFY"
