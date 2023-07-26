@@ -3,6 +3,9 @@ import { JWTHeaderParameters, JWTPayload } from "jose";
 import { KMSClient, SignCommand } from "@aws-sdk/client-kms";
 import { TokenResponse } from "./models";
 
+const encryptionAlgorithm = "ES256";
+const issuer = "https://oidc-stub.home.account.gov.uk";
+
 export interface Response {
   statusCode: number;
   body: string;
@@ -15,7 +18,7 @@ const newClaims = (
   randomString: string
 ): JWTPayload => ({
   sub: `urn:fdc:gov.uk:2022:${randomString}`,
-  iss: "https://oidc-stub.home.account.gov.uk",
+  iss: issuer,
   aud: OIDC_CLIENT_ID,
   exp: epochDateNow() + 3600,
   iat: epochDateNow(),
@@ -24,7 +27,7 @@ const newClaims = (
 
 const newJwtHeader = (keyId: string): JWTHeaderParameters => ({
   kid: keyId,
-  alg: "ES256",
+  alg: encryptionAlgorithm,
 });
 
 const signJwtViaKms = async (

@@ -608,6 +608,9 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:
+          SIGNING_KEY_ID: !GetAtt OidcTokenSigningKey.Arn
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -627,6 +630,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref OidcJWKSStubPolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -636,6 +640,18 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - "sts:AssumeRole"
+
+  OidcJWKSStubPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - "kms:GetPublicKey"
+            Resource:
+              -!Ref OidcTokenSigningKey
 
   OidcJWKSStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -771,9 +787,3 @@ Resources:
           Value: !Ref OwnerTagValue
         - Key: Source
           Value: !Ref SourceTagValue
-  
-  # OidcTokenSigningKeyAlias:
-  #   Type: AWS::KMS::Alias
-  #   Properties:
-  #     AliasName: !Sub "alias/${AWS::StackName}-ToeknSigningKmsKey"
-  #     TargetKeyId: !GetAtt OidcTokenSigningKey.Arn
