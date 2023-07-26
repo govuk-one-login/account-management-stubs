@@ -53,6 +53,7 @@ export const handler = async (
   const { state } = queryStringParameters;
   const { DUMMY_TXMA_QUEUE_URL } = process.env;
   const { ACCOUNT_MANAGEMENT_URL } = process.env;
+  const code = uuid();
 
   if (
     typeof DUMMY_TXMA_QUEUE_URL === "undefined" ||
@@ -67,7 +68,7 @@ export const handler = async (
   return {
     statusCode: 302,
     headers: {
-      Location: `${ACCOUNT_MANAGEMENT_URL}${redirectReturnPath}/?state=${state}`,
+      Location: `${ACCOUNT_MANAGEMENT_URL}${redirectReturnPath}/?state=${state}&code=${code}`,
     },
   };
 };

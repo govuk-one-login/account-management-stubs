@@ -4,10 +4,11 @@ import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 import { handler, Response } from "../oidc-authorize-stub";
 
 const sqsMock = mockClient(SQSClient);
-
 const queueUrl = "http://my_queue_url";
 const frontendUrl = "http://home.account.gov.uk";
 const state = "fQXbG9oLnvU1pw";
+
+jest.mock("uuid", () => ({ v4: () => "12345" }));
 
 describe("handler", () => {
   const event: any = {
@@ -33,7 +34,7 @@ describe("handler", () => {
   });
 
   test("sends message to TXMA Queue and returns a redirect", async () => {
-    const redirectReturnUrl = `${frontendUrl}/auth/callback/?state=${state}`;
+    const redirectReturnUrl = `${frontendUrl}/auth/callback/?state=${state}&code=12345`;
 
     const result: Response = await handler(event);
     expect(result.statusCode).toEqual(302);
