@@ -1,9 +1,24 @@
 import { TokenResponse } from "../models";
 import { Response, handler } from "../oidc-token-api-stub";
+import { KMSClient, SignCommand } from "@aws-sdk/client-kms";
+import { mockClient } from "aws-sdk-client-mock";
+import "aws-sdk-client-mock-jest";
+
+const kmsMock = mockClient(KMSClient);
+
+const OIDC_CLIENT_ID = "12345";
+const SIGNING_KEY_ID = "B-QMUxdJOJ8ubkmArc4i1SGmfZnNNlM-va9h0HJ0jCo";
 
 describe("handler", () => {
   beforeEach(() => {
-    process.env.OIDC_CLIENT_ID = "12345";
+    kmsMock.reset();
+    process.env.OIDC_CLIENT_ID = OIDC_CLIENT_ID;
+    process.env.SIGNING_KEY_ID = SIGNING_KEY_ID;
+    kmsMock.on(SignCommand).resolves({
+      KeyId: SIGNING_KEY_ID,
+      Signature: Buffer.from("signed-blob"),
+      SigningAlgorithm: "",
+    });
   });
 
   test("returns 200 OK response including body with access token", async () => {
@@ -11,7 +26,8 @@ describe("handler", () => {
     const body: TokenResponse = JSON.parse(result.body);
     expect(result.statusCode).toEqual(200);
     expect(body.id_token).toContain(
-      "eyJraWQiOiJCLVFNVXhkSk9KOHVia21BcmM0aTFTR21mWm5OTmxNLXZhOWgwSEowakNvIiwiYWxnIjoiRVMyNTYifQ"
+      "eyJraWQiOiJCLVFNVXhkSk9KOHVia21BcmM0aTFTR21mWm5OTmxNLXZhOWgwSEowakNvIiwiYWxnIjoiRVMyNTYifQ."
     );
+    expect(body.id_token).toContain(".c2lnbmVkLWJsb2I");
   });
 });

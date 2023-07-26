@@ -31,14 +31,14 @@ const signJwtViaKms = async (
   header: JWTHeaderParameters,
   payload: JWTPayload,
   keyId: string
-) => {
+): Promise<string> => {
   const kmsClient = new KMSClient({});
   const jwtParts = {
     header: Buffer.from(JSON.stringify(header)).toString("base64url"),
     payload: Buffer.from(JSON.stringify(payload)).toString("base64url"),
     signature: "",
   };
-  const message = Buffer.from(jwtParts.header + "." + jwtParts.payload);
+  const message = Buffer.from(`${jwtParts.header}.${jwtParts.payload}`);
   const signCommand = new SignCommand({
     Message: message,
     MessageType: "RAW",
@@ -50,12 +50,13 @@ const signJwtViaKms = async (
     throw new Error(`Failed to sign JWT with KMS key ${keyId}`);
   }
   jwtParts.signature = Buffer.from(response.Signature).toString("base64url");
-  return jwtParts.header + "." + jwtParts.payload + "." + jwtParts.signature;
+  return `${jwtParts.header}.${jwtParts.payload}.${jwtParts.signature}`;
 };
 
 export const handler = async (): Promise<Response> => {
   const { OIDC_CLIENT_ID } = process.env;
   const { SIGNING_KEY_ID } = process.env;
+
   if (
     typeof OIDC_CLIENT_ID === "undefined" ||
     typeof SIGNING_KEY_ID === "undefined"
@@ -64,11 +65,14 @@ export const handler = async (): Promise<Response> => {
       `environemnt variable OIDC_CLIENT_ID ${OIDC_CLIENT_ID} or SIGNING_KEY_ID ${SIGNING_KEY_ID} is null`
     );
   }
+
   const signedJwt = await signJwtViaKms(
     newJwtHeader(SIGNING_KEY_ID),
     newClaims(OIDC_CLIENT_ID, uuid()),
     SIGNING_KEY_ID
   );
+
+  console.log(signedJwt);
 
   const tokenResponse = (): TokenResponse => ({
     access_token: "123ABC",
@@ -77,6 +81,7 @@ export const handler = async (): Promise<Response> => {
     expires_in: 3600,
     id_token: signedJwt,
   });
+
   return {
     statusCode: 200,
     body: JSON.stringify(tokenResponse()),
