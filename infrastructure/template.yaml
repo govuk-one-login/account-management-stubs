@@ -715,4 +715,4 @@ Resources:
             Action:
               - "secretsmanager:GetSecretValue"
             Resource:
-              - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:/account-mgmt-stubs/oidc/signing/key"
+              - !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:/account-mgmt-stubs/oidc/signing/key-6KhXKy"
