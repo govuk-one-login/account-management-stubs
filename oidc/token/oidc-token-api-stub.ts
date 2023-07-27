@@ -14,12 +14,13 @@ export interface Response {
 const epochDateNow = (): number => Math.round(Date.now() / 1000);
 
 const newClaims = (
-  OIDC_CLIENT_ID: string,
+  oidcClientId: string,
+  environment: string,
   randomString: string
 ): JWTPayload => ({
   sub: `urn:fdc:gov.uk:2022:${randomString}`,
-  iss: issuer,
-  aud: OIDC_CLIENT_ID,
+  iss: `https://oidc-stub.home.${environment}.account.gov.uk/`,
+  aud: oidcClientId,
   exp: epochDateNow() + 3600,
   iat: epochDateNow(),
   sid: uuid(),
@@ -59,19 +60,22 @@ const signJwtViaKms = async (
 export const handler = async (): Promise<Response> => {
   const { OIDC_CLIENT_ID } = process.env;
   const { SIGNING_KEY_ID } = process.env;
+  const { ENVIRONMENT } = process.env;
 
   if (
     typeof OIDC_CLIENT_ID === "undefined" ||
-    typeof SIGNING_KEY_ID === "undefined"
+    typeof SIGNING_KEY_ID === "undefined" ||
+    typeof ENVIRONMENT === "undefined"
   ) {
     throw new Error(
-      `environemnt variable OIDC_CLIENT_ID ${OIDC_CLIENT_ID} or SIGNING_KEY_ID ${SIGNING_KEY_ID} is null`
+      `variable OIDC_CLIENT_ID ${OIDC_CLIENT_ID} or SIGNING_KEY_ID ${SIGNING_KEY_ID}
+       or ENVIRONMENT ${ENVIRONMENT} is undefined`
     );
   }
 
   const signedJwt = await signJwtViaKms(
     newJwtHeader(SIGNING_KEY_ID),
-    newClaims(OIDC_CLIENT_ID, uuid()),
+    newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid()),
     SIGNING_KEY_ID
   );
 

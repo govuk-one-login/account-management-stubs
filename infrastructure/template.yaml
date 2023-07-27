@@ -701,6 +701,7 @@ Resources:
           OIDC_CLIENT_ID: "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
           OIDC_SIGNING_KEY: !Sub "{{resolve:secretsmanager:/${AWS::StackName}/Config/Oidc/Signing/Key}}"
           SIGNING_KEY_ID: !GetAtt OidcTokenSigningKey.Arn
+          ENVIRONMENT: !Ref Environment
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
