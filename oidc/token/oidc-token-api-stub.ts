@@ -4,7 +4,6 @@ import { KMSClient, SignCommand } from "@aws-sdk/client-kms";
 import { TokenResponse } from "./models";
 
 const encryptionAlgorithm = "ES256";
-const issuer = "https://oidc-stub.home.account.gov.uk/";
 
 export interface Response {
   statusCode: number;
