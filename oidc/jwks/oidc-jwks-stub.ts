@@ -5,7 +5,7 @@ export interface Response {
   body: string;
 }
 
-interface JksKey {  
+interface JksKey {
   kty: string;
   use: string;
   crv: string;
@@ -15,46 +15,38 @@ interface JksKey {
   alg: string;
 }
 
-const publicKey = async (keyId: string): JksKey => {
-
+const publicKey = async (keyId: string): Promise<JksKey> => {
   const getPublicKeyCommand = new GetPublicKeyCommand({
-    KeyId: keyId
+    KeyId: keyId,
   });
   const kmsClient = new KMSClient({});
   const kmsResponse = await kmsClient.send(getPublicKeyCommand);
-  if (!kmsResponse.KeyId) {
+  if (!kmsResponse.KeyId || !kmsResponse.SigningAlgorithms) {
     throw new Error(`Failed to get KMS Key with KeyId: ${keyId}`);
   }
-  const returnableKey: JksKey = {  
+  const returnableKey: JksKey = {
     kty: "EC",
     use: "sig",
-    crv: "P-256"
+    crv: "P-256",
     kid: kmsResponse.KeyId,
-    x: string;
-    y: string;
-    alg: kmsResponse.SigningAlgorithms,
-  }
-}
+    x: "unsure",
+    y: "unsure",
+    alg: kmsResponse.SigningAlgorithms[0],
+  };
+  return returnableKey;
+};
 
 export const handler = async () => {
-
   const { SIGNING_KEY_ID } = process.env;
 
-  if (
-    typeof keyId === "undefined"
-  ) {
-    throw new Error(
-      `environemnt variable SIGNING_KEY_ID is null`
-    );
+  if (typeof SIGNING_KEY_ID === "undefined") {
+    throw new Error(`environemnt variable SIGNING_KEY_ID is null`);
   }
 
-  const publicKey: JksKey = publicKey(SIGNING_KEY_ID);
+  const ddd: JksKey = await publicKey(SIGNING_KEY_ID);
 
-
-  const data = 
-  const response = {
+  return {
     statusCode: 200,
-    body: JSON.stringify([]),
+    body: JSON.stringify(ddd),
   };
-  return response;
 };

@@ -12,18 +12,18 @@ describe("handler", () => {
     kmsMock.reset();
     process.env.SIGNING_KEY_ID = SIGNING_KEY_ID;
     kmsMock.on(GetPublicKeyCommand).resolves({
-      EncryptionAlgorithms: [ "ES256" ],
+      EncryptionAlgorithms: ["ES256"],
       KeyId: SIGNING_KEY_ID,
       KeySpec: "ECC_NIST_P256",
       KeyUsage: "SIGN_VERIFY",
       PublicKey: Buffer.from("public-key"),
-      SigningAlgorithms: [ "string" ]
-   });
+      SigningAlgorithms: ["string"],
+    });
   });
 
   test("returns jwks data", async () => {
     const result: Response = await handler();
     expect(result.statusCode).toEqual(200);
-    expect(result.body).toContain('"kty":"EC"');
+    expect(result.body).toContain(`"kid":"${SIGNING_KEY_ID}"`);
   });
 });
