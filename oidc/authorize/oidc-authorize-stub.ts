@@ -54,6 +54,8 @@ export const handler = async (
   const { DUMMY_TXMA_QUEUE_URL } = process.env;
   const { ACCOUNT_MANAGEMENT_URL } = process.env;
   const code = uuid();
+  const token =
+    ":eyJraWQiOiJCLVFNVXhkSk9KOHVia21BcmM0aTFTR21mWm5OTmxNLXZhOWgwSEowakNvIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJ1cm46ZmRjOmdvdi51azoyMDIyOmZhNmNmNDA3LTNjYjEtNDU3MS1hYjJiLTZlNzQyOTA5OTllNCIsImlzcyI6Imh0dHBzOi8vb2lkYy1zdHViLmhvbWUuYWNjb3VudC5nb3YudWsiLCJhdWQiOiJWY2VyNy1pejlCTnJkVkZHLUpWcUo0azJtdnciLCJleHAiOjE2OTA0NTc3NDgsImlhdCI6MTY5MDQ1NDE0OCwic2lkIjoiZjhjNmU5MmMtZTViYS00OTMwLWI3YWEtZTZmYTY2OGFmNzRjIn0.UfkhJXC7i-3l2Qmq8XRqunJJdvCNNHBwGUFSfqIwctmvvdTz2Z_yA8oxkpsdj-fazM83XWdD4DZLJA_Zzdi0Zg";
 
   if (
     typeof DUMMY_TXMA_QUEUE_URL === "undefined" ||
@@ -68,7 +70,7 @@ export const handler = async (
   return {
     statusCode: 302,
     headers: {
-      Location: `${ACCOUNT_MANAGEMENT_URL}${redirectReturnPath}/?state=${state}&code=${code}`,
+      Location: `${ACCOUNT_MANAGEMENT_URL}${redirectReturnPath}/?state=${state}&code=${code}&id_token=${token}`,
     },
   };
 };

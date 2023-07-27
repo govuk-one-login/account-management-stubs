@@ -7,6 +7,8 @@ const sqsMock = mockClient(SQSClient);
 const queueUrl = "http://my_queue_url";
 const frontendUrl = "http://home.account.gov.uk";
 const state = "fQXbG9oLnvU1pw";
+const token =
+  ":eyJraWQiOiJCLVFNVXhkSk9KOHVia21BcmM0aTFTR21mWm5OTmxNLXZhOWgwSEowakNvIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJ1cm46ZmRjOmdvdi51azoyMDIyOmZhNmNmNDA3LTNjYjEtNDU3MS1hYjJiLTZlNzQyOTA5OTllNCIsImlzcyI6Imh0dHBzOi8vb2lkYy1zdHViLmhvbWUuYWNjb3VudC5nb3YudWsiLCJhdWQiOiJWY2VyNy1pejlCTnJkVkZHLUpWcUo0azJtdnciLCJleHAiOjE2OTA0NTc3NDgsImlhdCI6MTY5MDQ1NDE0OCwic2lkIjoiZjhjNmU5MmMtZTViYS00OTMwLWI3YWEtZTZmYTY2OGFmNzRjIn0.UfkhJXC7i-3l2Qmq8XRqunJJdvCNNHBwGUFSfqIwctmvvdTz2Z_yA8oxkpsdj-fazM83XWdD4DZLJA_Zzdi0Zg";
 
 jest.mock("uuid", () => ({ v4: () => "12345" }));
 
@@ -34,7 +36,7 @@ describe("handler", () => {
   });
 
   test("sends message to TXMA Queue and returns a redirect", async () => {
-    const redirectReturnUrl = `${frontendUrl}/auth/callback/?state=${state}&code=12345`;
+    const redirectReturnUrl = `${frontendUrl}/auth/callback/?state=${state}&code=12345&id_token=${token}`;
 
     const result: Response = await handler(event);
     expect(result.statusCode).toEqual(302);
