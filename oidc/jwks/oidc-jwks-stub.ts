@@ -27,7 +27,7 @@ const publicKey = async (keyId: string): Promise<JksKey> => {
   return {
     kty: "EC",
     use: "sig",
-    crv: "P-256",    
+    crv: "P-256",
     kid: keyId,
     x: "unsure",
     y: "unsure",
