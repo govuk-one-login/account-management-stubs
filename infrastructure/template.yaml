@@ -582,6 +582,7 @@ Resources:
     # checkov:skip=CKV_AWS_116
     DependsOn:
       - OidcJWKSStubFunctionLogGroup
+      - OidcTokenSigningKey
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-jwks-stub
       Architectures: ["arm64"]
@@ -670,6 +671,7 @@ Resources:
     # checkov:skip=CKV_AWS_116
     DependsOn:
       - OidcTokenApiStubFunctionLogGroup
+      - OidcTokenSigningKey
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token-api-stub
       Architectures: ["arm64"]
