@@ -1,9 +1,10 @@
 import { TokenResponse } from "../models";
-import { Response, handler } from "../oidc-token-api-stub";
+import { Response, handler, thing } from "../oidc-token-api-stub";
 
 describe("handler", () => {
   beforeEach(() => {
     process.env.OIDC_CLIENT_ID = "12345";
+    process.env.ENVIRONMENT = "dev";
   });
 
   test("returns 200 OK response including body with access token", async () => {

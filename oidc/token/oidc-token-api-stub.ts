@@ -1,5 +1,9 @@
 import { v4 as uuid } from "uuid";
 import { importJWK, JWTHeaderParameters, JWTPayload, SignJWT } from "jose";
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from "@aws-sdk/client-secrets-manager";
 import { TokenResponse } from "./models";
 
 export interface Response {
@@ -7,45 +11,69 @@ export interface Response {
   body: string;
 }
 
+interface EcJws {
+  d: string;
+  kty: string;
+  use: string;
+  crv: string;
+  kid: string;
+  x: string;
+  y: string;
+  alg: string;
+}
+
+const secret_name = "/account-mgmt-stubs/oidc/signing/key";
+const algorithm = "ES256";
+
 const epochDateNow = (): number => Math.round(Date.now() / 1000);
 
 const newClaims = (
-  OIDC_CLIENT_ID: string,
+  oidcClientId: string,
+  environemnt: string,
   randomString: string
 ): JWTPayload => ({
   sub: `urn:fdc:gov.uk:2022:${randomString}`,
-  iss: "https://oidc-stub.home.account.gov.uk",
-  aud: OIDC_CLIENT_ID,
+  iss: `https://oidc-stub.home.${environemnt}.account.gov.uk/`,
+  aud: oidcClientId,
   exp: epochDateNow() + 3600,
   iat: epochDateNow(),
   sid: uuid(),
 });
-
-const jwk = {
-  kty: "EC",
-  d: "Ob4_qMu1nkkBLEw97u--PHVsShP3xOKOJ6z0WsdU0Xw",
-  use: "sig",
-  crv: "P-256",
-  kid: "B-QMUxdJOJ8ubkmArc4i1SGmfZnNNlM-va9h0HJ0jCo",
-  x: "YrTTzbuUwQhWyaj11w33k-K8bFydLfQssVqr8mx6AVE",
-  y: "8UQcw-6Wp0bp8iIIkRw8PW2RSSjmj1I_8euyKEDtWRk",
-  alg: "ES256",
-};
-
-const algorithm = "ES256";
 
 const newJwtHeader = (): JWTHeaderParameters => ({
   kid: "B-QMUxdJOJ8ubkmArc4i1SGmfZnNNlM-va9h0HJ0jCo",
   alg: algorithm,
 });
 
+const client = new SecretsManagerClient({
+  region: "eu-west-2",
+});
+
+
 export const handler = async (): Promise<Response> => {
-  const { OIDC_CLIENT_ID } = process.env;
-  if (typeof OIDC_CLIENT_ID === "undefined") {
-    throw new Error("OIDC_CLIENT_ID environemnt variable is null");
+
+  let secretManagerResponse;
+  try {
+    secretManagerResponse = await client.send(
+      new GetSecretValueCommand({
+        SecretId: secret_name,
+      })
+    );
+    if (!secretManagerResponse.SecretString) {
+      throw new Error();  
+    }
+  } catch (error) {
+    throw new Error("Could not get JWK key from secrets manager");
   }
-  const privateKey = await importJWK(jwk, algorithm);
-  const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID, uuid()))
+
+  const JwsKey: EcJws = JSON.parse(secretManagerResponse.SecretString);
+  
+  const { OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
+  if (typeof OIDC_CLIENT_ID === "undefined" || typeof ENVIRONMENT === "undefined") {
+    throw new Error("OIDC_CLIENT_ID or ENVIRONMENT environemnt variable is undefined");
+  }
+  const privateKey = await importJWK(kwsKey, algorithm);
+  const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid()))
     .setProtectedHeader(newJwtHeader())
     .sign(privateKey);
   const tokenResponse = (): TokenResponse => ({
