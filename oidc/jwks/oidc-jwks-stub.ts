@@ -24,16 +24,15 @@ const publicKey = async (keyId: string): Promise<JksKey> => {
   if (!kmsResponse.KeyId || !kmsResponse.SigningAlgorithms) {
     throw new Error(`Failed to get KMS Key with KeyId: ${keyId}`);
   }
-  const returnableKey: JksKey = {
+  return {
     kty: "EC",
     use: "sig",
-    crv: "P-256",
-    kid: kmsResponse.KeyId,
+    crv: "P-256",    
+    kid: keyId,
     x: "unsure",
     y: "unsure",
     alg: kmsResponse.SigningAlgorithms[0],
   };
-  return returnableKey;
 };
 
 export const handler = async () => {
@@ -43,10 +42,8 @@ export const handler = async () => {
     throw new Error(`environemnt variable SIGNING_KEY_ID is null`);
   }
 
-  const ddd: JksKey = await publicKey(SIGNING_KEY_ID);
-
   return {
     statusCode: 200,
-    body: JSON.stringify(ddd),
+    body: JSON.stringify(await publicKey(SIGNING_KEY_ID)),
   };
 };
