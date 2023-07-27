@@ -1,9 +1,5 @@
 import { v4 as uuid } from "uuid";
 import { importJWK, JWTHeaderParameters, JWTPayload, SignJWT } from "jose";
-import {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} from "@aws-sdk/client-secrets-manager";
 import { TokenResponse } from "./models";
 
 export interface Response {
@@ -11,18 +7,6 @@ export interface Response {
   body: string;
 }
 
-interface EcJws {
-  d: string;
-  kty: string;
-  use: string;
-  crv: string;
-  kid: string;
-  x: string;
-  y: string;
-  alg: string;
-}
-
-const secret_name = "/account-mgmt-stubs/oidc/signing/key";
 const algorithm = "ES256";
 
 const epochDateNow = (): number => Math.round(Date.now() / 1000);
@@ -45,34 +29,19 @@ const newJwtHeader = (): JWTHeaderParameters => ({
   alg: algorithm,
 });
 
-const client = new SecretsManagerClient({
-  region: "eu-west-2",
-});
-
-
 export const handler = async (): Promise<Response> => {
-
-  let secretManagerResponse;
-  try {
-    secretManagerResponse = await client.send(
-      new GetSecretValueCommand({
-        SecretId: secret_name,
-      })
+  const { JWK_KEY_SECRET, OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
+  if (
+    typeof OIDC_CLIENT_ID === "undefined" ||
+    typeof JWK_KEY_SECRET === "undefined" ||
+    typeof ENVIRONMENT === "undefined"
+  ) {
+    throw new Error(
+      "OIDC_CLIENT_ID or ENVIRONMENT environemnt variable is undefined"
     );
-    if (!secretManagerResponse.SecretString) {
-      throw new Error();  
-    }
-  } catch (error) {
-    throw new Error("Could not get JWK key from secrets manager");
   }
-
-  const JwsKey: EcJws = JSON.parse(secretManagerResponse.SecretString);
-  
-  const { OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
-  if (typeof OIDC_CLIENT_ID === "undefined" || typeof ENVIRONMENT === "undefined") {
-    throw new Error("OIDC_CLIENT_ID or ENVIRONMENT environemnt variable is undefined");
-  }
-  const privateKey = await importJWK(kwsKey, algorithm);
+  const jwsKey = JSON.parse(JWK_KEY_SECRET);
+  const privateKey = await importJWK(jwsKey, algorithm);
   const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid()))
     .setProtectedHeader(newJwtHeader())
     .sign(privateKey);
