@@ -651,7 +651,7 @@ Resources:
             Action:
               - "kms:GetPublicKey"
             Resource:
-              -!Ref OidcTokenSigningKey
+              - !Ref OidcTokenSigningKey
 
   OidcJWKSStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -755,7 +755,7 @@ Resources:
             Action:
               - "kms:Sign"
             Resource:
-              -!Ref OidcTokenSigningKey
+              - !Ref OidcTokenSigningKey
   
   OidcTokenSigningKey:
     Type: AWS::KMS::Key
