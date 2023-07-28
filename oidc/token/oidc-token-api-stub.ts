@@ -42,8 +42,9 @@ export const handler = async (): Promise<Response> => {
     );
   }
   console.log(`JWK_KEY_SECRET: ${JWK_KEY_SECRET}`);
-  const jwsKey = JSON.parse(JWK_KEY_SECRET);
-  const privateKey = await importJWK(jwsKey, algorithm);
+
+  const jwsKeySecret = JSON.parse(JWK_KEY_SECRET);
+  const privateKey = await importJWK(jwsKeySecret, algorithm);
   const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid()))
     .setProtectedHeader(newJwtHeader())
     .sign(privateKey);
