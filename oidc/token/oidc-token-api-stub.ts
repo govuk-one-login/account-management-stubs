@@ -41,6 +41,7 @@ export const handler = async (): Promise<Response> => {
       or JWK_KEY_SECRET: ${JWK_KEY_SECRET} environemnt variable is undefined`
     );
   }
+  console.log(`JWK_KEY_SECRET: ${JWK_KEY_SECRET}`);
   const jwsKey = JSON.parse(JWK_KEY_SECRET);
   const privateKey = await importJWK(jwsKey, algorithm);
   const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid()))
