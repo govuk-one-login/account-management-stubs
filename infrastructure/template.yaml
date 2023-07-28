@@ -666,7 +666,7 @@ Resources:
       Environment:
         Variables:   
           OIDC_CLIENT_ID: "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
-          JWK_KEY_SECRET: "{{resolve:secretsmanager:/account-mgmt-stubs/oidc/signing/key}}"
+          JWK_KEY_SECRET: "{{resolve:ssm:/account-mgmt-stubs/oidc/signing/key}}"
           ENVIRONMENT: !Ref Environment
     Metadata:
       BuildMethod: esbuild
