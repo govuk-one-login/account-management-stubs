@@ -32,12 +32,13 @@ const newJwtHeader = (): JWTHeaderParameters => ({
 export const handler = async (): Promise<Response> => {
   const { JWK_KEY_SECRET, OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
   if (
-    typeof OIDC_CLIENT_ID === "undefined" ||
     typeof JWK_KEY_SECRET === "undefined" ||
+    typeof OIDC_CLIENT_ID === "undefined" ||
     typeof ENVIRONMENT === "undefined"
   ) {
     throw new Error(
-      "OIDC_CLIENT_ID or ENVIRONMENT environemnt variable is undefined"
+      `OIDC_CLIENT_ID: ${OIDC_CLIENT_ID} or ENVIRONMENT: ${ENVIRONMENT} 
+      or JWK_KEY_SECRET: ${JWK_KEY_SECRET} environemnt variable is undefined`
     );
   }
   const jwsKey = JSON.parse(JWK_KEY_SECRET);
