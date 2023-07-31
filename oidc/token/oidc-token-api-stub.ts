@@ -29,6 +29,10 @@ const newJwtHeader = (): JWTHeaderParameters => ({
   alg: algorithm,
 });
 
+interface SecretKey {
+  jwsKey: string;
+}
+
 export const handler = async (): Promise<Response> => {
   const { JWK_KEY_SECRET, OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
   if (
@@ -43,8 +47,9 @@ export const handler = async (): Promise<Response> => {
   }
   console.log(`JWK_KEY_SECRET: ${JWK_KEY_SECRET}`);
 
-  const jwsKeySecret = JSON.parse(JWK_KEY_SECRET);
-  const privateKey = await importJWK(jwsKeySecret, algorithm);
+  const jwsKeySecret: SecretKey = JSON.parse(JWK_KEY_SECRET);
+  const jwsKey = JSON.parse(jwsKeySecret.jwsKey);
+  const privateKey = await importJWK(jwsKey, algorithm);
   const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid()))
     .setProtectedHeader(newJwtHeader())
     .sign(privateKey);
