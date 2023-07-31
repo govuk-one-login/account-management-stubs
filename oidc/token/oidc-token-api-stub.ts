@@ -1,5 +1,14 @@
 import { v4 as uuid } from "uuid";
-import { importJWK, JWTHeaderParameters, JWTPayload, SignJWT } from "jose";
+import {
+  importJWK,
+  JWTHeaderParameters,
+  JWTPayload,
+  KeyLike,
+  SignJWT,
+} from "jose";
+import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { TokenResponse } from "./models";
 
 export interface Response {
@@ -7,14 +16,30 @@ export interface Response {
   body: string;
 }
 
+interface OicdPersistedData {
+  code: string;
+  nonce: string;
+}
+
 const algorithm = "ES256";
+
+const marshallOptions = {
+  convertClassInstanceToMap: true,
+};
+const translateConfig = { marshallOptions };
+const dynamoClient = new DynamoDBClient({});
+const dynamoDocClient = DynamoDBDocumentClient.from(
+  dynamoClient,
+  translateConfig
+);
 
 const epochDateNow = (): number => Math.round(Date.now() / 1000);
 
 const newClaims = (
   oidcClientId: string,
   environemnt: string,
-  randomString: string
+  randomString: string,
+  nonce: string
 ): JWTPayload => ({
   sub: `urn:fdc:gov.uk:2022:${randomString}`,
   iss: `https://oidc-stub.home.${environemnt}.account.gov.uk/`,
@@ -22,6 +47,8 @@ const newClaims = (
   exp: epochDateNow() + 3600,
   iat: epochDateNow(),
   sid: uuid(),
+  nonce,
+  vot: "Cl.Cm",
 });
 
 const newJwtHeader = (): JWTHeaderParameters => ({
@@ -29,37 +56,64 @@ const newJwtHeader = (): JWTHeaderParameters => ({
   alg: algorithm,
 });
 
-interface SecretKey {
-  jwsKey: string;
-}
+const persistedNonce = async (code: string): Promise<string> => {
+  const { TABLE_NAME } = process.env;
+  const command = new GetCommand({
+    TableName: TABLE_NAME,
+    Key: {
+      code,
+    },
+  });
+  const results = await dynamoDocClient.send(command);
+  if (results.Item === undefined) {
+    throw new Error("code not found in DB");
+  }
+  return (results.Item as OicdPersistedData).nonce;
+};
 
-export const handler = async (): Promise<Response> => {
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<Response> => {
+  if (!event.body) {
+    throw new Error(`code not found in request parameters`);
+  }
+
+  const code = event.body.substring(
+    event.body.indexOf("&code=") + 6,
+    event.body.indexOf("&redirect_uri=")
+  );
+
+  const nonce = await persistedNonce(code);
+
   const { JWK_KEY_SECRET, OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
+
   if (
     typeof JWK_KEY_SECRET === "undefined" ||
     typeof OIDC_CLIENT_ID === "undefined" ||
     typeof ENVIRONMENT === "undefined"
   ) {
     throw new Error(
-      `OIDC_CLIENT_ID: ${OIDC_CLIENT_ID} or ENVIRONMENT: ${ENVIRONMENT} 
-      or JWK_KEY_SECRET: ${JWK_KEY_SECRET} environemnt variable is undefined`
+      `an environment variable is undefined OIDC_CLIENT_ID: ${OIDC_CLIENT_ID}
+      or ENVIRONMENT: ${ENVIRONMENT} or JWK_KEY_SECRET: ${JWK_KEY_SECRET}`
     );
   }
-  console.log(`JWK_KEY_SECRET: ${JWK_KEY_SECRET}`);
 
-  const jwsKeySecret: SecretKey = JSON.parse(JWK_KEY_SECRET);
-  const jwsKey = JSON.parse(jwsKeySecret.jwsKey);
-  const privateKey = await importJWK(jwsKey, algorithm);
-  const jwt = await new SignJWT(newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid()))
+  const jwkSecret = JSON.parse(JWK_KEY_SECRET);
+  const jwk: KeyLike = JSON.parse(jwkSecret);
+  const privateKey = await importJWK(jwk, algorithm);
+  const jwt = await new SignJWT(
+    newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid(), nonce)
+  )
     .setProtectedHeader(newJwtHeader())
     .sign(privateKey);
   const tokenResponse = (): TokenResponse => ({
-    access_token: "123ABC",
+    access_token: jwt,
     refresh_token: "456DEF",
     token_type: "Bearer",
     expires_in: 3600,
     id_token: jwt,
   });
+
   return {
     statusCode: 200,
     body: JSON.stringify(tokenResponse()),
