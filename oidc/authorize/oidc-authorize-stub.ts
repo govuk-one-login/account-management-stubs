@@ -35,6 +35,7 @@ export interface Response {
 }
 
 const redirectReturnPath = "/auth/callback";
+
 const newTxmaEvent = (): TxmaEvent => ({
   event_id: uuid(),
   timestamp: Date.now(),
@@ -99,6 +100,7 @@ export const handler = async (
   try {
     await writeNonce(code, nonce);
 
+
     sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
     return {
       statusCode: 302,
@@ -115,4 +117,5 @@ export const handler = async (
       },
     };
   }
+
 };

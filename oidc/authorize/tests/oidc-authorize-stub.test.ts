@@ -44,8 +44,10 @@ describe("handler", () => {
   });
 
   test("sends message to TXMA Queue and returns a redirect", async () => {
+
     const result: Response = await handler(mockApiEvent);
     const redirectReturnUrl = `${redirectUrl}?state=${state}&code=12345`;
+
     expect(result.statusCode).toEqual(302);
     expect(result.headers.Location).toEqual(redirectReturnUrl);
     expect(sqsMock.commandCalls(SendMessageCommand).length).toEqual(1);
