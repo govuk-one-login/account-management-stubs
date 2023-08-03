@@ -44,7 +44,6 @@ describe("handler", () => {
   });
 
   test("sends message to TXMA Queue and returns a redirect", async () => {
-
     const result: Response = await handler(mockApiEvent);
     const redirectReturnUrl = `${redirectUrl}?state=${state}&code=12345`;
 
