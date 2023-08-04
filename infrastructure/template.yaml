@@ -27,6 +27,9 @@ Parameters:
     Description: >
       The ARN of the permissions boundary to apply to any role created by the template
     Default: "none"
+  OidcStubDataTableName:
+    Type: String
+    Default: oidc_stub_data
 
 Mappings:
   AccountManagementUI:
@@ -251,6 +254,62 @@ Resources:
       Value: !Sub am-stub.home.${Environment}.account.gov.uk
 
   ######################################
+  # OIDC datastore
+  ######################################
+  OidcStubDataStore:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: code
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TableName: !Ref OidcStubDataTableName
+      KeySchema:
+        - AttributeName: code
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt DatabaseKmsKey.Arn
+      TimeToLiveSpecification:
+        AttributeName: remove_at
+        Enabled: true
+      Tags:
+        - Key: Product
+          Value: GOV.UK Sign In
+        - Key: System
+          Value: Account Management Backend
+        - Key: Owner
+          Value: govuk-accounts-tech@digital.cabinet-office.gov.uk
+        - Key: Environment
+          Value: !Ref "Environment"
+        - Key: Source
+          Value: "https://github.com/alphagov/di-account-management-stubs/blob/main/infrastructure/template.yaml"
+
+  DatabaseKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action:
+              - kms:*
+            Resource:
+              - "*"
+
+  DatabaseKmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/DatabaseKmsKey"
+      TargetKeyId: !Ref DatabaseKmsKey
+  
+  ######################################
   # OIDC Authorization API Stub
   ######################################
   OidcAuthorizeApiStubFunction:
@@ -274,6 +333,7 @@ Resources:
         Variables:
           DUMMY_TXMA_QUEUE_URL: !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueUrl]
           ACCOUNT_MANAGEMENT_URL: !FindInMap [AccountManagementUI, !Ref Environment, url]
+          TABLE_NAME: !Ref OidcStubDataTableName
       Events:
         userinfo:
           Type: Api
@@ -344,6 +404,22 @@ Resources:
               - kms:GenerateDataKey*
               - kms:ReEncrypt*
             Resource: !FindInMap [TxmaDummyInputQueue, !Ref Environment, KeyArn]
+          - Effect: Allow
+            Action:
+              - dynamodb:PutItem
+            Resource:
+              - !GetAtt OidcStubDataStore.Arn
+              - !Sub
+                - "${Arn}/*"
+                - Arn: !GetAtt OidcStubDataStore.Arn
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Resource:
+              - !GetAtt DatabaseKmsKey.Arn
+
 
   ######################################
   # OIDC UserInfo API Stub
@@ -398,7 +474,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - !Ref OidcAuthorizeApiStubPolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -417,8 +492,6 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-userinfo-api-stub"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
-
-
 
   ######################################
   # OIDC API Stub API Gateway
@@ -484,6 +557,7 @@ Resources:
       Name: !Sub "/${AWS::StackName}/Stub/OIDC"
       Type: String
       Value: !Sub oidc-stub.home.${Environment}.account.gov.uk
+  
   ######################################
   # OIDC Configuration Stub
   ######################################
@@ -557,3 +631,177 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-config-stub"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  ######################################
+  # OIDC JWKS API Stub
+  ######################################
+  OidcJWKSStubFunction:
+    Type: AWS::Serverless::Function
+    # checkov:skip=CKV_AWS_116
+    DependsOn:
+      - OidcJWKSStubFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-jwks-stub
+      Architectures: ["arm64"]
+      CodeUri: ../oidc/jwks/
+      Handler: oidc-jwks-stub.handler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 128
+      ReservedConcurrentExecutions: 5
+      Runtime: nodejs18.x
+      Role: !GetAtt OidcJWKSStubFunctionRole.Arn
+      Timeout: 5
+      Events:
+        userinfo:
+          Type: Api
+          Properties:
+            Path: /.well-known/jwks.json
+            Method: GET
+            RestApiId:
+              Ref: OidcStubsRestApi
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - oidc-jwks-stub.ts
+
+  OidcJWKSStubFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+
+  OidcJWKSStubFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-jwks-stub"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  ######################################
+  # OIDC Token API Stub
+  ######################################
+  OidcTokenApiStubFunction:
+    Type: AWS::Serverless::Function
+    # checkov:skip=CKV_AWS_116
+    DependsOn:
+      - OidcTokenApiStubFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token-api-stub
+      Architectures: ["arm64"]
+      CodeUri: ../oidc/token/
+      Handler: oidc-token-api-stub.handler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 128
+      ReservedConcurrentExecutions: 5
+      Runtime: nodejs18.x
+      Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
+      Timeout: 5
+      Events:
+        userinfo:
+          Type: Api
+          Properties:
+            Path: /token
+            Method: POST
+            RestApiId:
+              Ref: OidcStubsRestApi
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:
+          OIDC_CLIENT_ID: "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
+          JWK_KEY_SECRET: "{{resolve:secretsmanager:/account-mgmt-stubs/oidc/signing/key}}"
+          ENVIRONMENT: !Ref Environment
+          TABLE_NAME: !Ref OidcStubDataTableName
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - oidc-token-api-stub.ts
+
+  OidcTokenApiStubFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref OidcTokenApiStubPolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+
+  OidcTokenApiStubFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-token-api-stub"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  OidcTokenApiStubPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:Query
+              - dynamodb:GetItem
+            Resource:
+              - !GetAtt OidcStubDataStore.Arn
+              - !Sub
+                - "${Arn}/*"
+                - Arn: !GetAtt OidcStubDataStore.Arn
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Resource:
+              - !GetAtt DatabaseKmsKey.Arn

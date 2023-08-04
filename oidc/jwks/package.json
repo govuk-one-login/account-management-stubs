@@ -1,8 +1,8 @@
 {
-  "name": "oidc-authorize",
+  "name": "oidc-jwks-stub",
   "version": "1.0.0",
-  "description": "A Lambda function to stub calls to the OIDC's authorize endpoint",
-  "main": "oidc-authorize-stub.js",
+  "description": "A Lambda function to stub calls to the OIDC JSON Web Key Set API",
+  "main": "oidc-jwks-stub.js",
   "scripts": {
     "test": "jest",
     "lint": "eslint . --ext .ts",
@@ -18,12 +18,9 @@
     "@babel/core": "^7.19.3",
     "@babel/preset-env": "^7.19.3",
     "@babel/preset-typescript": "^7.18.6",
-    "@types/jest": "^29.2.4",
+    "@types/jest": "^29.5.3",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
-    "@types/aws-lambda": "^8.10.106",
     "aws-sdk-client-mock": "^2.0.0",
-    "aws-sdk-client-mock-jest": "^2.0.0",
-    "aws-sdk-mock": "^5.8.0",
     "babel-jest": "^29.1.2",
     "eslint": "^8.25.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -39,10 +36,6 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.348.0",
-    "@aws-sdk/lib-dynamodb": "^3.186.0",
-    "@aws-sdk/client-sqs": "^3.348.0",
-    "@types/aws-lambda": "^8.10.106",
-    "@types/uuid": "^9.0.2"
+    "@types/aws-lambda": "^8.10.106"
   }
 }
