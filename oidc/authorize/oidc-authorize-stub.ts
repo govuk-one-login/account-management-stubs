@@ -98,7 +98,7 @@ export const handler = async (
   try {
     await writeNonce(code, nonce);
 
-    sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
+    await sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
     return {
       statusCode: 302,
       headers: {
