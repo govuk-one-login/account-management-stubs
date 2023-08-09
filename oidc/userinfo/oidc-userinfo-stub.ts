@@ -10,8 +10,8 @@ const newUserInfo = (): UserInfo => ({
   sub: uuid(),
   email: "test@test.com",
   email_verified: true,
-  phone: "1234567890",
-  phone_verified: true,
+  phone_number: "1234567890",
+  phone_number_verified: true,
   updated_at: Date.now().toString(),
 });
 
