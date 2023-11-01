@@ -145,7 +145,7 @@ Resources:
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
-      ReservedConcurrentExecutions: 5
+      ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt AccountManagementStubFunctionRole.Arn
       Timeout: 5
@@ -325,7 +325,7 @@ Resources:
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
-      ReservedConcurrentExecutions: 5
+      ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcAuthorizeApiStubFunctionRole.Arn
       Timeout: 5
@@ -437,7 +437,7 @@ Resources:
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
-      ReservedConcurrentExecutions: 5
+      ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcUserInfoApiStubFunctionRole.Arn
       Timeout: 5
@@ -573,7 +573,7 @@ Resources:
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
-      ReservedConcurrentExecutions: 5
+      ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcConfigStubFunctionRole.Arn
       Events:
@@ -648,7 +648,7 @@ Resources:
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
-      ReservedConcurrentExecutions: 5
+      ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcJWKSStubFunctionRole.Arn
       Timeout: 5
@@ -720,7 +720,7 @@ Resources:
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
-      ReservedConcurrentExecutions: 5
+      ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
       Timeout: 5
