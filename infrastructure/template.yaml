@@ -39,9 +39,9 @@ Mappings:
       url: "https://home.build.account.gov.uk"
   TxmaDummyInputQueue:
     dev:
-      QueueArn: "arn:aws:sqs:eu-west-2:985326104449:account-mgmt-backend-TxMAInputDummyQueue-2nXfeOxQGy3g"
-      KeyArn: "arn:aws:kms:eu-west-2:985326104449:key/6acd497a-65fc-464d-9d88-adaa34dad4cf"
-      QueueUrl: "https://sqs.eu-west-2.amazonaws.com/985326104449/account-mgmt-backend-TxMAInputDummyQueue-2nXfeOxQGy3g"
+      QueueArn: "arn:aws:sqs:eu-west-2:985326104449:account-mgmt-backend-TxMAInputDummyQueue-lZORy5gLrQ4D"
+      KeyArn: "arn:aws:kms:eu-west-2:985326104449:key/290ec47d-887b-4a99-a81c-4f5c3e0b04ee"
+      QueueUrl: "https://sqs.eu-west-2.amazonaws.com/985326104449/account-mgmt-backend-TxMAInputDummyQueue-lZORy5gLrQ4D"
     build:
       QueueArn: "arn:aws:sqs:eu-west-2:301577035144:account-mgmt-backend-TxMAInputDummyQueue-yWYwdmAuecBo"
       KeyArn: "arn:aws:kms:eu-west-2:301577035144:key/844ec710-0c1b-4455-8532-c5c7658298e3"
