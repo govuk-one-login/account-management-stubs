@@ -286,7 +286,7 @@ Resources:
         - Key: Environment
           Value: !Ref "Environment"
         - Key: Source
-          Value: "https://github.com/alphagov/di-account-management-stubs/blob/main/infrastructure/template.yaml"
+          Value: "https://github.com/govuk-one-login/account-management-stubs/blob/main/infrastructure/template.yaml"
 
   DatabaseKmsKey:
     Type: AWS::KMS::Key
