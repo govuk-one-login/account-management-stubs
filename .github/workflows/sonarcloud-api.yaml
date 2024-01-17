@@ -1,0 +1,65 @@
+#name: Sonarcloud
+#
+#on:
+#  push:
+#    paths:
+#      - ".github/workflows/sonarcloud.yaml"
+#    branches:
+#      - main
+#  pull_request:
+#
+#
+#jobs:
+#  run_sonarcloud:
+#    name: Run Sonar Scan
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@83b7061638ee4956cf7545a6f7efe594e5ad0247 # pin@v3
+#        with:
+#          ref: ${{ inputs.gitRef || github.ref }}
+#      - uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # pin@v3
+#        with:
+#          node-version-file: .node-version
+#      - name: Install dependencies
+#        run: yarn install
+#      - name: Generate coverage report
+#        run: yarn test:unit
+#      - name: SonarCloud Scan
+#        uses: SonarSource/sonarcloud-github-action@db501078e936e4b4c8773d1bb949ba9ddb7b6b6a # pin@master
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+
+name: SonarCloud API scan
+
+on:
+  push:
+    paths:
+      - ".github/workflows/sonarcloud-api.yaml"
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@83b7061638ee4956cf7545a6f7efe594e5ad0247 # pin@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: "Run SonarCloud Scan"
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: ./account-management-api
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_API }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
