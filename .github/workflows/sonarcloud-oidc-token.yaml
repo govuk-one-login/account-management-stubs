@@ -1,12 +1,12 @@
-name: SonarCloud API Scan
+name: SonarCloud OIDC Token Scan
 
 on:
   push:
     branches:
       - main
     paths:
-      - ".github/workflows/sonarcloud-api.yaml"
-      - "account-management-api/**"
+      - ".github/workflows/sonarcloud-oidc-token.yaml"
+      - "oidc/token/**"
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -27,7 +27,7 @@ jobs:
       - name: "Run SonarCloud Scan"
         uses: SonarSource/sonarcloud-github-action@db501078e936e4b4c8773d1bb949ba9ddb7b6b6a # pin@master
         with:
-          projectBaseDir: ./account-management-api
+          projectBaseDir: ./oidc/token
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_API }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_OIDC_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
