@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import { UserInfo } from "./models";
 
 export interface Response {
@@ -7,8 +6,8 @@ export interface Response {
 }
 
 const newUserInfo = (): UserInfo => ({
-  sub: uuid(),
-  email: "test@test.com",
+  sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+  email: "your.name@example.com",
   email_verified: true,
   phone_number: "1234567890",
   phone_number_verified: true,
