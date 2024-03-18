@@ -10,7 +10,7 @@ const newUserInfo = (): UserInfo => ({
   email: "your.name@example.com",
   email_verified: true,
   phone_number: "1234567890",
-  phone_number_verified: true,
+  phone_number_verified: false,
   updated_at: Date.now().toString(),
 });
 
