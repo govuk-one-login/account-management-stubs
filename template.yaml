@@ -140,8 +140,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-account-management-api-stub
       Architectures: ["arm64"]
-      CodeUri: ../account-management-api/
-      Handler: account-management-api-stub.handler
+      CodeUri: src
+      Handler: .account-management-api/all-routes.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -162,7 +162,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - account-management-api-stub.ts
+          - account-management-api/all-routes.ts
 
   AccountManagementStubFunctionRole:
     Type: AWS::IAM::Role
@@ -308,7 +308,7 @@ Resources:
     Properties:
       AliasName: !Sub "alias/${AWS::StackName}/${Environment}/DatabaseKmsKey"
       TargetKeyId: !Ref DatabaseKmsKey
-  
+
   ######################################
   # OIDC Authorization API Stub
   ######################################
@@ -320,8 +320,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-authorize-stub
       Architectures: ["arm64"]
-      CodeUri: ../oidc/authorize/
-      Handler: oidc-authorize-stub.handler
+      CodeUri: src
+      Handler: .oidc/authorize.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -331,8 +331,10 @@ Resources:
       Timeout: 5
       Environment:
         Variables:
-          DUMMY_TXMA_QUEUE_URL: !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueUrl]
-          ACCOUNT_MANAGEMENT_URL: !FindInMap [AccountManagementUI, !Ref Environment, url]
+          DUMMY_TXMA_QUEUE_URL:
+            !FindInMap [TxmaDummyInputQueue, !Ref Environment, QueueUrl]
+          ACCOUNT_MANAGEMENT_URL:
+            !FindInMap [AccountManagementUI, !Ref Environment, url]
           TABLE_NAME: !Ref OidcStubDataTableName
       Events:
         userinfo:
@@ -355,7 +357,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc-authorize-stub.ts
+          - oidc/authorize.ts
 
   OidcAuthorizeApiStubFunctionRole:
     Type: AWS::IAM::Role
@@ -420,7 +422,6 @@ Resources:
             Resource:
               - !GetAtt DatabaseKmsKey.Arn
 
-
   ######################################
   # OIDC UserInfo API Stub
   ######################################
@@ -432,8 +433,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-userinfo-stub
       Architectures: ["arm64"]
-      CodeUri: ../oidc/userinfo/
-      Handler: oidc-userinfo-stub.handler
+      CodeUri: src
+      Handler: .oidc/userinfo.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -462,7 +463,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc-userinfo-stub.ts
+          - oidc/userinfo.ts
 
   OidcUserInfoApiStubFunctionRole:
     Type: AWS::IAM::Role
@@ -548,7 +549,7 @@ Resources:
       Stage: !Ref Environment
       RestApiId: !Ref OidcStubsRestApi
     DependsOn:
-      - OidcStubsRestApiStage  # This resource is created as part of the OidcStubsRestApi resource
+      - OidcStubsRestApiStage # This resource is created as part of the OidcStubsRestApi resource
 
   OidcStubEndpoint:
     Type: AWS::SSM::Parameter
@@ -557,7 +558,7 @@ Resources:
       Name: !Sub "/${AWS::StackName}/Stub/OIDC"
       Type: String
       Value: !Sub oidc-stub.home.${Environment}.account.gov.uk
-  
+
   ######################################
   # OIDC Configuration Stub
   ######################################
@@ -568,8 +569,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-config-stub
       Architectures: ["arm64"]
-      CodeUri: ../oidc/configuration/
-      Handler: oidc-config-stub.handler
+      CodeUri: src
+      Handler: .oidc/configuration.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -601,7 +602,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc-config-stub.ts
+          - oidc/configuration.ts
 
   OidcConfigStubFunctionRole:
     Type: AWS::IAM::Role
@@ -643,8 +644,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-jwks-stub
       Architectures: ["arm64"]
-      CodeUri: ../oidc/jwks/
-      Handler: oidc-jwks-stub.handler
+      CodeUri: src
+      Handler: .oidc/jkws.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -673,7 +674,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc-jwks-stub.ts
+          - oidc/jwks.ts
 
   OidcJWKSStubFunctionRole:
     Type: AWS::IAM::Role
@@ -715,8 +716,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token-api-stub
       Architectures: ["arm64"]
-      CodeUri: ../oidc/token/
-      Handler: oidc-token-api-stub.handler
+      CodeUri: src
+      Handler: .oidc/token.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -751,7 +752,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc-token-api-stub.ts
+          - oidc/token.ts
 
   OidcTokenApiStubFunctionRole:
     Type: AWS::IAM::Role
