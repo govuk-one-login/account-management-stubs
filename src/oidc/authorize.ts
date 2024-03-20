@@ -15,7 +15,7 @@ import {
   SQSClient,
 } from "@aws-sdk/client-sqs";
 
-import { TxmaEvent } from "../common/oidc-authorize-models";
+import { TxmaEvent } from "../common/models";
 
 const marshallOptions = {
   convertClassInstanceToMap: true,

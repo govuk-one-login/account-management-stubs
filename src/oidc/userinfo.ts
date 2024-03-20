@@ -1,4 +1,4 @@
-import { UserInfo } from "../common/oidc-userinfo-models";
+import { UserInfo } from "../common/models";
 
 export interface Response {
   statusCode: number;

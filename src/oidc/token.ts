@@ -9,7 +9,7 @@ import {
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { TokenResponse } from "../common/oidc-token.models";
+import { Token } from "../common/models";
 
 export interface Response {
   statusCode: number;
@@ -106,7 +106,7 @@ export const handler = async (
   )
     .setProtectedHeader(newJwtHeader())
     .sign(privateKey);
-  const tokenResponse = (): TokenResponse => ({
+  const tokenResponse = (): Token => ({
     access_token: jwt,
     refresh_token: "456DEF",
     token_type: "Bearer",

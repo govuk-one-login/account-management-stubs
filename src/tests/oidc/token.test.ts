@@ -2,7 +2,7 @@ import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { Response, handler } from "../../oidc/token";
-import { TokenResponse } from "../../common/oidc-token.models";
+import { Token } from "../../common/models";
 
 const dynamoMock = mockClient(DynamoDBDocumentClient);
 const tableName = "TableName";
@@ -35,7 +35,7 @@ describe("handler", () => {
       body: "client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback",
     } as never;
     const result: Response = await handler(mockApiEvent);
-    const body: TokenResponse = JSON.parse(result.body);
+    const body: Token = JSON.parse(result.body);
     expect(result.statusCode).toEqual(200);
     expect(body.id_token).toContain(
       "eyJraWQiOiJCLVFNVXhkSk9KOHVia21BcmM0aTFTR21mWm5OTmxNLXZhOWgwSEowakNvIiwiYWxnIjoiRVMyNTYifQ."
