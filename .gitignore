@@ -132,3 +132,11 @@ redirect.zip
 
 # Localstack
 volume/
+
+.aws-sam/
+build.toml
+.idea
+.DS_Store
+.vscode/
+node_modules/
+coverage/
