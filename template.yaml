@@ -140,8 +140,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-account-management-api
       Architectures: ["arm64"]
-      CodeUri: src
-      Handler: .account-management-api/all-routes.handler
+      CodeUri: src/account-management-api
+      Handler: all-routes.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -162,7 +162,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - account-management-api/all-routes.ts
+          - all-routes.ts
 
   AccountManagementStubFunctionRole:
     Type: AWS::IAM::Role
@@ -320,8 +320,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-authorize
       Architectures: ["arm64"]
-      CodeUri: src
-      Handler: .oidc/authorize.handler
+      CodeUri: src/oidc
+      Handler: authorize.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -357,7 +357,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc/authorize.ts
+          - authorize.ts
 
   OidcAuthorizeApiStubFunctionRole:
     Type: AWS::IAM::Role
@@ -433,8 +433,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-userinfo
       Architectures: ["arm64"]
-      CodeUri: src
-      Handler: .oidc/userinfo.handler
+      CodeUri: src/oidc
+      Handler: userinfo.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -463,7 +463,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc/userinfo.ts
+          - userinfo.ts
 
   OidcUserInfoApiStubFunctionRole:
     Type: AWS::IAM::Role
@@ -569,8 +569,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-config
       Architectures: ["arm64"]
-      CodeUri: src
-      Handler: .oidc/configuration.handler
+      CodeUri: src/oidc
+      Handler: configuration.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -602,7 +602,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc/configuration.ts
+          - configuration.ts
 
   OidcConfigStubFunctionRole:
     Type: AWS::IAM::Role
@@ -644,8 +644,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-jwks
       Architectures: ["arm64"]
-      CodeUri: src
-      Handler: .oidc/jkws.handler
+      CodeUri: src/oidc
+      Handler: jkws.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -674,7 +674,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc/jwks.ts
+          - jwks.ts
 
   OidcJWKSStubFunctionRole:
     Type: AWS::IAM::Role
@@ -716,8 +716,8 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token-api
       Architectures: ["arm64"]
-      CodeUri: src
-      Handler: .oidc/token.handler
+      CodeUri: src/oidc
+      Handler: token.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -752,7 +752,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - oidc/token.ts
+          - token.ts
 
   OidcTokenApiStubFunctionRole:
     Type: AWS::IAM::Role
