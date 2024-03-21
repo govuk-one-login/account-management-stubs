@@ -138,7 +138,7 @@ Resources:
     DependsOn:
       - AccountManagementStubFunctionLogGroup
     Properties:
-      FunctionName: !Sub ${Environment}-${AWS::StackName}-account-management-api-stub
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-account-management-api
       Architectures: ["arm64"]
       CodeUri: src
       Handler: .account-management-api/all-routes.handler
@@ -212,7 +212,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-account-management-api-stub"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-account-management-api"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
@@ -318,7 +318,7 @@ Resources:
     DependsOn:
       - OidcAuthorizeApiStubFunctionLogGroup
     Properties:
-      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-authorize-stub
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-authorize
       Architectures: ["arm64"]
       CodeUri: src
       Handler: .oidc/authorize.handler
@@ -385,7 +385,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-authorize-api-stub"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-authorize-api"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
@@ -431,7 +431,7 @@ Resources:
     DependsOn:
       - OidcUserInfoApiStubFunctionLogGroup
     Properties:
-      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-userinfo-stub
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-userinfo
       Architectures: ["arm64"]
       CodeUri: src
       Handler: .oidc/userinfo.handler
@@ -490,7 +490,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-userinfo-api-stub"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-userinfo-api"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
@@ -567,7 +567,7 @@ Resources:
     DependsOn:
       - OidcConfigStubFunctionLogGroup
     Properties:
-      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-config-stub
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-config
       Architectures: ["arm64"]
       CodeUri: src
       Handler: .oidc/configuration.handler
@@ -629,7 +629,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-config-stub"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-config"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
@@ -642,7 +642,7 @@ Resources:
     DependsOn:
       - OidcJWKSStubFunctionLogGroup
     Properties:
-      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-jwks-stub
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-jwks
       Architectures: ["arm64"]
       CodeUri: src
       Handler: .oidc/jkws.handler
@@ -701,7 +701,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-jwks-stub"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-jwks"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
@@ -714,7 +714,7 @@ Resources:
     DependsOn:
       - OidcTokenApiStubFunctionLogGroup
     Properties:
-      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token-api-stub
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token-api
       Architectures: ["arm64"]
       CodeUri: src
       Handler: .oidc/token.handler
@@ -780,7 +780,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-token-api-stub"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-token-api"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
