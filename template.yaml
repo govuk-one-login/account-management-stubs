@@ -385,7 +385,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-authorize-api"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-authorize"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
@@ -490,7 +490,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-userinfo-api"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-userinfo"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
@@ -714,7 +714,7 @@ Resources:
     DependsOn:
       - OidcTokenApiStubFunctionLogGroup
     Properties:
-      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token-api
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-token
       Architectures: ["arm64"]
       CodeUri: src/oidc
       Handler: token.handler
@@ -780,7 +780,7 @@ Resources:
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-token-api"
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-token"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
