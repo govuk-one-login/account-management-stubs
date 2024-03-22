@@ -645,7 +645,7 @@ Resources:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-jwks
       Architectures: ["arm64"]
       CodeUri: src/oidc
-      Handler: jkws.handler
+      Handler: jwks.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
