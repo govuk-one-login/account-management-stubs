@@ -1,4 +1,5 @@
 import "aws-sdk-client-mock-jest";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { components } from "../../method-management/models/schema";
 import { handler, Response } from "../../method-management/method-management";
 
@@ -7,7 +8,9 @@ type MfaMethod = components["schemas"]["MfaMethod"];
 describe("MFA Management API Mock", () => {
   test("Registered user with a single MFA of type SMS", async () => {
     // Act
-    const result: Response = await handler();
+    const result: Response = await handler({
+      path: "/retrieve",
+    } as APIGatewayProxyEvent);
 
     // Assert
     expect(result).toBeDefined();

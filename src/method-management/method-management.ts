@@ -41,4 +41,6 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<Response> =>
   if (event.path.endsWith('/mfa-methods')) {
     return createMfaMethodHandler();
   }
+
+  throw new Error(`Unknown path: ${event.path}`);
 }
