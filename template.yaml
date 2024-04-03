@@ -894,7 +894,7 @@ Resources:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-method-management-v1
       Architectures: ["arm64"]
       CodeUri: src/method-management
-      Handler: method-management.handler
+      Handler: method-management.userInfoHandler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
@@ -907,13 +907,6 @@ Resources:
           Type: Api
           Properties:
             Path: /v1/mfa-methods/retrieve
-            Method: POST
-            RestApiId:
-              Ref: MethodManagementv1StubsRestApi
-        createmethod:
-          Type: Api
-          Properties:
-            Path: /v1/mfa-methods
             Method: POST
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
@@ -958,6 +951,75 @@ Resources:
     UpdateReplacePolicy: Delete
     Properties:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-method-management-v1"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  MethodManagementCreatev1ApiStubFunction:
+    Type: AWS::Serverless::Function
+    # checkov:skip=CKV_AWS_116
+    DependsOn:
+      - MethodManagementCreatev1ApiStubFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-method-management-create-v1
+      Architectures: ["arm64"]
+      CodeUri: src/method-management
+      Handler: method-management.createMfaMethodHandler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 128
+      ReservedConcurrentExecutions: 30
+      Runtime: nodejs18.x
+      Role: !GetAtt MethodManagementCreatev1ApiStubFunctionRole.Arn
+      Timeout: 5
+      Events:
+        userinfo:
+          Type: Api
+          Properties:
+            Path: /v1/mfa-methods
+            Method: POST
+            RestApiId:
+              Ref: MethodManagementv1StubsRestApi
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - method-management.ts
+
+  MethodManagementCreatev1ApiStubFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+
+  MethodManagementCreatev1ApiStubFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-method-management-create-v1"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 

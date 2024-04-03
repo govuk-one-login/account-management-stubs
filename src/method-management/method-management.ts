@@ -1,4 +1,3 @@
-import { APIGatewayProxyEvent } from "aws-lambda/trigger/api-gateway-proxy";
 import { components } from "./models/schema";
 
 type MfaMethod = components["schemas"]["MfaMethod"];
@@ -8,7 +7,7 @@ export interface Response {
   body: string;
 }
 
-const userInfoHandler = async (): Promise<Response> => {
+export const userInfoHandler = async (): Promise<Response> => {
   const response: MfaMethod[] = [
     {
       mfaIdentifier: 1,
@@ -25,22 +24,9 @@ const userInfoHandler = async (): Promise<Response> => {
   };
 };
 
-const createMfaMethodHandler = async (): Promise<Response> => {
-
+export const createMfaMethodHandler = async (): Promise<Response> => {
   return {
     statusCode: 200,
-    body: JSON.stringify({})
-  }
-}
-
-export const handler = async (event: APIGatewayProxyEvent): Promise<Response> => {
-  if (event.path.endsWith('/retrieve')) {
-    return userInfoHandler();
-  }
-
-  if (event.path.endsWith('/mfa-methods')) {
-    return createMfaMethodHandler();
-  }
-
-  throw new Error(`Unknown path: ${event.path}`);
-}
+    body: JSON.stringify({}),
+  };
+};
