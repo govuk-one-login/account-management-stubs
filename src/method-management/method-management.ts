@@ -33,7 +33,7 @@ export const createMfaMethodHandler = async (
     email,
     otp,
     credential,
-    mfaMethod: { priorityIdentifier, mfaMethodType },
+    mfaMethod: { priorityIdentifier = undefined, mfaMethodType = undefined} = {},
   } = JSON.parse(event.body || "{}");
   try {
     assert(email, "no email provided");
