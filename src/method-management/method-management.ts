@@ -1,3 +1,5 @@
+import { APIGatewayProxyEvent } from "aws-lambda";
+import assert from "node:assert/strict";
 import { components } from "./models/schema";
 
 type MfaMethod = components["schemas"]["MfaMethod"];
@@ -7,7 +9,7 @@ export interface Response {
   body: string;
 }
 
-export const handler = async (): Promise<Response> => {
+export const userInfoHandler = async (): Promise<Response> => {
   const response: MfaMethod[] = [
     {
       mfaIdentifier: 1,
@@ -21,5 +23,40 @@ export const handler = async (): Promise<Response> => {
   return {
     statusCode: 200,
     body: JSON.stringify(response),
+  };
+};
+
+export const createMfaMethodHandler = async (
+  event: APIGatewayProxyEvent
+): Promise<Response> => {
+  const {
+    email,
+    otp,
+    credential,
+    mfaMethod: {
+      priorityIdentifier = undefined,
+      mfaMethodType = undefined,
+    } = {},
+  } = JSON.parse(event.body || "{}");
+  try {
+    assert(email, "no email provided");
+    assert(otp, "no otp provided");
+    assert(credential, "no credential provided");
+    assert.match(
+      priorityIdentifier,
+      /^(PRIMARY|SECONDARY)$/,
+      "invalid priorityIdentifier"
+    );
+    assert.match(mfaMethodType, /^(AUTH_APP|SMS)$/, "invalid mfaMethodType");
+  } catch (e) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: (e as Error).message }),
+    };
+  }
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({}),
   };
 };
