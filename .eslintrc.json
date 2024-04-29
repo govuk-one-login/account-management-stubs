@@ -1,7 +1,8 @@
 {
   "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
   "extends": [
-    "airbnb-typescript-prettier",
+    "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
