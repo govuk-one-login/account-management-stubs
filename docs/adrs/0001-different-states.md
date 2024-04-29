@@ -21,3 +21,11 @@ When the frontend makes a request to the API, we could add a `Scenario` header, 
 This would solve the issue of multiple developers changing scenarios, or automated tests requiring specific scenarios.
 
 However, this would require a significant change to the frontend API in order to pass the header through to the API requests, we may want to avoid adding this if it is just for development.
+
+## Option 3: Switch responses based on user
+
+We could create "profiles" of users, based on scenarios that we want to test. The return the relevant response based on which user is making the request.
+
+We would need some way of changing the user who is logged in, this could be done by modfying the DynamoDB table to change the user id in the session token.
+
+Potentially, we could create an API or page to facilitate this.
