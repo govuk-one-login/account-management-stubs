@@ -23,7 +23,11 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
   console.log("event", event);
-  console.log("jwt", parseJwt(event?.headers?.Authorization || ""));
+
+  if (event?.headers?.Authorization) {
+    console.log("jwt", parseJwt(event?.headers?.Authorization));
+  }
+
   return {
     statusCode: 200,
     body: JSON.stringify(newUserInfo()),
