@@ -6,6 +6,10 @@ export interface Response {
   body: string;
 }
 
+const parseJwt = (token: string) => {
+  return JSON.parse(Buffer.from(token.split(".")[1], "base64").toString());
+};
+
 const newUserInfo = (): UserInfo => ({
   sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
   email: "your.name@example.com",
@@ -19,6 +23,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
   console.log("event", event);
+  console.log("jwt", parseJwt(event?.headers?.Authorization || ""));
   return {
     statusCode: 200,
     body: JSON.stringify(newUserInfo()),
