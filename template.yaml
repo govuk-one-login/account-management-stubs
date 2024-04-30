@@ -415,6 +415,8 @@ Resources:
             Method: GET
             RestApiId:
               Ref: OidcStubsRestApi
+            RequestParameter:
+              - method.request.header.Cookie
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA

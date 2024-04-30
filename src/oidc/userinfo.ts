@@ -1,3 +1,4 @@
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { UserInfo } from "../common/models";
 
 export interface Response {
@@ -14,7 +15,9 @@ const newUserInfo = (): UserInfo => ({
   updated_at: Date.now().toString(),
 });
 
-export const handler = async () => {
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<Response> => {
   return {
     statusCode: 200,
     body: JSON.stringify(newUserInfo()),
