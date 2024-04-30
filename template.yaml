@@ -416,9 +416,7 @@ Resources:
             RestApiId:
               Ref: OidcStubsRestApi
             RequestParameters:
-              - method.request.header.Cookie:
-                  Required: false
-                  Caching: false
+              - "integration.request.header.Cookie": "method.request.header.Cookie"
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
