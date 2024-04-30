@@ -1,3 +1,4 @@
+import { APIGatewayProxyEvent } from "aws-lambda/trigger/api-gateway-proxy";
 import { handler, Response } from "../../oidc/userinfo";
 
 describe("handler", () => {
