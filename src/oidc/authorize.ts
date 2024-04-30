@@ -50,15 +50,14 @@ const getCookiesFromHeader = (headers: APIGatewayProxyEventHeaders) => {
   if (
     headers === null ||
     headers === undefined ||
-    headers.Cookie === undefined
+    headers.cookie === undefined
   ) {
     return {};
   }
 
   const list: Record<string, string> = {};
-  const rc = headers.Cookie;
 
-  rc.split(";").forEach((cookie) => {
+  headers.cookie.split(";").forEach((cookie) => {
     const parts = cookie.split("=");
     const key = (parts.shift() || "").trim();
     const value = decodeURI(parts.join("="));
@@ -107,8 +106,6 @@ export const handler = async (
 ): Promise<Response> => {
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
-
-  console.log("event", event);
 
   const cookies = getCookiesFromHeader(event.headers);
 
