@@ -1,6 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import assert from "node:assert/strict";
 import { components } from "./models/schema";
+import { validateFields } from "../common/validation";
+import { formatResponse } from "../common/response-utils";
 
 type MfaMethod = components["schemas"]["MfaMethod"];
 
@@ -8,23 +10,6 @@ export interface Response {
   statusCode: number;
   body: string;
 }
-
-const formatResponse = (statusCode: number, body: unknown): Response => ({
-  statusCode,
-  body: JSON.stringify(body),
-});
-
-const validateFields = (
-  fields: { [key: string]: string | undefined },
-  checks: { [key: string]: RegExp },
-) => {
-  Object.entries(fields).forEach(([key, value]) => {
-    assert(value, `no ${key} provided`);
-    if (checks[key]) {
-      assert.match(value, checks[key], `invalid ${key}`);
-    }
-  });
-};
 
 export const userInfoHandler = async (): Promise<Response> => {
   const response: MfaMethod[] = [
@@ -64,10 +49,7 @@ export const createMfaMethodHandler = async (
     return formatResponse(400, { error: (e as Error).message });
   }
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({}),
-  };
+  return formatResponse(200, {});
 };
 
 export const updateMfaMethodHandler = async (
