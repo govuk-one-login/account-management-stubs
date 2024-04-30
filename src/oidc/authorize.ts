@@ -108,6 +108,8 @@ export const handler = async (
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
 
+  console.log(event.headers);
+
   const cookies = getCookiesFromHeader(event.headers);
 
   const { state, nonce } = queryStringParameters;
