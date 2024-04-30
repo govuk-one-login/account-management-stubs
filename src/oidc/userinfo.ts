@@ -18,6 +18,7 @@ const newUserInfo = (): UserInfo => ({
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
+  console.log("event", event);
   return {
     statusCode: 200,
     body: JSON.stringify(newUserInfo()),
