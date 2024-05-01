@@ -533,7 +533,7 @@ Resources:
             RestApiId:
               Ref: OidcStubsRestApi
             RequestParameters:
-              method.request.header.Authentication:
+              method.request.header.Authorization:
                 Caching: false
 
       VpcConfig:
