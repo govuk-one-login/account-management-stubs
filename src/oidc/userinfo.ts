@@ -27,6 +27,8 @@ const dynamoDocClient = DynamoDBDocumentClient.from(
 
 const getUserId = async (nonce: string): Promise<string> => {
   const { TABLE_NAME } = process.env;
+  assert(TABLE_NAME, "TABLE_NAME environment variable not set");
+
   const command = new GetCommand({
     TableName: TABLE_NAME,
     Key: {
@@ -63,7 +65,10 @@ const newUserInfo = (userId: string): UserInfo => ({
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
-  assert(event?.headers?.Authorization);
+  assert(
+    event?.headers?.Authorization,
+    "There is no Authorization header in the request"
+  );
 
   console.log("event", event);
   const jwt = parseJwt(event?.headers?.Authorization);
