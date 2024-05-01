@@ -41,7 +41,7 @@
     "@aws-sdk/client-sqs": "^3.565.0",
     "@aws-sdk/lib-dynamodb": "^3.565.0",
     "@types/aws-lambda": "^8.10.136",
-    "jose": "^5.2.3",
+    "jose": "^5.2.4",
     "uuid": "^9.0.1"
   }
 }
