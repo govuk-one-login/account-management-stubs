@@ -269,6 +269,8 @@ Resources:
       AttributeDefinitions:
         - AttributeName: code
           AttributeType: S
+        - AttributeName: nonce
+          AttributeType: S
       BillingMode: PAY_PER_REQUEST
       TableName: !Ref OidcStubDataTableName
       KeySchema:
