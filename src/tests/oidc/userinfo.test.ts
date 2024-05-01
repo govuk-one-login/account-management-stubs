@@ -12,7 +12,7 @@ describe("handler", () => {
     dynamoMock.on(QueryCommand).resolves({
       Items: [
         {
-          userId: "abc",
+          userId: "user1",
         },
       ],
     });

@@ -5,7 +5,7 @@ interface UserScenarios {
     userinfo: {
       email: string;
       email_verified: boolean;
-      sub: string;
+      sub: keyof UserScenarios;
       phone_number: string;
       phone_number_verified: boolean;
       updated_at: string;
@@ -18,7 +18,7 @@ type NestedKeys<T> = keyof T[keyof T];
 const userScenarios: UserScenarios = {
   "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA": {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FAs",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
