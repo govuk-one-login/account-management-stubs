@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda/trigger/api-gateway-proxy";
-import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 import { handler, Response } from "../../oidc/userinfo";
 
@@ -9,10 +9,12 @@ const tableName = "TABLE_NAME";
 describe("handler", () => {
   beforeEach(() => {
     dynamoMock.reset();
-    dynamoMock.on(GetCommand).resolves({
-      Item: {
-        userId: "abc",
-      },
+    dynamoMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          userId: "abc",
+        },
+      ],
     });
     process.env.TABLE_NAME = tableName;
   });
