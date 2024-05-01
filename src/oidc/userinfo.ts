@@ -71,7 +71,7 @@ export const handler = async (
   );
 
   console.log("event", event);
-  const jwt = parseJwt(event?.headers?.Authorization);
+  const jwt = parseJwt(event.headers.Authorization);
 
   return {
     statusCode: 200,

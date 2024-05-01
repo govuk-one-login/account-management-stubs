@@ -4,6 +4,7 @@ import { mockClient } from "aws-sdk-client-mock";
 import { handler, Response } from "../../oidc/userinfo";
 
 const dynamoMock = mockClient(DynamoDBDocumentClient);
+const tableName = "TABLE_NAME";
 
 describe("handler", () => {
   beforeEach(() => {
@@ -13,6 +14,7 @@ describe("handler", () => {
         userId: "abc",
       },
     });
+    process.env.TABLE_NAME = tableName;
   });
   afterEach(() => {
     jest.clearAllMocks();
