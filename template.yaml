@@ -529,6 +529,9 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
