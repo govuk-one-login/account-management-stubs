@@ -274,6 +274,8 @@ Resources:
       KeySchema:
         - AttributeName: code
           KeyType: HASH
+        - AttributeName: nonce
+          KeyType: HASH
       SSESpecification:
         SSEEnabled: true
         SSEType: KMS
