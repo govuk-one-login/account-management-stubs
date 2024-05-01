@@ -43,6 +43,7 @@ const getUserId = async (nonce: string): Promise<string> => {
   if (results.Items?.length !== 1) {
     throw new Error("nonce not found in DB");
   }
+  console.log(results.Items);
   return (
     (results.Items[0] as OicdPersistedData).userId ||
     "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA"
@@ -66,6 +67,7 @@ export const handler = async (
   );
 
   const jwt = parseJwt(event.headers.Authorization);
+  console.log(jwt);
 
   return {
     statusCode: 200,
