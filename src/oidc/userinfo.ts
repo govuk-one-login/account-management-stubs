@@ -3,6 +3,7 @@ import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import assert from "node:assert/strict";
 import { UserInfo } from "../common/models";
+import getUserScenario from "../scenarios/scenarios";
 
 export interface Response {
   statusCode: number;
@@ -56,15 +57,6 @@ const parseJwt = (
   return JSON.parse(Buffer.from(token.split(".")[1], "base64").toString());
 };
 
-const newUserInfo = (userId: string): UserInfo => ({
-  sub: userId,
-  email: "your.name@example.com",
-  email_verified: true,
-  phone_number: "1234567890",
-  phone_number_verified: true,
-  updated_at: Date.now().toString(),
-});
-
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
@@ -73,11 +65,12 @@ export const handler = async (
     "There is no Authorization header in the request"
   );
 
-  console.log("event", event);
   const jwt = parseJwt(event.headers.Authorization);
 
   return {
     statusCode: 200,
-    body: JSON.stringify(newUserInfo(await getUserId(jwt.nonce))),
+    body: JSON.stringify(
+      getUserScenario(await getUserId(jwt.nonce), "userinfo")
+    ),
   };
 };
