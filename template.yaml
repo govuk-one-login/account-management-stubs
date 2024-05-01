@@ -276,8 +276,13 @@ Resources:
       KeySchema:
         - AttributeName: code
           KeyType: HASH
-        - AttributeName: nonce
-          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: oidcNonceLookup
+          KeySchema:
+            - AttributeName: nonce
+              KeyType: HASH
+            Projection:
+              ProjectionType: KEYS_ONLY
       SSESpecification:
         SSEEnabled: true
         SSEType: KMS
