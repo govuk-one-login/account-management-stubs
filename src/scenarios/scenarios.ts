@@ -24,7 +24,6 @@ const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       updated_at: Date.now().toString(),
-      d,
     },
   },
   user1: {
