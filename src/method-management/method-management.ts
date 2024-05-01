@@ -1,28 +1,20 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import assert from "node:assert/strict";
-import { components } from "./models/schema";
-
-type MfaMethod = components["schemas"]["MfaMethod"];
+import { getUserIdFromEvent, getUserScenario } from "../scenarios/scenarios";
 
 export interface Response {
   statusCode: number;
   body: string;
 }
 
-export const userInfoHandler = async (): Promise<Response> => {
-  const response: MfaMethod[] = [
-    {
-      mfaIdentifier: 1,
-      priorityIdentifier: "PRIMARY",
-      mfaMethodType: "SMS",
-      endPoint: "07123456789",
-      methodVerified: true,
-    },
-  ];
-
+export const userInfoHandler = async (
+  event: APIGatewayProxyEvent
+): Promise<Response> => {
   return {
     statusCode: 200,
-    body: JSON.stringify(response),
+    body: JSON.stringify(
+      getUserScenario(await getUserIdFromEvent(event), "mfaMethods")
+    ),
   };
 };
 
