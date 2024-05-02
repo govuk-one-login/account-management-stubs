@@ -269,11 +269,20 @@ Resources:
       AttributeDefinitions:
         - AttributeName: code
           AttributeType: S
+        - AttributeName: nonce
+          AttributeType: S
       BillingMode: PAY_PER_REQUEST
       TableName: !Ref OidcStubDataTableName
       KeySchema:
         - AttributeName: code
           KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: OidcNonceIndex
+          KeySchema:
+            - AttributeName: nonce
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
       SSESpecification:
         SSEEnabled: true
         SSEType: KMS
@@ -327,7 +336,7 @@ Resources:
       CacheClusterSize: "0.5"
       MethodSettings:
         - HttpMethod: "*"
-          CachingEnabled: true
+          CachingEnabled: false
           ResourcePath: /*
       TracingEnabled: true
       AccessLogSetting:
@@ -415,6 +424,8 @@ Resources:
             Method: GET
             RestApiId:
               Ref: OidcStubsRestApi
+            RequestParameters:
+              - method.request.header.Cookie
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
@@ -504,7 +515,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-userinfo
       Architectures: ["arm64"]
-      CodeUri: src/oidc
+      CodeUri: src
       Handler: userinfo.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
@@ -521,12 +532,18 @@ Resources:
             Method: GET
             RestApiId:
               Ref: OidcStubsRestApi
+            RequestParameters:
+              method.request.header.Authorization:
+                Caching: false
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -534,7 +551,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - userinfo.ts
+          - oidc/userinfo.ts
 
   OidcUserInfoApiStubFunctionRole:
     Type: AWS::IAM::Role
@@ -546,6 +563,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref OidcUserInfoApiStubPolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -564,6 +582,29 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-userinfo"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  OidcUserInfoApiStubPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:Query
+              - dynamodb:GetItem
+            Resource:
+              - !GetAtt OidcStubDataStore.Arn
+              - !Sub
+                - "${Arn}/*"
+                - Arn: !GetAtt OidcStubDataStore.Arn
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Resource:
+              - !GetAtt DatabaseKmsKey.Arn
 
   ######################################
   # OIDC Configuration Stub
@@ -893,7 +934,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-method-management-v1
       Architectures: ["arm64"]
-      CodeUri: src/method-management
+      CodeUri: src
       Handler: method-management.userInfoHandler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
@@ -916,6 +957,9 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -923,7 +967,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - method-management.ts
+          - method-management/method-management.ts
 
   MethodManagementv1ApiStubFunctionRole:
     Type: AWS::IAM::Role
@@ -935,6 +979,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref MethodManagementv1ApiStubPolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -944,6 +989,29 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - "sts:AssumeRole"
+
+  MethodManagementv1ApiStubPolicy:
+      Type: AWS::IAM::ManagedPolicy
+      Properties:
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Query
+                - dynamodb:GetItem
+              Resource:
+                - !GetAtt OidcStubDataStore.Arn
+                - !Sub
+                  - "${Arn}/*"
+                  - Arn: !GetAtt OidcStubDataStore.Arn
+            - Effect: Allow
+              Action:
+                - kms:Decrypt
+                - kms:GenerateDataKey*
+                - kms:ReEncrypt*
+              Resource:
+                - !GetAtt DatabaseKmsKey.Arn
 
   MethodManagementv1ApiStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -962,7 +1030,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-method-management-create-v1
       Architectures: ["arm64"]
-      CodeUri: src/method-management
+      CodeUri: src
       Handler: method-management.createMfaMethodHandler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
@@ -992,7 +1060,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - method-management.ts
+          - method-management/method-management.ts
 
   MethodManagementCreatev1ApiStubFunctionRole:
     Type: AWS::IAM::Role
@@ -1022,4 +1090,3 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-method-management-create-v1"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
-
