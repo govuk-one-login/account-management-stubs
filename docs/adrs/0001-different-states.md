@@ -29,3 +29,10 @@ We could create "profiles" of users, based on scenarios that we want to test. Th
 We would need some way of changing the user who is logged in, this could be done by modfying the DynamoDB table to change the user id in the session token.
 
 Potentially, we could create an API or page to facilitate this.
+
+
+## Decision
+
+We have decided to go with option 3, we will acheive this by setting a cookie on the OIDC API's domain, which will specify a user to login as. We can store this user alongside the nonce and code in DynamoDB. When an authenticated request is made, we can retrieve User ID from the database (by looking it up in the table, with the nonce from the access token).
+
+![Sequence Diagram](0001-sequence.png)
