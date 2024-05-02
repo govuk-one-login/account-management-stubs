@@ -25,7 +25,7 @@ interface UserScenarios {
     userinfo: {
       email: string;
       email_verified: boolean;
-      sub: keyof UserScenarios;
+      sub: string;
       phone_number: string;
       phone_number_verified: boolean;
       updated_at: string;
@@ -39,8 +39,6 @@ interface UserScenarios {
     }[];
   };
 }
-
-type NestedKeys<T> = keyof T[keyof T];
 
 const userScenarios: UserScenarios = {
   "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA": {
@@ -131,7 +129,7 @@ export const getUserIdFromEvent = async (
 
 export const getUserScenario = (
   userId: keyof typeof userScenarios,
-  scenario: NestedKeys<UserScenarios>
+  scenario: keyof UserScenarios[keyof UserScenarios]
 ) => {
   assert(
     userScenarios[userId] && userScenarios[userId][scenario],
