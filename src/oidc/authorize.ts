@@ -7,6 +7,7 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import {
   APIGatewayProxyEvent,
+  APIGatewayProxyEventHeaders,
   APIGatewayProxyEventQueryStringParameters,
 } from "aws-lambda";
 import {
@@ -45,6 +46,29 @@ const newTxmaEvent = (): TxmaEvent => ({
   },
 });
 
+const getCookiesFromHeader = (headers: APIGatewayProxyEventHeaders) => {
+  if (
+    headers === null ||
+    headers === undefined ||
+    headers.cookie === undefined
+  ) {
+    return {};
+  }
+
+  const list: Record<string, string> = {};
+
+  headers.cookie.split(";").forEach((cookie) => {
+    const parts = cookie.split("=");
+    const key = (parts.shift() || "").trim();
+    const value = decodeURI(parts.join("="));
+    if (key !== "") {
+      list[key] = value;
+    }
+  });
+
+  return list;
+};
+
 export const sendSqsMessage = async (
   messageBody: string,
   queueUrl: string | undefined
@@ -61,7 +85,8 @@ export const sendSqsMessage = async (
 
 export const writeNonce = async (
   code: string,
-  nonce: string
+  nonce: string,
+  userId = "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA"
 ): Promise<PutCommandOutput> => {
   const { TABLE_NAME } = process.env;
 
@@ -70,6 +95,7 @@ export const writeNonce = async (
     Item: {
       code,
       nonce,
+      userId,
     },
   });
   return dynamoDocClient.send(command);
@@ -80,6 +106,8 @@ export const handler = async (
 ): Promise<Response> => {
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
+
+  const cookies = getCookiesFromHeader(event.headers);
 
   const { state, nonce } = queryStringParameters;
   const redirectUri = queryStringParameters.redirect_uri;
@@ -96,7 +124,7 @@ export const handler = async (
     );
   }
   try {
-    await writeNonce(code, nonce);
+    await writeNonce(code, nonce, cookies?.userId);
 
     await sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
     return {

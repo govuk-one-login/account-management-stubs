@@ -1,22 +1,24 @@
-import { UserInfo } from "../common/models";
+import { APIGatewayProxyEvent } from "aws-lambda";
+import assert from "node:assert/strict";
+import { getUserScenario, getUserIdFromEvent } from "../scenarios/scenarios";
 
 export interface Response {
   statusCode: number;
   body: string;
 }
 
-const newUserInfo = (): UserInfo => ({
-  sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
-  email: "your.name@example.com",
-  email_verified: true,
-  phone_number: "1234567890",
-  phone_number_verified: true,
-  updated_at: Date.now().toString(),
-});
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<Response> => {
+  assert(
+    event?.headers?.Authorization,
+    "There is no Authorization header in the request"
+  );
 
-export const handler = async () => {
   return {
     statusCode: 200,
-    body: JSON.stringify(newUserInfo()),
+    body: JSON.stringify(
+      getUserScenario(await getUserIdFromEvent(event), "userinfo")
+    ),
   };
 };
