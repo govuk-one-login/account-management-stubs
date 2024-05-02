@@ -1099,7 +1099,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-method-management-update-v1
       Architectures: [ "arm64" ]
-      CodeUri: src/method-management
+      CodeUri: src
       Handler: method-management.updateMfaMethodHandler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
@@ -1129,7 +1129,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - method-management.ts
+          - method-management/method-management.ts
 
   MethodManagementUpdateV1ApiStubFunctionRole:
     Type: AWS::IAM::Role
