@@ -535,6 +535,9 @@ Resources:
             RequestParameters:
               method.request.header.Authorization:
                 Caching: false
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OidcStubDataTableName
 
       VpcConfig:
         SubnetIds:
