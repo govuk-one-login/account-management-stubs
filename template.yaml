@@ -535,10 +535,6 @@ Resources:
             RequestParameters:
               method.request.header.Authorization:
                 Caching: false
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref OidcStubDataTableName
-
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
@@ -961,6 +957,9 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
