@@ -6,7 +6,7 @@ Currently, the stub API works quite basically; doing a very basic level of valid
 
 As we develop One Login Home, there is a need to have more flexibility in the API responses. For example, with MFA method management, we'd like to demonstrate users who have different combinations of MFA methods enabled, we can't do this with static responses.
 
-## Option 1: Systems Manager Parameter Store
+## Option 1: Systems Manager Parameter Store
 
 We could use the [systems manager parameter store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html) to store a parameter that corresponds to a scenario. And then return the response we want.
 
@@ -22,7 +22,7 @@ This would solve the issue of multiple developers changing scenarios, or automat
 
 However, this would require a significant change to the frontend API in order to pass the header through to the API requests, we may want to avoid adding this if it is just for development.
 
-## Option 3: Switch responses based on user
+## Option 3: Switch responses based on user
 
 We could create "profiles" of users, based on scenarios that we want to test. The return the relevant response based on which user is making the request.
 
