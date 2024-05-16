@@ -82,7 +82,7 @@ describe("updateMfaMethodHandler", () => {
     };
   };
 
-  test("should return 200 and the updated method when the request is valid", async () => {
+  test("should return 200 and the updated SMS method when the request is valid", async () => {
     const requestBody = {
       email: "email@email.com",
       credential: "email",
@@ -92,6 +92,25 @@ describe("updateMfaMethodHandler", () => {
         priorityIdentifier: "PRIMARY",
         mfaMethodType: "SMS",
         endPoint: "07123456789",
+        methodVerified: true,
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
+    const response = await updateMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body)).toMatchObject(requestBody.mfaMethod);
+  });
+
+  test("should return 200 and the updated auth app method when the request is valid", async () => {
+    const requestBody = {
+      email: "email@email.com",
+      credential: "email",
+      otp: "123456",
+      mfaMethod: {
+        mfaIdentifier: 1,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "AUTH_APP",
+        endPoint: null,
         methodVerified: true,
       },
     };
