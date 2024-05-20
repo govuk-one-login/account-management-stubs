@@ -182,6 +182,42 @@ const userScenarios: UserScenarios = {
         methodVerified: true,
       }
     ]
+  },
+  errorMultiplePrimaryMethods: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 2,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: 3,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      }
+    ]
+  },
+  errorMultipleAuthAppMethods: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 1,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "AUTH_APP",
+        endPoint: "1Password",
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: 2,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "AUTH_APP",
+        endPoint: "1Password",
+        methodVerified: true,
+      }
+    ]
   }
 };
 
@@ -224,10 +260,10 @@ export const getUserIdFromEvent = async (
   );
 };
 
-export const getUserScenario = (
+export const getUserScenario = <T extends keyof UserScenarios[keyof UserScenarios]>(
   userId: keyof typeof userScenarios,
-  scenario: keyof UserScenarios[keyof UserScenarios]
-) => {
+  scenario: T
+): UserScenarios["default"][T] => {
   const id = userScenarios[userId] ? userId : "default"
   
   const response = userScenarios[id][scenario] || userScenarios.default[scenario];
