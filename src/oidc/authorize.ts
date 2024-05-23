@@ -17,6 +17,7 @@ import {
 } from "@aws-sdk/client-sqs";
 
 import { TxmaEvent } from "../common/models";
+import { userScenarios } from "../scenarios/scenarios";
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -102,6 +103,20 @@ export const writeNonce = async (
   });
   return dynamoDocClient.send(command);
 };
+
+export const selectScenarioHandler = async () => {
+  const scenarios = Object.keys(userScenarios).map((scenario) => {
+    return `<button>${scenario}</button>`
+  }).join('<br/>')
+
+  const body = `<html><body>${scenarios}</body></html>`
+
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "text/html" },
+    body
+  }
+}
 
 export const handler = async (
   event: APIGatewayProxyEvent
