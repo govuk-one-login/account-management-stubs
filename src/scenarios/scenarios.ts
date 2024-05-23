@@ -21,7 +21,7 @@ interface OicdPersistedData {
 }
 
 interface UserScenarios {
-  [key: string]: {
+  default: {
     userinfo: {
       email: string;
       email_verified: boolean;
@@ -38,10 +38,11 @@ interface UserScenarios {
       methodVerified: boolean;
     }[];
   };
+  [key: string]: Partial<UserScenarios["default"]>
 }
 
 const userScenarios: UserScenarios = {
-  "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA": {
+  "default": {
     userinfo: {
       sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
       email: "your.name@example.com",
@@ -60,32 +61,164 @@ const userScenarios: UserScenarios = {
       },
     ],
   },
-  user1: {
-    userinfo: {
-      email: "user1@example.com",
-      email_verified: true,
-      sub: "user1",
-      phone_number: "999",
-      phone_number_verified: true,
-      updated_at: Date.now().toString(),
-    },
+  userPrimaryAuthApp: {
     mfaMethods: [
       {
-        mfaIdentifier: 0,
-        priorityIdentifier: "PRIMARY",
-        mfaMethodType: "SMS",
-        endPoint: "07123456789",
-        methodVerified: true,
-      },
-      {
         mfaIdentifier: 1,
-        priorityIdentifier: "SECONDARY",
+        priorityIdentifier: "PRIMARY",
         mfaMethodType: "AUTH_APP",
         endPoint: "1Password",
         methodVerified: true,
       },
     ],
   },
+  userPrimarySms: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 1,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "SMS",
+        endPoint: "0123456789",
+        methodVerified: true,
+      }
+    ]
+  },
+  userPrimarySmsBackupAuthApp: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 1,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "SMS",
+        endPoint: "0123456789",
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: 2,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "AUTH_APP",
+        endPoint: "1Password",
+        methodVerified: true,
+      },
+    ]
+  },
+  userPrimaryAuthAppBackupSms: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 1,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "AUTH_APP",
+        endPoint: "1Password",
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: 2,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "SMS",
+        endPoint: "0123456789",
+        methodVerified: true,
+      },
+    ]
+  },
+  userPrimarySmsBackupSms: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 1,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "SMS",
+        endPoint: "0123456789",
+        methodVerified: true,
+      }, 
+      {
+        mfaIdentifier: 2,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      }
+    ]
+  },
+  errorNoMfaMethods: {
+    mfaMethods: []
+  },
+  errorMoreThanTwoMethods: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 1,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: 2,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: 3,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      }
+    ]
+  },
+  errorNoPrimaryMethod: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 2,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: 3,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      }
+    ]
+  },
+  errorMultiplePrimaryMethods: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 2,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: 3,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "SMS",
+        endPoint: "99940850934",
+        methodVerified: true,
+      }
+    ]
+  },
+  errorMultipleAuthAppMethods: {
+    mfaMethods: [
+      {
+        mfaIdentifier: 1,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "AUTH_APP",
+        endPoint: "1Password",
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: 2,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "AUTH_APP",
+        endPoint: "1Password",
+        methodVerified: true,
+      }
+    ]
+  }
 };
 
 const parseJwt = (
@@ -127,14 +260,17 @@ export const getUserIdFromEvent = async (
   );
 };
 
-export const getUserScenario = (
+export const getUserScenario = <T extends keyof UserScenarios[keyof UserScenarios]>(
   userId: keyof typeof userScenarios,
-  scenario: keyof UserScenarios[keyof UserScenarios]
-) => {
-  assert(
-    userScenarios[userId] && userScenarios[userId][scenario],
-    `scenario "${scenario}" does not exist for user "${userId}"`
-  );
+  scenario: T
+): UserScenarios["default"][T] => {
+  const id = userScenarios[userId] ? userId : "default"
+  
+  const response = userScenarios[id][scenario] || userScenarios.default[scenario];
 
-  return userScenarios[userId][scenario];
+  if ('email' in response) {
+    response.email = `${id}@example.org`
+  }
+
+  return response
 };

@@ -13,6 +13,36 @@ export const userInfoHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
   const response = getUserScenario(await getUserIdFromEvent(event), "mfaMethods");
+
+  if (response.length === 0) {
+    // a user with no MFA factors
+    return formatResponse(404, {})
+  }
+
+  if (response.length > 2) {
+    // user with more than 2 methods
+    return formatResponse(422, {})
+  }
+  
+  const primaryMethodCount = response.filter(m => m.priorityIdentifier === "PRIMARY").length
+
+  if (primaryMethodCount === 0) {
+    // user with no primary method
+    return formatResponse(422, {})
+  }
+
+  if (primaryMethodCount > 1) {
+    // user with more than one primary method
+    return formatResponse(409, {})
+  }
+
+  const appMethodCount = response.filter(m => m.mfaMethodType === "AUTH_APP").length
+
+  if (appMethodCount > 1) {
+    // user with more than one app method
+    return formatResponse(409, {})
+  }
+
   return formatResponse(200, response);
 };
 
