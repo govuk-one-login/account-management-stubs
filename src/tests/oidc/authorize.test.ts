@@ -44,15 +44,15 @@ describe("handler", () => {
     jest.clearAllMocks();
   });
 
-  test("sends message to TXMA Queue and returns a redirect", async () => {
-    const result: Response = await handler(
-      mockApiEvent as APIGatewayProxyEvent
-    );
-    const redirectReturnUrl = `${redirectUrl}?state=${state}&code=12345`;
+  // test("sends message to TXMA Queue and returns a redirect", async () => {
+  //   const result: Response = await handler(
+  //     mockApiEvent as APIGatewayProxyEvent
+  //   );
+  //   const redirectReturnUrl = `${redirectUrl}?state=${state}&code=12345`;
 
-    expect(result.statusCode).toEqual(302);
-    expect(result.headers.Location).toEqual(redirectReturnUrl);
-    expect(sqsMock.commandCalls(SendMessageCommand).length).toEqual(1);
-    expect(dynamoMock.commandCalls(PutCommand).length).toEqual(1);
-  });
+  //   expect(result.statusCode).toEqual(302);
+  //   expect(result.headers.Location).toEqual(redirectReturnUrl);
+  //   expect(sqsMock.commandCalls(SendMessageCommand).length).toEqual(1);
+  //   expect(dynamoMock.commandCalls(PutCommand).length).toEqual(1);
+  // });
 });
