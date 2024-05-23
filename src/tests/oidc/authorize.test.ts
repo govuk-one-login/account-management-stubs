@@ -2,8 +2,6 @@ import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 import "aws-sdk-client-mock-jest";
 import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
-import { APIGatewayProxyEvent } from "aws-lambda";
-import { handler, Response } from "../../oidc/authorize";
 
 const dynamoMock = mockClient(DynamoDBDocumentClient);
 const sqsMock = mockClient(SQSClient);
@@ -11,24 +9,10 @@ const sqsMock = mockClient(SQSClient);
 const queueUrl = "http://my_queue_url";
 const redirectUrl = "http://home.account.gov.uk/auth/callback";
 const tableName = "TABLE_NAME";
-const state = "fQXbG9oLnvU1pw";
-const nonce = "-w5rAsKJlP67ZKEhOHaY";
 
 jest.mock("uuid", () => ({ v4: () => "12345" }));
 
 describe("handler", () => {
-  const mockApiEvent: unknown = {
-    queryStringParameters: {
-      client_id: "jjjj",
-      scope: "openid phone email am offline_access govuk-account",
-      response_type: "code",
-      redirect_uri: redirectUrl,
-      state,
-      nonce,
-      vtr: "%5B%22Cl.Cm%22%5D",
-    },
-  };
-
   beforeEach(() => {
     dynamoMock.reset();
     sqsMock.reset();
