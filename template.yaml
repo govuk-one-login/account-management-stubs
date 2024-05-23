@@ -413,7 +413,7 @@ Resources:
         userinfo:
           Type: Api
           Properties:
-            Path: /scenario
+            Path: /authorize
             Method: GET
             RestApiId:
               Ref: OidcStubsRestApi
