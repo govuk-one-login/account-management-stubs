@@ -23,7 +23,7 @@ npm install -g openapi-typescript
 openapi-typescript ../../../openapi-specs/auth/method-management-api.yaml --output models/schema.d.ts
 ```
 
-## Using custom scenarios
+## Using custom scenarios
 
 The stub API can be configure to return specific API responses based on what "scenario" is set. This can be used to test functionaltiy in the frontend, for example, if you wanted to test the case when a user has no MFA methods set.
 
