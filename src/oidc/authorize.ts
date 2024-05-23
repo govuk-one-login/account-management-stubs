@@ -87,7 +87,7 @@ export const selectScenarioHandler = async (
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
 
-  const { state, nonce, redirectUri } = queryStringParameters;
+  const { state, nonce, redirect_uri } = queryStringParameters;
 
   const scenarios = Object.keys(userScenarios).map((scenario) => {
     return `<button name="scenario" value="${scenario}">${scenario}</button>`
@@ -97,7 +97,7 @@ export const selectScenarioHandler = async (
       <form method="post" action='/authorize'>
         <input type="hidden" name="state" value="${state}" />
         <input type="hidden" name="nonce" value="${nonce}" /> 
-        <input type="hidden" name="redirectUri" value="${redirectUri}" />
+        <input type="hidden" name="redirectUri" value="${redirect_uri}" />
         ${scenarios}
       </form>
     </body></html>`
