@@ -18,6 +18,7 @@ import {
 
 import { TxmaEvent } from "../common/models";
 import { userScenarios } from "../scenarios/scenarios";
+import assert from "node:assert/strict";
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -120,7 +121,7 @@ export const selectScenarioHandler = async (
       <form method="post" action='/authorize'>
         <input type="hidden" name="state" value="${state}" />
         <input type="hidden" name="nonce" value="${nonce}" /> 
-        <input type="hidden" name="redirectUrl" value="${redirectUri}" />
+        <input type="hidden" name="redirectUri" value="${redirectUri}" />
         ${scenarios}
       </form>
     </body></html>`
@@ -135,13 +136,18 @@ export const selectScenarioHandler = async (
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
-  const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
-    event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
+  assert(event.body, 'no body')
 
-  const cookies = getCookiesFromHeader(event.headers);
+  const properties = new URLSearchParams(event.body)
+  const nonce = properties.get('nonce')
+  const state = properties.get('state')
+  const redirectUri = properties.get('redirectUri')
+  const scenario = properties.get('scenario') || 'default'
 
-  const { state, nonce } = queryStringParameters;
-  const redirectUri = queryStringParameters.redirect_uri;
+  assert(nonce, 'no nonce')
+  assert(state, 'no state')
+  assert(redirectUri, 'no redirect url')
+
   const { DUMMY_TXMA_QUEUE_URL } = process.env;
 
   const code = uuid();
@@ -160,7 +166,7 @@ export const handler = async (
   );
 
   try {
-    await writeNonce(code, nonce, cookies?.userId, remove_at);
+    await writeNonce(code, nonce, scenario, remove_at);
 
     await sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
     return {

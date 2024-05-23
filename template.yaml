@@ -493,7 +493,7 @@ Resources:
           Type: Api
           Properties:
             Path: /authorize
-            Method: GET
+            Method: POST
             RestApiId:
               Ref: OidcStubsRestApi
             RequestParameters:
