@@ -48,29 +48,6 @@ const newTxmaEvent = (): TxmaEvent => ({
   },
 });
 
-const getCookiesFromHeader = (headers: APIGatewayProxyEventHeaders) => {
-  if (
-    headers === null ||
-    headers === undefined ||
-    headers.cookie === undefined
-  ) {
-    return {};
-  }
-
-  const list: Record<string, string> = {};
-
-  headers.cookie.split(";").forEach((cookie) => {
-    const parts = cookie.split("=");
-    const key = (parts.shift() || "").trim();
-    const value = decodeURI(parts.join("="));
-    if (key !== "") {
-      list[key] = value;
-    }
-  });
-
-  return list;
-};
-
 export const sendSqsMessage = async (
   messageBody: string,
   queueUrl: string | undefined
