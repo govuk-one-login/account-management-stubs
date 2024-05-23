@@ -33,6 +33,7 @@ There is a piece of work in the backlog to create some kind of UI for this, but 
 
 1. Go to the stub API in dyour browser (https://oidc-stub.home.dev.account.gov.uk/)
 2. In the Developer Tools, set a `userId` cookie, with the value of the scenario you want to set (you can find a list of scenarios in src/scenarios/scenarios.ts)
+
 ![](docs/set-scenario.png)
 3. Log out and back in to One Login Home on Dev
 
