@@ -104,12 +104,26 @@ export const writeNonce = async (
   return dynamoDocClient.send(command);
 };
 
-export const selectScenarioHandler = async () => {
+export const selectScenarioHandler = async (
+  event: APIGatewayProxyEvent
+) => {
+  const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
+    event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
+
+  const { state, nonce, redirectUri } = queryStringParameters;
+
   const scenarios = Object.keys(userScenarios).map((scenario) => {
-    return `<button>${scenario}</button>`
+    return `<button name="scenario" value="${scenario}">${scenario}</button>`
   }).join('<br/>')
 
-  const body = `<html><body>${scenarios}</body></html>`
+  const body = `<html><body>
+      <form method="post" action='/authorize'>
+        <input type="hidden" name="state" value="${state}" />
+        <input type="hidden" name="nonce" value="${nonce}" /> 
+        <input type="hidden" name="redirectUrl" value="${redirectUri}" />
+        ${scenarios}
+      </form>
+    </body></html>`
 
   return {
     statusCode: 200,
