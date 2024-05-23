@@ -166,7 +166,6 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - all-routes.ts
-
   AccountManagementStubFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -177,6 +176,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -854,9 +854,9 @@ Resources:
             Resource:
               - !GetAtt DatabaseKmsKey.Arn
 
-#
-# Method Management
-#
+  #
+  # Method Management
+  #
 
   ######################################
   # Method Management API Stub API
@@ -991,27 +991,27 @@ Resources:
               - "sts:AssumeRole"
 
   MethodManagementv1ApiStubPolicy:
-      Type: AWS::IAM::ManagedPolicy
-      Properties:
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action:
-                - dynamodb:Query
-                - dynamodb:GetItem
-              Resource:
-                - !GetAtt OidcStubDataStore.Arn
-                - !Sub
-                  - "${Arn}/*"
-                  - Arn: !GetAtt OidcStubDataStore.Arn
-            - Effect: Allow
-              Action:
-                - kms:Decrypt
-                - kms:GenerateDataKey*
-                - kms:ReEncrypt*
-              Resource:
-                - !GetAtt DatabaseKmsKey.Arn
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:Query
+              - dynamodb:GetItem
+            Resource:
+              - !GetAtt OidcStubDataStore.Arn
+              - !Sub
+                - "${Arn}/*"
+                - Arn: !GetAtt OidcStubDataStore.Arn
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Resource:
+              - !GetAtt DatabaseKmsKey.Arn
 
   MethodManagementv1ApiStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -1053,6 +1053,9 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -1072,6 +1075,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref OidcUserInfoApiStubPolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -1098,7 +1102,7 @@ Resources:
       - MethodManagementUpdateV1ApiStubFunctionLogGroup
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-method-management-update-v1
-      Architectures: [ "arm64" ]
+      Architectures: ["arm64"]
       CodeUri: src
       Handler: method-management.updateMfaMethodHandler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
@@ -1122,6 +1126,9 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -1141,6 +1148,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref OidcUserInfoApiStubPolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
