@@ -7,7 +7,6 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import {
   APIGatewayProxyEvent,
-  APIGatewayProxyEventHeaders,
   APIGatewayProxyEventQueryStringParameters,
 } from "aws-lambda";
 import {
