@@ -86,7 +86,8 @@ export const sendSqsMessage = async (
 export const writeNonce = async (
   code: string,
   nonce: string,
-  userId = "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA"
+  userId = "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+  remove_at: number
 ): Promise<PutCommandOutput> => {
   const { TABLE_NAME } = process.env;
 
@@ -96,6 +97,7 @@ export const writeNonce = async (
       code,
       nonce,
       userId,
+      remove_at,
     },
   });
   return dynamoDocClient.send(command);
@@ -123,8 +125,13 @@ export const handler = async (
       "TXMA Queue URL or Frontend URL environemnt variables is null"
     );
   }
+
+  const remove_at = Math.floor(
+    (new Date().getTime() + 24 * 60 * 60 * 1000) / 1000
+  );
+
   try {
-    await writeNonce(code, nonce, cookies?.userId);
+    await writeNonce(code, nonce, cookies?.userId, remove_at);
 
     await sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
     return {
