@@ -18,6 +18,7 @@ interface OicdPersistedData {
   code: string;
   nonce: string;
   userId: string;
+  remove_at: string;
 }
 
 interface UserScenarios {
@@ -38,11 +39,11 @@ interface UserScenarios {
       methodVerified: boolean;
     }[];
   };
-  [key: string]: Partial<UserScenarios["default"]>
+  [key: string]: Partial<UserScenarios["default"]>;
 }
 
 const userScenarios: UserScenarios = {
-  "default": {
+  default: {
     userinfo: {
       sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
       email: "your.name@example.com",
@@ -80,8 +81,8 @@ const userScenarios: UserScenarios = {
         mfaMethodType: "SMS",
         endPoint: "0123456789",
         methodVerified: true,
-      }
-    ]
+      },
+    ],
   },
   userPrimarySmsBackupAuthApp: {
     mfaMethods: [
@@ -99,7 +100,7 @@ const userScenarios: UserScenarios = {
         endPoint: "1Password",
         methodVerified: true,
       },
-    ]
+    ],
   },
   userPrimaryAuthAppBackupSms: {
     mfaMethods: [
@@ -117,7 +118,7 @@ const userScenarios: UserScenarios = {
         endPoint: "0123456789",
         methodVerified: true,
       },
-    ]
+    ],
   },
   userPrimarySmsBackupSms: {
     mfaMethods: [
@@ -127,18 +128,18 @@ const userScenarios: UserScenarios = {
         mfaMethodType: "SMS",
         endPoint: "0123456789",
         methodVerified: true,
-      }, 
+      },
       {
         mfaIdentifier: 2,
         priorityIdentifier: "SECONDARY",
         mfaMethodType: "SMS",
         endPoint: "99940850934",
         methodVerified: true,
-      }
-    ]
+      },
+    ],
   },
   errorNoMfaMethods: {
-    mfaMethods: []
+    mfaMethods: [],
   },
   errorMoreThanTwoMethods: {
     mfaMethods: [
@@ -162,8 +163,8 @@ const userScenarios: UserScenarios = {
         mfaMethodType: "SMS",
         endPoint: "99940850934",
         methodVerified: true,
-      }
-    ]
+      },
+    ],
   },
   errorNoPrimaryMethod: {
     mfaMethods: [
@@ -180,8 +181,8 @@ const userScenarios: UserScenarios = {
         mfaMethodType: "SMS",
         endPoint: "99940850934",
         methodVerified: true,
-      }
-    ]
+      },
+    ],
   },
   errorMultiplePrimaryMethods: {
     mfaMethods: [
@@ -198,8 +199,8 @@ const userScenarios: UserScenarios = {
         mfaMethodType: "SMS",
         endPoint: "99940850934",
         methodVerified: true,
-      }
-    ]
+      },
+    ],
   },
   errorMultipleAuthAppMethods: {
     mfaMethods: [
@@ -216,9 +217,9 @@ const userScenarios: UserScenarios = {
         mfaMethodType: "AUTH_APP",
         endPoint: "1Password",
         methodVerified: true,
-      }
-    ]
-  }
+      },
+    ],
+  },
 };
 
 const parseJwt = (
@@ -260,17 +261,20 @@ export const getUserIdFromEvent = async (
   );
 };
 
-export const getUserScenario = <T extends keyof UserScenarios[keyof UserScenarios]>(
+export const getUserScenario = <
+  T extends keyof UserScenarios[keyof UserScenarios],
+>(
   userId: keyof typeof userScenarios,
   scenario: T
 ): UserScenarios["default"][T] => {
-  const id = userScenarios[userId] ? userId : "default"
-  
-  const response = userScenarios[id][scenario] || userScenarios.default[scenario];
+  const id = userScenarios[userId] ? userId : "default";
 
-  if ('email' in response) {
-    response.email = `${id}@example.org`
+  const response =
+    userScenarios[id][scenario] || userScenarios.default[scenario];
+
+  if ("email" in response) {
+    response.email = `${id}@example.org`;
   }
 
-  return response
+  return response;
 };
