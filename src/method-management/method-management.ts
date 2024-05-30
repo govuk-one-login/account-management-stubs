@@ -82,7 +82,6 @@ export const updateMfaMethodHandler = async (
     const mfaIdentifier = event.pathParameters?.mfaIdentifier;
     const {
       email,
-      credential,
       otp,
       mfaMethod: {
         priorityIdentifier = undefined,
@@ -93,7 +92,7 @@ export const updateMfaMethodHandler = async (
     } = body;
 
     validateFields(
-      { email, otp, credential, mfaIdentifier },
+      { email, otp, mfaIdentifier },
       {
         priorityIdentifier: /^(PRIMARY|SECONDARY)$/,
         mfaMethodType: /^(AUTH_APP|SMS)$/,

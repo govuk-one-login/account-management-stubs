@@ -67,7 +67,7 @@ const userScenarios: UserScenarios = {
         mfaIdentifier: 1,
         priorityIdentifier: "PRIMARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "1Password",
+        endPoint: "",
         methodVerified: true,
       },
     ],
@@ -96,7 +96,7 @@ const userScenarios: UserScenarios = {
         mfaIdentifier: 2,
         priorityIdentifier: "SECONDARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "1Password",
+        endPoint: "",
         methodVerified: true,
       },
     ]
@@ -107,7 +107,7 @@ const userScenarios: UserScenarios = {
         mfaIdentifier: 1,
         priorityIdentifier: "PRIMARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "1Password",
+        endPoint: "",
         methodVerified: true,
       },
       {
@@ -207,14 +207,14 @@ const userScenarios: UserScenarios = {
         mfaIdentifier: 1,
         priorityIdentifier: "PRIMARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "1Password",
+        endPoint: "",
         methodVerified: true,
       },
       {
         mfaIdentifier: 2,
         priorityIdentifier: "SECONDARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "1Password",
+        endPoint: "",
         methodVerified: true,
       }
     ]
