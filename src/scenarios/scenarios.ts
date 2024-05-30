@@ -34,7 +34,7 @@ interface UserScenarios {
       mfaIdentifier: number;
       priorityIdentifier: "PRIMARY" | "SECONDARY";
       mfaMethodType: "SMS" | "AUTH_APP";
-      endPoint: string;
+      endPoint?: string;
       methodVerified: boolean;
     }[];
   };
@@ -67,7 +67,6 @@ const userScenarios: UserScenarios = {
         mfaIdentifier: 1,
         priorityIdentifier: "PRIMARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "",
         methodVerified: true,
       },
     ],
@@ -96,7 +95,6 @@ const userScenarios: UserScenarios = {
         mfaIdentifier: 2,
         priorityIdentifier: "SECONDARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "",
         methodVerified: true,
       },
     ]
@@ -107,7 +105,6 @@ const userScenarios: UserScenarios = {
         mfaIdentifier: 1,
         priorityIdentifier: "PRIMARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "",
         methodVerified: true,
       },
       {
@@ -207,14 +204,12 @@ const userScenarios: UserScenarios = {
         mfaIdentifier: 1,
         priorityIdentifier: "PRIMARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "",
         methodVerified: true,
       },
       {
         mfaIdentifier: 2,
         priorityIdentifier: "SECONDARY",
         mfaMethodType: "AUTH_APP",
-        endPoint: "",
         methodVerified: true,
       }
     ]

@@ -120,10 +120,9 @@ describe("updateMfaMethodHandler", () => {
     expect(JSON.parse(response.body)).toMatchObject(requestBody.mfaMethod);
   });
 
-  test("should return 200 and the updated sms method when the request is valid", async () => {
+  test("should return 200 even when credential is not provided", async () => {
     const requestBody = {
       email: "email@email.com",
-      credential: "",
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
