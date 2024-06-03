@@ -42,7 +42,7 @@ interface UserScenarios {
   [key: string]: Partial<UserScenarios["default"]>;
 }
 
-const userScenarios: UserScenarios = {
+export const userScenarios: UserScenarios = {
   default: {
     userinfo: {
       sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
