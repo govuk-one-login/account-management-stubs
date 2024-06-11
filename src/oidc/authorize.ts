@@ -7,7 +7,6 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 import {
   APIGatewayProxyEvent,
-  APIGatewayProxyEventHeaders,
   APIGatewayProxyEventQueryStringParameters,
 } from "aws-lambda";
 import {
@@ -17,6 +16,8 @@ import {
 } from "@aws-sdk/client-sqs";
 
 import { TxmaEvent } from "../common/models";
+import { userScenarios } from "../scenarios/scenarios";
+import assert from "node:assert/strict";
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -45,29 +46,6 @@ const newTxmaEvent = (): TxmaEvent => ({
     session_id: uuid(),
   },
 });
-
-const getCookiesFromHeader = (headers: APIGatewayProxyEventHeaders) => {
-  if (
-    headers === null ||
-    headers === undefined ||
-    headers.cookie === undefined
-  ) {
-    return {};
-  }
-
-  const list: Record<string, string> = {};
-
-  headers.cookie.split(";").forEach((cookie) => {
-    const parts = cookie.split("=");
-    const key = (parts.shift() || "").trim();
-    const value = decodeURI(parts.join("="));
-    if (key !== "") {
-      list[key] = value;
-    }
-  });
-
-  return list;
-};
 
 export const sendSqsMessage = async (
   messageBody: string,
@@ -103,16 +81,49 @@ export const writeNonce = async (
   return dynamoDocClient.send(command);
 };
 
-export const handler = async (
+export const selectScenarioHandler = async (
   event: APIGatewayProxyEvent
-): Promise<Response> => {
+) => {
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
 
-  const cookies = getCookiesFromHeader(event.headers);
+  const { state, nonce, redirect_uri } = queryStringParameters;
 
-  const { state, nonce } = queryStringParameters;
-  const redirectUri = queryStringParameters.redirect_uri;
+  const scenarios = Object.keys(userScenarios).map((scenario) => {
+    return `<button name="scenario" value="${scenario}">${scenario}</button>`
+  }).join('<br/>')
+
+  const body = `<html><body>
+      <form method="post" action='/authorize'>
+        <input type="hidden" name="state" value="${state}" />
+        <input type="hidden" name="nonce" value="${nonce}" /> 
+        <input type="hidden" name="redirectUri" value="${redirect_uri}" />
+        ${scenarios}
+      </form>
+    </body></html>`
+
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "text/html" },
+    body
+  }
+}
+
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<Response> => {
+  assert(event.body, 'no body')
+
+  const properties = new URLSearchParams(event.body)
+  const nonce = properties.get('nonce')
+  const state = properties.get('state')
+  const redirectUri = properties.get('redirectUri')
+  const scenario = properties.get('scenario') || 'default'
+
+  assert(nonce, 'no nonce')
+  assert(state, 'no state')
+  assert(redirectUri, 'no redirect url')
+
   const { DUMMY_TXMA_QUEUE_URL } = process.env;
 
   const code = uuid();
@@ -131,7 +142,7 @@ export const handler = async (
   );
 
   try {
-    await writeNonce(code, nonce, cookies?.userId, remove_at);
+    await writeNonce(code, nonce, scenario, remove_at);
 
     await sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
     return {
