@@ -12,22 +12,69 @@ import {
 
 type MfaMethod = components["schemas"]["MfaMethod"];
 
-jest.mock("../../scenarios/scenarios", () => {
+interface HttpResponse {
+  code: number;
+  message: string;
+}
+
+interface Scenario {
+  httpResponse: HttpResponse;
+  mfaMethods?: MfaMethod[];
+  [key: string]: HttpResponse | MfaMethod[] | undefined;
+}
+
+jest.mock("../../scenarios/scenarios-utils.ts", () => {
   return {
-    getUserIdFromEvent: () => {
-      return "abc";
-    },
-    getUserScenario: () => {
-      return [
-        {
-          mfaIdentifier: 1,
-          priorityIdentifier: "PRIMARY",
-          mfaMethodType: "SMS",
-          endPoint: "07123456789",
-          methodVerified: true,
+    getUserIdFromEvent: jest.fn().mockImplementation((event) => {
+      if (event.headers.Authorization === "errorToken") {
+        return Promise.resolve("errorMfa400");
+      }
+      return Promise.resolve("default");
+    }),
+    getUserScenario: jest.fn((userId: string, type: string) => {
+      const scenarios: { [key: string]: Scenario } = {
+        default: {
+          httpResponse: {
+            code: 200,
+            message: "OK",
+          },
+          mfaMethods: [
+            {
+              mfaIdentifier: 1,
+              priorityIdentifier: "PRIMARY",
+              mfaMethodType: "SMS",
+              endPoint: "07123456789",
+              methodVerified: true,
+            },
+          ],
         },
-      ];
-    },
+        errorMfa400: {
+          httpResponse: {
+            code: 400,
+            message: "BAD REQUEST",
+          },
+          mfaMethods: [
+            {
+              mfaIdentifier: 1,
+              priorityIdentifier: "PRIMARY",
+              mfaMethodType: "SMS",
+              endPoint: "07123456789",
+              methodVerified: true,
+            },
+          ],
+        },
+      };
+
+      if (scenarios[userId]) {
+        if (type && scenarios[userId][type]) {
+          return scenarios[userId][type];
+        } else {
+          return scenarios[userId];
+        }
+      } else {
+        return null;
+      }
+    }),
   };
 });
 
@@ -63,7 +110,7 @@ describe("MFA Management API Mock", () => {
 describe("updateMfaMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
     body: unknown,
-    mfaIdentifier: string,
+    mfaIdentifier: string
   ): APIGatewayProxyEvent => {
     return {
       body: JSON.stringify(body),
@@ -136,5 +183,48 @@ describe("updateMfaMethodHandler", () => {
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject(requestBody.mfaMethod);
+  });
+});
+
+describe("updateMfaMethodHandlerError", () => {
+  const createFakeAPIGatewayProxyEvent = (
+    body: unknown,
+    mfaIdentifier: string
+  ): APIGatewayProxyEvent => {
+    return {
+      body: JSON.stringify(body),
+      httpMethod: "PUT",
+      path: `/mfa-methods/${mfaIdentifier}`,
+      pathParameters: { mfaIdentifier },
+      isBase64Encoded: false,
+      headers: {
+        Authorization: "errorToken", // used to switch mock scenarios
+      },
+      multiValueHeaders: {},
+      queryStringParameters: null,
+      multiValueQueryStringParameters: null,
+      stageVariables: null,
+      requestContext:
+        {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+      resource: "",
+    };
+  };
+
+  test("should return 400", async () => {
+    const requestBody = {
+      email: "errorMfa400@email.com",
+      credential: "email",
+      otp: "123456",
+      mfaMethod: {
+        mfaIdentifier: 1,
+        priorityIdentifier: "PRIMARY",
+        mfaMethodType: "SMS",
+        endPoint: "07123456789",
+        methodVerified: true,
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
+    const response = await updateMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(400);
   });
 });

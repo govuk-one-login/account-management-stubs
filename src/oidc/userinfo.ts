@@ -1,6 +1,9 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import assert from "node:assert/strict";
-import { getUserScenario, getUserIdFromEvent } from "../scenarios/scenarios";
+import {
+  getUserScenario,
+  getUserIdFromEvent,
+} from "../scenarios/scenarios-utils";
 
 export interface Response {
   statusCode: number;
