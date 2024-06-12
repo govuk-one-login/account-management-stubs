@@ -7,7 +7,7 @@ import { components } from "../../method-management/models/schema";
 import {
   userInfoHandler,
   updateMfaMethodHandler,
-  Response,
+  Response, createMfaMethodHandler,
 } from "../../method-management/method-management";
 
 type MfaMethod = components["schemas"]["MfaMethod"];
@@ -106,6 +106,49 @@ describe("MFA Management API Mock", () => {
     expect(mfaMethod[0].methodVerified).toBe(true);
   });
 });
+
+describe("createMfaMethodHandler", () => {
+  const createFakeAPIGatewayProxyEvent = (
+      body: unknown,
+  ): APIGatewayProxyEvent => {
+    return {
+      body: JSON.stringify(body),
+      httpMethod: "POST",
+      path: `/mfa-methods`,
+      pathParameters: null,
+      isBase64Encoded: false,
+      headers: {},
+      multiValueHeaders: {},
+      queryStringParameters: null,
+      multiValueQueryStringParameters: null,
+      stageVariables: null,
+      requestContext:
+          {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+      resource: "",
+    };
+  };
+
+  test("should return 200 when adding phone number as backup method the request is valid", async () => {
+    const requestBody = {
+      email: "email@email.com",
+      credential: "email",
+      otp: "123456",
+      mfaMethod: {
+        mfaIdentifier: 1,
+        priorityIdentifier: "SECONDARY",
+        mfaMethodType: "SMS",
+        endPoint: "07123456789",
+        methodVerified: true,
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody);
+    const response = await createMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body)).toMatchObject({});
+  });
+
+});
+
 
 describe("updateMfaMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
