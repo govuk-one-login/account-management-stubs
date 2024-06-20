@@ -20,7 +20,7 @@ export interface UserScenarios {
     };
     mfaMethods: {
       mfaIdentifier: number;
-      priorityIdentifier: "PRIMARY" | "SECONDARY";
+      priorityIdentifier: "DEFAULT" | "BACKUP";
       mfaMethodType: "SMS" | "AUTH_APP";
       endPoint?: string;
       methodVerified: boolean;
