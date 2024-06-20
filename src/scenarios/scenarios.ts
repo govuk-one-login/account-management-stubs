@@ -18,8 +18,10 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 0,
         priorityIdentifier: "DEFAULT",
+        method: {
         mfaMethodType: "SMS",
         endPoint: "07123456789",
+        },
         methodVerified: true,
       },
     ],
@@ -29,7 +31,9 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "AUTH_APP",
+        method: {
+          mfaMethodType: "AUTH_APP",
+        },
         methodVerified: true,
       },
     ],
@@ -39,8 +43,10 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "0123456789",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "0123456789",
+        },
         methodVerified: true,
       },
     ],
@@ -50,14 +56,18 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "0123456789",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "0123456789",
+        },
         methodVerified: true,
       },
       {
         mfaIdentifier: 2,
         priorityIdentifier: "BACKUP",
-        mfaMethodType: "AUTH_APP",
+        method: {
+          mfaMethodType: "AUTH_APP",
+        },
         methodVerified: true,
       },
     ],
@@ -67,14 +77,18 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "AUTH_APP",
+        method: {
+          mfaMethodType: "AUTH_APP",
+        },
         methodVerified: true,
       },
       {
         mfaIdentifier: 2,
         priorityIdentifier: "BACKUP",
-        mfaMethodType: "SMS",
-        endPoint: "0123456789",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "0123456789",
+		    },
         methodVerified: true,
       },
     ],
@@ -84,15 +98,19 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "0123456789",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "0123456789",
+		    },
         methodVerified: true,
       },
       {
         mfaIdentifier: 2,
         priorityIdentifier: "BACKUP",
-        mfaMethodType: "SMS",
-        endPoint: "99940850934",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "99940850934",
+        },
         methodVerified: true,
       },
     ],
@@ -105,22 +123,28 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "99940850934",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "99940850934",
+        },
         methodVerified: true,
       },
       {
         mfaIdentifier: 2,
         priorityIdentifier: "BACKUP",
-        mfaMethodType: "SMS",
-        endPoint: "99940850934",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "99940850934",
+        },
         methodVerified: true,
       },
       {
         mfaIdentifier: 3,
         priorityIdentifier: "BACKUP",
-        mfaMethodType: "SMS",
-        endPoint: "99940850934",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "99940850934",
+        },
         methodVerified: true,
       },
     ],
@@ -130,15 +154,19 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 2,
         priorityIdentifier: "BACKUP",
-        mfaMethodType: "SMS",
-        endPoint: "99940850934",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "99940850934",
+        },
         methodVerified: true,
       },
       {
         mfaIdentifier: 3,
         priorityIdentifier: "BACKUP",
-        mfaMethodType: "SMS",
-        endPoint: "99940850934",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "99940850934",
+        },
         methodVerified: true,
       },
     ],
@@ -148,15 +176,19 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 2,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "99940850934",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "99940850934",
+        },
         methodVerified: true,
       },
       {
         mfaIdentifier: 3,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "99940850934",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "99940850934",
+        },
         methodVerified: true,
       },
     ],
@@ -166,13 +198,17 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "AUTH_APP",
+        method: {
+          mfaMethodType: "AUTH_APP",
+        },
         methodVerified: true,
       },
       {
         mfaIdentifier: 2,
         priorityIdentifier: "BACKUP",
-        mfaMethodType: "AUTH_APP",
+        method: {
+          mfaMethodType: "AUTH_APP",
+        },
         methodVerified: true,
       },
     ],
@@ -186,8 +222,10 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "0123456789",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "0123456789",
+        },
         methodVerified: true,
       },
     ],
@@ -201,8 +239,10 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "0123456789",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "0123456789",
+        },
         methodVerified: true,
       },
     ],
@@ -216,8 +256,10 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "0123456789",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "0123456789",
+		    },
         methodVerified: true,
       },
     ],
