@@ -4,251 +4,370 @@
  */
 
 export interface paths {
-  "/mfa-methods/retrieve": {
-    /**
-     * Retrieves the list of MFA Methods for a user
-     * @description Retrieve mfaMethods that match criteria in the MFASearchRequest in the request body
-     */
-    post: operations["mfa-methods-retrieve"];
-  };
-  "/mfa-methods": {
-    /** @description Creates an mfa method. A new MFA Method cannot be created as PRIMARY, it must be SECONDARY and promoted at a later stage */
-    post: operations["mfa-method-create"];
-  };
-  "/mfa-methods/{mfaIdentifier}": {
-    /** @description Updates an mfa method. If the MFA method is updated to 'PRIMARY', the current 'PRIMARY' gets relegated to secondary. */
-    put: operations["mfa-methods-update"];
-    /** @description Deletes the mfa method identified by the mfa identifier. Cannot delete an identifier that is 'PRIMARY'. */
-    delete: operations["mfa-method-delete"];
-  };
+    "/mfa-methods/retrieve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Retrieves the list of MFA Methods for a user
+         * @description Retrieve mfaMethods that match criteria in the MFASearchRequest in the request body
+         */
+        post: operations["mfa-methods-retrieve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mfa-methods": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Creates an mfa method. A new MFA Method cannot be created as PRIMARY, it must be SECONDARY and promoted at a later stage */
+        post: operations["mfa-method-create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/mfa-methods/{mfaIdentifier}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Updates an mfa method. If the MFA method is updated to 'PRIMARY', the current 'PRIMARY' gets relegated to secondary. */
+        put: operations["mfa-methods-update"];
+        post?: never;
+        /** @description Deletes the mfa method identified by the mfa identifier. Cannot delete an identifier that is 'PRIMARY'. */
+        delete: operations["mfa-method-delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
-
 export type webhooks = Record<string, never>;
-
 export interface components {
-  schemas: {
-    /**
-     * @example {
-     *   "mfaIdentifier": 1213,
-     *   "priorityIdentifier": "SECONDARY",
-     *   "mfaMethodType": "SMS",
-     *   "endPoint": "PHONE",
-     *   "methodVerfied": true
-     * }
-     */
-    MfaMethod: {
-      mfaIdentifier?: number;
-      /** @enum {string} */
-      priorityIdentifier?: "PRIMARY" | "SECONDARY";
-      /** @enum {string} */
-      mfaMethodType?: "SMS" | "AUTH_APP";
-      endPoint?: string;
-      methodVerified?: boolean;
-    };
-    /**
-     * @example {
-     *   "email": "testusersearching@searchersexampledomain.co.uk"
-     * }
-     */
-    MfaSearchRequest: {
-      email: string;
-    };
-    /**
-     * @example {
-     *   "email": "testuser@testexampledomain.co.uk",
-     *   "credential": "SMS",
-     *   "otp": "123456",
-     *   "mfaMethod": {
-     *     "mfaIdentifier": 1213,
-     *     "priorityIdentifier": "SECONDARY",
-     *     "mfaMethodType": "SMS",
-     *     "endPoint": "PHONE",
-     *     "methodVerfied": true
-     *   }
-     * }
-     */
-    MfaMethodCreateOrUpdateRequest: {
-      email: string;
-      credential: string;
-      otp: string;
-      mfaMethod: components["schemas"]["MfaMethod"];
-    };
-    ProblemDetail: {
-      /**
-       * Format: uri
-       * @example https://account.gov.uk/problems/mfa-method-not-updated
-       */
-      type?: string;
-      /** @example MFA Method could not be updated. */
-      title?: string;
-      status?: string;
-      /** @example Database error */
-      detail?: string;
-      /** @example /mfa-methods/{mfaIdentifier} */
-      resource?: string;
-      extension?: {
-        error?: {
-          /** @enum {unknown} */
-          code?: 1056 | 1057 | 1058;
+    schemas: {
+        /** @enum {string} */
+        PriorityEnum: "DEFAULT" | "BACKUP";
+        /** @enum {string} */
+        MethodTypeEnum: "SMS" | "AUTH_APP";
+        MfaMethod: {
+            mfaIdentifier?: number;
+            priorityIdentifier: components["schemas"]["PriorityEnum"];
+            method: components["schemas"]["SmsMethod"] | components["schemas"]["AuthAppMethod"];
+            methodVerified?: boolean;
+            smsPhoneNumber?: string;
         };
-      };
+        SmsMethod: {
+            /** @enum {string} */
+            mfaMethodType?: "SMS";
+            endPoint?: string;
+        };
+        AuthAppMethod: {
+            /** @enum {string} */
+            mfaMethodType?: "AUTH_APP";
+            credential?: string;
+        };
+        /** @example {
+         *       "priorityIdentifier": "DEFAULT",
+         *       "mfaMethodType": "AUTH_APP",
+         *       "endPoint": "n/a"
+         *     } */
+        MfaMethodCreate: {
+            priorityIdentifier: components["schemas"]["PriorityEnum"];
+            mfaMethodType: components["schemas"]["MethodTypeEnum"];
+            endPoint?: string;
+            credential?: string;
+        };
+        /** @example {
+         *       "mfaIdentifier": 1,
+         *       "priorityIdentifier": "DEFAULT",
+         *       "mfaMethodType": "SMS",
+         *       "endPoint": "070"
+         *     } */
+        MfaMethodUpdate: {
+            mfaIdentifier: number;
+            priorityIdentifier: components["schemas"]["PriorityEnum"];
+            mfaMethodType: components["schemas"]["MethodTypeEnum"];
+            credential?: string;
+            endPoint?: string;
+        };
+        /** @example {
+         *       "email": "testusersearching@searchersexampledomain.co.uk"
+         *     } */
+        MfaSearchRequest: {
+            email: string;
+        };
+        /** @example {
+         *       "email": "testuser@testexampledomain.co.uk",
+         *       "credential": "???",
+         *       "otp": "123456",
+         *       "mfaMethod": {
+         *         "priorityIdentifier": "DEFAULT",
+         *         "mfaMethodType": "AUTH_APP",
+         *         "endPoint": "n/a"
+         *       },
+         *       "methodVerified": true
+         *     } */
+        MfaMethodCreateRequest: {
+            email: string;
+            credential: string;
+            otp: string;
+            mfaMethod: components["schemas"]["MfaMethodCreate"];
+        };
+        /** @example {
+         *       "email": "testuser@testexampledomain.co.uk",
+         *       "otp": "123456",
+         *       "mfaMethod": {
+         *         "mfaIdentifier": 1,
+         *         "priorityIdentifier": "DEFAULT",
+         *         "mfaMethodType": "AUTH_APP",
+         *         "endPoint": "n/a"
+         *       }
+         *     } */
+        MfaMethodUpdateRequest: {
+            email: string;
+            otp: string;
+            mfaMethod: components["schemas"]["MfaMethodUpdate"];
+        };
+        ProblemDetail: {
+            /**
+             * Format: uri
+             * @example https://account.gov.uk/problems/mfa-method-not-updated
+             */
+            type?: string;
+            /** @example MFA Method could not be updated. */
+            title?: string;
+            status?: string;
+            /** @example Database error */
+            detail?: string;
+            /** @example /mfa-methods/{mfaIdentifier} */
+            resource?: string;
+            extension?: {
+                error?: {
+                    /** @enum {unknown} */
+                    code?: 1056 | 1057 | 1058;
+                };
+            };
+        };
+        ValidationProblem: {
+            type?: string;
+            title?: string;
+            errors?: components["schemas"]["Error"][];
+        };
+        Error: {
+            detail?: string;
+            pointer?: string;
+        };
     };
-    ValidationProblem: {
-      type?: string;
-      title?: string;
-      errors?: components["schemas"]["Error"][];
-    };
-    Error: {
-      detail?: string;
-      pointer?: string;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-
 export type $defs = Record<string, never>;
-
-export type external = Record<string, never>;
-
 export interface operations {
-  /**
-   * Retrieves the list of MFA Methods for a user
-   * @description Retrieve mfaMethods that match criteria in the MFASearchRequest in the request body
-   */
-  "mfa-methods-retrieve": {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MfaSearchRequest"];
-      };
+    "mfa-methods-retrieve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MfaSearchRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Operation.  The retrieve query was accepted and the response contains all matching MFAMethods. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MfaMethod"][];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidationProblem"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Search not available */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
     };
-    responses: {
-      /** @description Successful Operation.  The retrieve query was accepted and the response contains all matching MFAMethods. */
-      200: {
-        content: {
-          "application/json": components["schemas"]["MfaMethod"][];
+    "mfa-method-create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": components["schemas"]["ValidationProblem"];
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MfaMethodCreateRequest"];
+            };
         };
-      };
-      /** @description Not Found */
-      404: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
+        responses: {
+            /** @description MFA Method Created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MfaMethod"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description MFA Method could not be created */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
         };
-      };
-      /** @description Search not available */
-      500: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
-        };
-      };
     };
-  };
-  /** @description Creates an mfa method. A new MFA Method cannot be created as PRIMARY, it must be SECONDARY and promoted at a later stage */
-  "mfa-method-create": {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MfaMethodCreateOrUpdateRequest"];
-      };
+    "mfa-methods-update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mfaIdentifier: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MfaMethodUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description MFA Method Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MfaMethod"];
+                };
+            };
+            /** @description MFA Method not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description MFA Method could not be updated */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+        };
     };
-    responses: {
-      /** @description MFA Method Updated */
-      200: {
-        content: never;
-      };
-      /** @description Bad Request */
-      400: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
+    "mfa-method-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                mfaIdentifier: string;
+            };
+            cookie?: never;
         };
-      };
-      /** @description MFA Method not Found */
-      404: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
+        requestBody?: never;
+        responses: {
+            /** @description MFA Method Deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description MFA Method Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description Cannot delete a Primary MFA Method */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
+            /** @description MFA Method could not be deleted */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetail"];
+                };
+            };
         };
-      };
-      /** @description MFA Method could not be created */
-      500: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
-        };
-      };
     };
-  };
-  /** @description Updates an mfa method. If the MFA method is updated to 'PRIMARY', the current 'PRIMARY' gets relegated to secondary. */
-  "mfa-methods-update": {
-    parameters: {
-      path: {
-        mfaIdentifier: string;
-      };
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MfaMethodCreateOrUpdateRequest"];
-      };
-    };
-    responses: {
-      /** @description MFA Method Updated */
-      200: {
-        content: {
-          "application/json": components["schemas"]["MfaMethod"];
-        };
-      };
-      /** @description MFA Method not Found */
-      404: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
-        };
-      };
-      /** @description MFA Method could not be updated */
-      500: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
-        };
-      };
-    };
-  };
-  /** @description Deletes the mfa method identified by the mfa identifier. Cannot delete an identifier that is 'PRIMARY'. */
-  "mfa-method-delete": {
-    parameters: {
-      path: {
-        mfaIdentifier: string;
-      };
-    };
-    responses: {
-      /** @description MFA Method Deleted */
-      200: {
-        content: {
-          "application/json": components["schemas"]["MfaMethod"];
-        };
-      };
-      /** @description MFA Method Not found */
-      404: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
-        };
-      };
-      /** @description Cannot delete a Primary MFA Method */
-      409: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
-        };
-      };
-      /** @description MFA Method could not be deleted */
-      500: {
-        content: {
-          "application/json": components["schemas"]["ProblemDetail"];
-        };
-      };
-    };
-  };
 }
