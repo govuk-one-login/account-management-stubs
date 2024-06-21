@@ -38,6 +38,8 @@ Mappings:
       url: "https://home.dev.account.gov.uk"
     build:
       url: "https://home.build.account.gov.uk"
+    demo:
+      url: "https://home.demo.account.gov.uk"
   TxmaDummyInputQueue:
     dev:
       QueueArn: "arn:aws:sqs:eu-west-2:985326104449:account-mgmt-backend-TxMAInputDummyQueue-lZORy5gLrQ4D"
