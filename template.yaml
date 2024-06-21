@@ -9,8 +9,9 @@ Parameters:
     AllowedValues:
       - "dev"
       - "build"
+      - "demo"
     Default: dev
-    ConstraintDescription: must be dev or build
+    ConstraintDescription: must be dev or build or demo
   VpcStackName:
     Description: >
       The name of the stack that defines the VPC in which this container will
