@@ -42,8 +42,10 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
             {
               mfaIdentifier: 1,
               priorityIdentifier: "DEFAULT",
-              mfaMethodType: "SMS",
-              endPoint: "07123456789",
+              method: {
+                mfaMethodType: "SMS",
+                endPoint: "07123456789",
+              },
               methodVerified: true,
             },
           ],
@@ -57,8 +59,10 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
             {
               mfaIdentifier: 1,
               priorityIdentifier: "DEFAULT",
-              mfaMethodType: "SMS",
-              endPoint: "07123456789",
+              method: {
+                mfaMethodType: "SMS",
+                endPoint: "07123456789",
+              },
               methodVerified: true,
             },
           ],
@@ -101,8 +105,8 @@ describe("MFA Management API Mock", () => {
     expect(mfaMethod.length).toEqual(1);
     expect(mfaMethod[0].mfaIdentifier).toEqual(1);
     expect(mfaMethod[0].priorityIdentifier).toEqual("DEFAULT");
-    expect(mfaMethod[0].mfaMethodType).toEqual("SMS");
-    expect(mfaMethod[0].endPoint).toEqual("07123456789");
+    expect(mfaMethod[0].method.mfaMethodType).toEqual("SMS");
+    expect(mfaMethod[0].method.mfaMethodType === "SMS" ? mfaMethod[0].method.endPoint : false).toEqual("07123456789");
     expect(mfaMethod[0].methodVerified).toBe(true);
   });
 });
