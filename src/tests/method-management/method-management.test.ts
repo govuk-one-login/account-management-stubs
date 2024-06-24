@@ -41,7 +41,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
           mfaMethods: [
             {
               mfaIdentifier: 1,
-              priorityIdentifier: "PRIMARY",
+              priorityIdentifier: "DEFAULT",
               mfaMethodType: "SMS",
               endPoint: "07123456789",
               methodVerified: true,
@@ -56,7 +56,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
           mfaMethods: [
             {
               mfaIdentifier: 1,
-              priorityIdentifier: "PRIMARY",
+              priorityIdentifier: "DEFAULT",
               mfaMethodType: "SMS",
               endPoint: "07123456789",
               methodVerified: true,
@@ -100,7 +100,7 @@ describe("MFA Management API Mock", () => {
     const mfaMethod: MfaMethod[] = JSON.parse(result.body);
     expect(mfaMethod.length).toEqual(1);
     expect(mfaMethod[0].mfaIdentifier).toEqual(1);
-    expect(mfaMethod[0].priorityIdentifier).toEqual("PRIMARY");
+    expect(mfaMethod[0].priorityIdentifier).toEqual("DEFAULT");
     expect(mfaMethod[0].mfaMethodType).toEqual("SMS");
     expect(mfaMethod[0].endPoint).toEqual("07123456789");
     expect(mfaMethod[0].methodVerified).toBe(true);
@@ -135,7 +135,7 @@ describe("createMfaMethodHandler", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "SECONDARY",
+        priorityIdentifier: "BACKUP",
         mfaMethodType: "SMS",
         endPoint: "07123456789",
         methodVerified: true,
@@ -179,7 +179,7 @@ describe("updateMfaMethodHandler", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "PRIMARY",
+        priorityIdentifier: "DEFAULT",
         mfaMethodType: "SMS",
         endPoint: "07123456789",
         methodVerified: true,
@@ -198,7 +198,7 @@ describe("updateMfaMethodHandler", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "PRIMARY",
+        priorityIdentifier: "DEFAULT",
         mfaMethodType: "AUTH_APP",
         endPoint: "",
         methodVerified: true,
@@ -216,7 +216,7 @@ describe("updateMfaMethodHandler", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "PRIMARY",
+        priorityIdentifier: "DEFAULT",
         mfaMethodType: "SMS",
         endPoint: "07111111111",
         methodVerified: true,
@@ -260,7 +260,7 @@ describe("updateMfaMethodHandlerError", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "PRIMARY",
+        priorityIdentifier: "DEFAULT",
         mfaMethodType: "SMS",
         endPoint: "07123456789",
         methodVerified: true,

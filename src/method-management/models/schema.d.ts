@@ -33,7 +33,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Creates an mfa method. A new MFA Method cannot be created as PRIMARY, it must be SECONDARY and promoted at a later stage */
+        /** @description Creates an mfa method. A new MFA Method cannot be created as DEFAULT, it must be BACKUP and promoted at a later stage */
         post: operations["mfa-method-create"];
         delete?: never;
         options?: never;
@@ -49,10 +49,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** @description Updates an mfa method. If the MFA method is updated to 'PRIMARY', the current 'PRIMARY' gets relegated to secondary. */
+        /** @description Updates an mfa method. If the MFA method is updated to 'DEFAULT', the current 'DEFAULT' gets relegated to secondary. */
         put: operations["mfa-methods-update"];
         post?: never;
-        /** @description Deletes the mfa method identified by the mfa identifier. Cannot delete an identifier that is 'PRIMARY'. */
+        /** @description Deletes the mfa method identified by the mfa identifier. Cannot delete an identifier that is 'DEFAULT'. */
         delete: operations["mfa-method-delete"];
         options?: never;
         head?: never;
