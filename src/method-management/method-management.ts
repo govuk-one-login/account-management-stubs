@@ -6,6 +6,7 @@ import {
   getUserIdFromEvent,
   getUserScenario,
 } from "../scenarios/scenarios-utils";
+import { components } from "./models/schema";
 
 export interface Response {
   statusCode: number;
@@ -130,11 +131,13 @@ export const updateMfaMethodHandler = async (
       }
     );
 
-    const response = {
+    const response: components["schemas"]["MfaMethod"] = {
       mfaIdentifier: Number(mfaIdentifier),
       priorityIdentifier,
-      mfaMethodType,
-      endPoint,
+      method: {
+        mfaMethodType,
+        endPoint,
+      },
       methodVerified,
     };
 
