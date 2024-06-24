@@ -46,7 +46,7 @@ export const userInfoHandler = async (
   }
 
   const appMethodCount = response.filter(
-    (m) => m.mfaMethodType === "AUTH_APP"
+    (m) => m.method.mfaMethodType === "AUTH_APP"
   ).length;
 
   if (appMethodCount > 1) {
