@@ -192,7 +192,15 @@ describe("updateMfaMethodHandler", () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject(requestBody.mfaMethod);
+    expect(JSON.parse(response.body)).toMatchObject({
+        mfaIdentifier: 1,
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "07123456789",
+        },
+        methodVerified: true,
+      });
   });
 
   test("should return 200 and the updated auth app method when the request is valid", async () => {
@@ -211,7 +219,15 @@ describe("updateMfaMethodHandler", () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject(requestBody.mfaMethod);
+    expect(JSON.parse(response.body)).toMatchObject({
+        mfaIdentifier: 1,
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "AUTH_APP",
+          endPoint: "",
+        },
+        methodVerified: true,
+      });
   });
 
   test("should return 200 even when credential is not provided", async () => {
