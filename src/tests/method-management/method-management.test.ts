@@ -221,17 +221,23 @@ describe("updateMfaMethodHandler", () => {
       mfaMethod: {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        method: {
-          mfaMethodType: "SMS",
-          endPoint: "07111111111",
-        },
+        mfaMethodType: "SMS",
+        endPoint: "07111111111",
         methodVerified: true,
       },
     };
     const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject(requestBody.mfaMethod);
+    expect(JSON.parse(response.body)).toMatchObject({
+        mfaIdentifier: 1,
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "07111111111",
+        },
+        methodVerified: true,
+      });
   });
 });
 
