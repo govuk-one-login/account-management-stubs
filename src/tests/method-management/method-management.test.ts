@@ -221,8 +221,10 @@ describe("updateMfaMethodHandler", () => {
       mfaMethod: {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "07111111111",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "07111111111",
+        },
         methodVerified: true,
       },
     };
