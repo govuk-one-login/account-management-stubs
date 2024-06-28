@@ -37,6 +37,7 @@ jobs:
       gitRef: ${{ inputs.gitRef }}
 
   deploy_to_demo:
+    environment: Demo-test
     permissions:
       contents: read
       id-token: write
@@ -74,7 +75,7 @@ jobs:
       - name: Set up AWS creds
         uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef # pin@v1-node16
         with:
-          role-to-assume: ${{ secrets.TEST_GH_ACTIONS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.DEMO_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
 
       - name: SAM validate
@@ -86,5 +87,5 @@ jobs:
       - name: Deploy SAM app
         uses: alphagov/di-devplatform-upload-action@1db904c002e0f98dbcb5ab453ceb1b71de5f7dd3 # pin@v2
         with:
-          artifact-bucket-name: ${{ secrets.TEST_ARTIFACT_BUCKET_NAME }}
-          signing-profile-name: ${{ secrets.TEST_SIGNING_PROFILE_NAME }}
+          artifact-bucket-name: ${{ secrets.DEMO_ARTIFACT_BUCKET_NAME }}
+          signing-profile-name: ${{ secrets.DEMO_SIGNING_PROFILE_NAME }}
