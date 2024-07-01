@@ -6,6 +6,7 @@ import {
   getUserIdFromEvent,
   getUserScenario,
 } from "../scenarios/scenarios-utils";
+import { components } from "./models/schema";
 
 export interface Response {
   statusCode: number;
@@ -30,22 +31,22 @@ export const userInfoHandler = async (
     return formatResponse(422, {});
   }
 
-  const primaryMethodCount = response.filter(
-    (m) => m.priorityIdentifier === "PRIMARY"
+  const defaultMethodCount = response.filter(
+    (m) => m.priorityIdentifier === "DEFAULT"
   ).length;
 
-  if (primaryMethodCount === 0) {
-    // user with no primary method
+  if (defaultMethodCount === 0) {
+    // user with no default method
     return formatResponse(422, {});
   }
 
-  if (primaryMethodCount > 1) {
-    // user with more than one primary method
+  if (defaultMethodCount > 1) {
+    // user with more than one default method
     return formatResponse(409, {});
   }
 
   const appMethodCount = response.filter(
-    (m) => m.mfaMethodType === "AUTH_APP"
+    (m) => m.method.mfaMethodType === "AUTH_APP"
   ).length;
 
   if (appMethodCount > 1) {
@@ -83,7 +84,7 @@ export const createMfaMethodHandler = async (
     validateFields(
       { email, otp, credential, priorityIdentifier, mfaMethodType },
       {
-        priorityIdentifier: /^(PRIMARY|SECONDARY)$/,
+        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
         mfaMethodType: /^(AUTH_APP|SMS)$/,
       }
     );
@@ -125,16 +126,18 @@ export const updateMfaMethodHandler = async (
     validateFields(
       { email, otp, mfaIdentifier },
       {
-        priorityIdentifier: /^(PRIMARY|SECONDARY)$/,
+        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
         mfaMethodType: /^(AUTH_APP|SMS)$/,
       }
     );
 
-    const response = {
+    const response: components["schemas"]["MfaMethod"] = {
       mfaIdentifier: Number(mfaIdentifier),
       priorityIdentifier,
-      mfaMethodType,
-      endPoint,
+      method: {
+        mfaMethodType,
+        endPoint,
+      },
       methodVerified,
     };
 

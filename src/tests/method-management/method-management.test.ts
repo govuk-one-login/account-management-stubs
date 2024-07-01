@@ -41,9 +41,11 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
           mfaMethods: [
             {
               mfaIdentifier: 1,
-              priorityIdentifier: "PRIMARY",
-              mfaMethodType: "SMS",
-              endPoint: "07123456789",
+              priorityIdentifier: "DEFAULT",
+              method: {
+                mfaMethodType: "SMS",
+                endPoint: "07123456789",
+              },
               methodVerified: true,
             },
           ],
@@ -56,9 +58,11 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
           mfaMethods: [
             {
               mfaIdentifier: 1,
-              priorityIdentifier: "PRIMARY",
-              mfaMethodType: "SMS",
-              endPoint: "07123456789",
+              priorityIdentifier: "DEFAULT",
+              method: {
+                mfaMethodType: "SMS",
+                endPoint: "07123456789",
+              },
               methodVerified: true,
             },
           ],
@@ -100,9 +104,9 @@ describe("MFA Management API Mock", () => {
     const mfaMethod: MfaMethod[] = JSON.parse(result.body);
     expect(mfaMethod.length).toEqual(1);
     expect(mfaMethod[0].mfaIdentifier).toEqual(1);
-    expect(mfaMethod[0].priorityIdentifier).toEqual("PRIMARY");
-    expect(mfaMethod[0].mfaMethodType).toEqual("SMS");
-    expect(mfaMethod[0].endPoint).toEqual("07123456789");
+    expect(mfaMethod[0].priorityIdentifier).toEqual("DEFAULT");
+    expect(mfaMethod[0].method.mfaMethodType).toEqual("SMS");
+    expect(mfaMethod[0].method.mfaMethodType === "SMS" ? mfaMethod[0].method.endPoint : false).toEqual("07123456789");
     expect(mfaMethod[0].methodVerified).toBe(true);
   });
 });
@@ -135,7 +139,7 @@ describe("createMfaMethodHandler", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "SECONDARY",
+        priorityIdentifier: "BACKUP",
         mfaMethodType: "SMS",
         endPoint: "07123456789",
         methodVerified: true,
@@ -179,7 +183,7 @@ describe("updateMfaMethodHandler", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "PRIMARY",
+        priorityIdentifier: "DEFAULT",
         mfaMethodType: "SMS",
         endPoint: "07123456789",
         methodVerified: true,
@@ -188,7 +192,15 @@ describe("updateMfaMethodHandler", () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject(requestBody.mfaMethod);
+    expect(JSON.parse(response.body)).toMatchObject({
+        mfaIdentifier: 1,
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "07123456789",
+        },
+        methodVerified: true,
+      });
   });
 
   test("should return 200 and the updated auth app method when the request is valid", async () => {
@@ -198,7 +210,7 @@ describe("updateMfaMethodHandler", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "PRIMARY",
+        priorityIdentifier: "DEFAULT",
         mfaMethodType: "AUTH_APP",
         endPoint: "",
         methodVerified: true,
@@ -207,7 +219,15 @@ describe("updateMfaMethodHandler", () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject(requestBody.mfaMethod);
+    expect(JSON.parse(response.body)).toMatchObject({
+        mfaIdentifier: 1,
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "AUTH_APP",
+          endPoint: "",
+        },
+        methodVerified: true,
+      });
   });
 
   test("should return 200 even when credential is not provided", async () => {
@@ -216,7 +236,7 @@ describe("updateMfaMethodHandler", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "PRIMARY",
+        priorityIdentifier: "DEFAULT",
         mfaMethodType: "SMS",
         endPoint: "07111111111",
         methodVerified: true,
@@ -225,7 +245,15 @@ describe("updateMfaMethodHandler", () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject(requestBody.mfaMethod);
+    expect(JSON.parse(response.body)).toMatchObject({
+        mfaIdentifier: 1,
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "07111111111",
+        },
+        methodVerified: true,
+      });
   });
 });
 
@@ -260,7 +288,7 @@ describe("updateMfaMethodHandlerError", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "PRIMARY",
+        priorityIdentifier: "DEFAULT",
         mfaMethodType: "SMS",
         endPoint: "07123456789",
         methodVerified: true,

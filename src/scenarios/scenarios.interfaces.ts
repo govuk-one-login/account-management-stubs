@@ -1,3 +1,5 @@
+import { components } from '../method-management/models/schema'
+
 export interface OicdPersistedData {
   code: string;
   nonce: string;
@@ -18,13 +20,7 @@ export interface UserScenarios {
       phone_number_verified: boolean;
       updated_at: string;
     };
-    mfaMethods: {
-      mfaIdentifier: number;
-      priorityIdentifier: "PRIMARY" | "SECONDARY";
-      mfaMethodType: "SMS" | "AUTH_APP";
-      endPoint?: string;
-      methodVerified: boolean;
-    }[];
+    mfaMethods: components["schemas"]["MfaMethod"][];
   };
   [key: string]: Partial<UserScenarios["default"]>;
 }
