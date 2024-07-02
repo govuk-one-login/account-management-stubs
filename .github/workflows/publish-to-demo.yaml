@@ -1,6 +1,9 @@
 name: "Verify & Publish to Demo"
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       refType:
