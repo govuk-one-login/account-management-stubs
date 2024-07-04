@@ -98,6 +98,8 @@ export const selectScenarioHandler = async (
         <input type="hidden" name="state" value="${state}" />
         <input type="hidden" name="nonce" value="${nonce}" /> 
         <input type="hidden" name="redirectUri" value="${redirect_uri}" />
+        <h1>API Simulation Tool</h1>
+        <p>Choose a scenario below instead of logging in. The app will act like you're that user, helping you test its behavior in different situations.</p>
         ${scenarios}
       </form>
     </body></html>`
