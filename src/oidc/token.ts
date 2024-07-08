@@ -10,6 +10,12 @@ import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { Token } from "../common/models";
+import {
+  validateClientIdMatches,
+  validateRedirectURLSupported,
+  validateSupportedGrantType,
+  verifyParametersExistAndOnlyOnce
+} from "./validate-token";
 
 export interface Response {
   statusCode: number;
@@ -75,8 +81,16 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
   if (!event.body) {
-    throw new Error(`code not found in request parameters`);
+    throw new Error(`no request body is provided`);
   }
+
+  console.log(`Event body is: ${event.body}`);
+
+  verifyParametersExistAndOnlyOnce(event.body)
+
+  validateRedirectURLSupported(event.body);
+
+  validateSupportedGrantType(event.body)
 
   const code = event.body.substring(
     event.body.indexOf("&code=") + 6,
@@ -97,6 +111,8 @@ export const handler = async (
       or ENVIRONMENT: ${ENVIRONMENT} or JWK_KEY_SECRET: ${JWK_KEY_SECRET}`
     );
   }
+
+  validateClientIdMatches(event.body, OIDC_CLIENT_ID);
 
   const jwkSecret = JSON.parse(JWK_KEY_SECRET);
   const jwk: KeyLike = JSON.parse(jwkSecret);
