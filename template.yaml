@@ -391,7 +391,7 @@ Resources:
       Name: !Sub "/${AWS::StackName}/Stub/OIDC"
       Type: String
       Value: !Sub oidc-stub.home.${Environment}.account.gov.uk
-      
+
   ######################################
   # OIDC Authorization API Stub
   ######################################

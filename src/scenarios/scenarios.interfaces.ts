@@ -1,4 +1,4 @@
-import { components } from '../method-management/models/schema'
+import { components } from "../method-management/models/schema";
 
 export interface OicdPersistedData {
   code: string;

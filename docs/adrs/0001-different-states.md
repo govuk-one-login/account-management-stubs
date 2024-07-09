@@ -1,6 +1,6 @@
 # Returning different states in the API
 
-## Context 
+## Context
 
 Currently, the stub API works quite basically; doing a very basic level of validation and responding with mostly static responses.
 
@@ -10,7 +10,7 @@ As we develop One Login Home, there is a need to have more flexibility in the AP
 
 We could use the [systems manager parameter store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html) to store a parameter that corresponds to a scenario. And then return the response we want.
 
-This would work in a similar way to how we use the secrets manager currently.  In the lambda we would read read the parameter from secrets manager and use it to determine the response. The parameter could be changed either through the AWS console, or through an API. We could create a simple interface in the stub api to allow people to change the current scenario.
+This would work in a similar way to how we use the secrets manager currently. In the lambda we would read read the parameter from secrets manager and use it to determine the response. The parameter could be changed either through the AWS console, or through an API. We could create a simple interface in the stub api to allow people to change the current scenario.
 
 The drawback here, is that we can only be running one scenario at a time, this may be an issue if multiple developers are working on something at the same time. Or if any tests that run rely on specific responses.
 
@@ -29,7 +29,6 @@ We could create "profiles" of users, based on scenarios that we want to test. Th
 We would need some way of changing the user who is logged in, this could be done by modfying the DynamoDB table to change the user id in the session token.
 
 Potentially, we could create an API or page to facilitate this.
-
 
 ## Decision
 

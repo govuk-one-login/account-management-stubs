@@ -20,7 +20,7 @@ describe("validateFields Function", () => {
       lastName: /^[a-zA-Z]+$/,
     };
     expect(() => validateFields(fields, checks)).toThrow(
-      /no firstName provided/,
+      /no firstName provided/
     );
   });
 

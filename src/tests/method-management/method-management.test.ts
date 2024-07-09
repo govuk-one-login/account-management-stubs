@@ -7,7 +7,8 @@ import { components } from "../../method-management/models/schema";
 import {
   userInfoHandler,
   updateMfaMethodHandler,
-  Response, createMfaMethodHandler,
+  Response,
+  createMfaMethodHandler,
 } from "../../method-management/method-management";
 
 type MfaMethod = components["schemas"]["MfaMethod"];
@@ -106,14 +107,18 @@ describe("MFA Management API Mock", () => {
     expect(mfaMethod[0].mfaIdentifier).toEqual(1);
     expect(mfaMethod[0].priorityIdentifier).toEqual("DEFAULT");
     expect(mfaMethod[0].method.mfaMethodType).toEqual("SMS");
-    expect(mfaMethod[0].method.mfaMethodType === "SMS" ? mfaMethod[0].method.endPoint : false).toEqual("07123456789");
+    expect(
+      mfaMethod[0].method.mfaMethodType === "SMS"
+        ? mfaMethod[0].method.endPoint
+        : false
+    ).toEqual("07123456789");
     expect(mfaMethod[0].methodVerified).toBe(true);
   });
 });
 
 describe("createMfaMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
-      body: unknown,
+    body: unknown
   ): APIGatewayProxyEvent => {
     return {
       body: JSON.stringify(body),
@@ -127,7 +132,7 @@ describe("createMfaMethodHandler", () => {
       multiValueQueryStringParameters: null,
       stageVariables: null,
       requestContext:
-          {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+        {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
       resource: "",
     };
   };
@@ -150,9 +155,7 @@ describe("createMfaMethodHandler", () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({});
   });
-
 });
-
 
 describe("updateMfaMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
@@ -193,14 +196,14 @@ describe("updateMfaMethodHandler", () => {
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
-        mfaIdentifier: 1,
-        priorityIdentifier: "DEFAULT",
-        method: {
-          mfaMethodType: "SMS",
-          endPoint: "07123456789",
-        },
-        methodVerified: true,
-      });
+      mfaIdentifier: 1,
+      priorityIdentifier: "DEFAULT",
+      method: {
+        mfaMethodType: "SMS",
+        endPoint: "07123456789",
+      },
+      methodVerified: true,
+    });
   });
 
   test("should return 200 and the updated auth app method when the request is valid", async () => {
@@ -220,14 +223,14 @@ describe("updateMfaMethodHandler", () => {
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
-        mfaIdentifier: 1,
-        priorityIdentifier: "DEFAULT",
-        method: {
-          mfaMethodType: "AUTH_APP",
-          endPoint: "",
-        },
-        methodVerified: true,
-      });
+      mfaIdentifier: 1,
+      priorityIdentifier: "DEFAULT",
+      method: {
+        mfaMethodType: "AUTH_APP",
+        endPoint: "",
+      },
+      methodVerified: true,
+    });
   });
 
   test("should return 200 even when credential is not provided", async () => {
@@ -246,14 +249,14 @@ describe("updateMfaMethodHandler", () => {
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
-        mfaIdentifier: 1,
-        priorityIdentifier: "DEFAULT",
-        method: {
-          mfaMethodType: "SMS",
-          endPoint: "07111111111",
-        },
-        methodVerified: true,
-      });
+      mfaIdentifier: 1,
+      priorityIdentifier: "DEFAULT",
+      method: {
+        mfaMethodType: "SMS",
+        endPoint: "07111111111",
+      },
+      methodVerified: true,
+    });
   });
 });
 
