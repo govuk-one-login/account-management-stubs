@@ -18,7 +18,6 @@ export interface UserScenarios {
       sub: string;
       phone_number: string;
       phone_number_verified: boolean;
-      updated_at: string;
     };
     mfaMethods: components["schemas"]["MfaMethod"][];
   };
