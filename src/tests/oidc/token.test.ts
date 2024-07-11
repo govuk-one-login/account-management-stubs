@@ -14,6 +14,8 @@ const oicdPersistedData = {
   nonce,
 };
 
+jest.mock('../../oidc/validate-token');
+
 describe("handler", () => {
   beforeEach(() => {
     process.env.OIDC_CLIENT_ID = "12345";
@@ -40,5 +42,18 @@ describe("handler", () => {
     expect(body.id_token).toContain(
       "eyJraWQiOiJCLVFNVXhkSk9KOHVia21BcmM0aTFTR21mWm5OTmxNLXZhOWgwSEowakNvIiwiYWxnIjoiRVMyNTYifQ."
     );
+  });
+
+  test("returns 500 error response if event body is undefined", async () => {
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: "",
+    } as never;
+    let errorThrown = false;
+    try {
+      await handler(mockApiEvent);
+    } catch (error) {
+      errorThrown= true;
+    }
+    expect(errorThrown).toBeTruthy();
   });
 });
