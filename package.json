@@ -7,7 +7,7 @@
     "test": "jest",
     "lint": "eslint . --ext .ts",
     "test:cov": "jest --coverage",
-    "prepare": "husky install"
+    "prepare": "husky || true"
   },
   "author": "GDS",
   "license": "OGL",
