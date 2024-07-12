@@ -81,17 +81,17 @@ export const writeNonce = async (
   return dynamoDocClient.send(command);
 };
 
-export const selectScenarioHandler = async (
-  event: APIGatewayProxyEvent
-) => {
+export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
 
   const { state, nonce, redirect_uri } = queryStringParameters;
 
-  const scenarios = Object.keys(userScenarios).map((scenario) => {
-    return `<button name="scenario" value="${scenario}">${scenario}</button>`
-  }).join('<br/>')
+  const scenarios = Object.keys(userScenarios)
+    .map((scenario) => {
+      return `<button name="scenario" value="${scenario}">${scenario}</button>`;
+    })
+    .join("<br/>");
 
   const body = `<html><body>
       <form method="post" action='/authorize'>
@@ -102,29 +102,29 @@ export const selectScenarioHandler = async (
         <p>Choose a scenario below instead of logging in. The app will act like you're that user, helping you test its behavior in different situations.</p>
         ${scenarios}
       </form>
-    </body></html>`
+    </body></html>`;
 
   return {
     statusCode: 200,
     headers: { "Content-Type": "text/html" },
-    body
-  }
-}
+    body,
+  };
+};
 
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
-  assert(event.body, 'no body')
+  assert(event.body, "no body");
 
-  const properties = new URLSearchParams(event.body)
-  const nonce = properties.get('nonce')
-  const state = properties.get('state')
-  const redirectUri = properties.get('redirectUri')
-  const scenario = properties.get('scenario') || 'default'
+  const properties = new URLSearchParams(event.body);
+  const nonce = properties.get("nonce");
+  const state = properties.get("state");
+  const redirectUri = properties.get("redirectUri");
+  const scenario = properties.get("scenario") || "default";
 
-  assert(nonce, 'no nonce')
-  assert(state, 'no state')
-  assert(redirectUri, 'no redirect url')
+  assert(nonce, "no nonce");
+  assert(state, "no state");
+  assert(redirectUri, "no redirect url");
 
   const { DUMMY_TXMA_QUEUE_URL } = process.env;
 
