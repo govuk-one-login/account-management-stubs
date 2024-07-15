@@ -638,7 +638,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - !Ref OidcUserInfoApiStubPolicy
+        - !Ref QueryOidcDynamoTablePolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -657,29 +657,6 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-userinfo"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
-
-  OidcUserInfoApiStubPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - dynamodb:Query
-              - dynamodb:GetItem
-            Resource:
-              - !GetAtt OidcStubDataStore.Arn
-              - !Sub
-                - "${Arn}/*"
-                - Arn: !GetAtt OidcStubDataStore.Arn
-          - Effect: Allow
-            Action:
-              - kms:Decrypt
-              - kms:GenerateDataKey*
-              - kms:ReEncrypt*
-            Resource:
-              - !GetAtt DatabaseKmsKey.Arn
 
   ######################################
   # OIDC Configuration Stub
@@ -886,7 +863,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - !Ref OidcTokenApiStubPolicy
+        - !Ref QueryOidcDynamoTablePolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -905,29 +882,6 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-oidc-token"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
-
-  OidcTokenApiStubPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - dynamodb:Query
-              - dynamodb:GetItem
-            Resource:
-              - !GetAtt OidcStubDataStore.Arn
-              - !Sub
-                - "${Arn}/*"
-                - Arn: !GetAtt OidcStubDataStore.Arn
-          - Effect: Allow
-            Action:
-              - kms:Decrypt
-              - kms:GenerateDataKey*
-              - kms:ReEncrypt*
-            Resource:
-              - !GetAtt DatabaseKmsKey.Arn
 
   #
   # Method Management
@@ -1001,6 +955,50 @@ Resources:
 
   # Lambda
 
+  MethodManagementv1LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref QueryOidcDynamoTablePolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+
+  QueryOidcDynamoTablePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:Query
+              - dynamodb:GetItem
+            Resource:
+              - !GetAtt OidcStubDataStore.Arn
+              - !Sub
+                - "${Arn}/*"
+                - Arn: !GetAtt OidcStubDataStore.Arn
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Resource:
+              - !GetAtt DatabaseKmsKey.Arn
+
   MethodManagementv1ApiStubFunction:
     Type: AWS::Serverless::Function
     # checkov:skip=CKV_AWS_116
@@ -1016,7 +1014,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
-      Role: !GetAtt MethodManagementv1ApiStubFunctionRole.Arn
+      Role: !GetAtt MethodManagementv1LambdaRole.Arn
       Timeout: 5
       Events:
         userinfo:
@@ -1044,50 +1042,6 @@ Resources:
         EntryPoints:
           - method-management/method-management.ts
 
-  MethodManagementv1ApiStubFunctionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      PermissionsBoundary: !If
-        - UsePermissionsBoundary
-        - !Ref PermissionsBoundary
-        - !Ref AWS::NoValue
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - !Ref MethodManagementv1ApiStubPolicy
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-
-  MethodManagementv1ApiStubPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - dynamodb:Query
-              - dynamodb:GetItem
-            Resource:
-              - !GetAtt OidcStubDataStore.Arn
-              - !Sub
-                - "${Arn}/*"
-                - Arn: !GetAtt OidcStubDataStore.Arn
-          - Effect: Allow
-            Action:
-              - kms:Decrypt
-              - kms:GenerateDataKey*
-              - kms:ReEncrypt*
-            Resource:
-              - !GetAtt DatabaseKmsKey.Arn
-
   MethodManagementv1ApiStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     DeletionPolicy: Delete
@@ -1112,7 +1066,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
-      Role: !GetAtt MethodManagementCreatev1ApiStubFunctionRole.Arn
+      Role: !GetAtt MethodManagementv1LambdaRole.Arn
       Timeout: 5
       Events:
         userinfo:
@@ -1140,27 +1094,6 @@ Resources:
         EntryPoints:
           - method-management/method-management.ts
 
-  MethodManagementCreatev1ApiStubFunctionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      PermissionsBoundary: !If
-        - UsePermissionsBoundary
-        - !Ref PermissionsBoundary
-        - !Ref AWS::NoValue
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - !Ref OidcUserInfoApiStubPolicy
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-
   MethodManagementCreatev1ApiStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     DeletionPolicy: Delete
@@ -1185,7 +1118,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
-      Role: !GetAtt MethodManagementUpdateV1ApiStubFunctionRole.Arn
+      Role: !GetAtt MethodManagementv1LambdaRole.Arn
       Timeout: 5
       Events:
         putMfaMethod:
@@ -1213,27 +1146,6 @@ Resources:
         EntryPoints:
           - method-management/method-management.ts
 
-  MethodManagementUpdateV1ApiStubFunctionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      PermissionsBoundary: !If
-        - UsePermissionsBoundary
-        - !Ref PermissionsBoundary
-        - !Ref AWS::NoValue
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - !Ref OidcUserInfoApiStubPolicy
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-
   MethodManagementUpdateV1ApiStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     DeletionPolicy: Delete
@@ -1258,7 +1170,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
-      Role: !GetAtt MethodManagementDeletev1ApiStubFunctionRole.Arn
+      Role: !GetAtt MethodManagementv1LambdaRole.Arn
       Timeout: 5
       Events:
         userinfo:
@@ -1285,50 +1197,6 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - method-management/method-management.ts
-
-  MethodManagementDeletev1ApiStubFunctionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      PermissionsBoundary: !If
-        - UsePermissionsBoundary
-        - !Ref PermissionsBoundary
-        - !Ref AWS::NoValue
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - !Ref MethodManagementDeletev1ApiStubPolicy
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
-
-  MethodManagementDeletev1ApiStubPolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - dynamodb:Query
-              - dynamodb:GetItem
-            Resource:
-              - !GetAtt OidcStubDataStore.Arn
-              - !Sub
-                - "${Arn}/*"
-                - Arn: !GetAtt OidcStubDataStore.Arn
-          - Effect: Allow
-            Action:
-              - kms:Decrypt
-              - kms:GenerateDataKey*
-              - kms:ReEncrypt*
-            Resource:
-              - !GetAtt DatabaseKmsKey.Arn
 
   MethodManagementDeletev1ApiStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
