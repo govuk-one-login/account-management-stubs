@@ -9,6 +9,7 @@ import {
   updateMfaMethodHandler,
   Response,
   createMfaMethodHandler,
+  deleteMethodHandler
 } from "../../method-management/method-management";
 
 type MfaMethod = components["schemas"]["MfaMethod"];
@@ -30,6 +31,9 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
       if (event.headers.Authorization === "errorToken") {
         return Promise.resolve("errorMfa400");
       }
+      if (event.headers.Authorization === "delete") {
+        return Promise.resolve("deleteMethod");
+      }
       return Promise.resolve("default");
     }),
     getUserScenario: jest.fn((userId: string, type: string) => {
@@ -49,6 +53,31 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
               },
               methodVerified: true,
             },
+          ],
+        },
+        deleteMethod: {
+          httpResponse: {
+            code: 200,
+            message: "OK",
+          },
+          mfaMethods: [
+            {
+              mfaIdentifier: 1,
+              priorityIdentifier: "DEFAULT",
+              method: {
+                mfaMethodType: "SMS",
+                endPoint: "07123456789",
+              },
+              methodVerified: true,
+            },
+            {
+              mfaIdentifier: 2,
+              priorityIdentifier: "BACKUP",
+              method: {
+                mfaMethodType: "AUTH_APP",
+              },
+              methodVerified: true,
+            }
           ],
         },
         errorMfa400: {
@@ -302,3 +331,46 @@ describe("updateMfaMethodHandlerError", () => {
     expect(response.statusCode).toBe(400);
   });
 });
+
+describe("deleteMethodHandler", () => {
+ const createFakeAPIGatewayProxyEvent = (
+    body: unknown,
+    mfaIdentifier: string
+  ): APIGatewayProxyEvent => {
+    return {
+      body: JSON.stringify(body),
+      httpMethod: "DELETE",
+      path: `/mfa-methods/${mfaIdentifier}`,
+      pathParameters: { mfaIdentifier },
+      isBase64Encoded: false,
+      multiValueHeaders: {},
+      queryStringParameters: null,
+      headers: {
+        Authorization: "delete", // used to switch mock scenarios
+      },
+      multiValueQueryStringParameters: null,
+      stageVariables: null,
+      requestContext:
+        {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+      resource: "",
+    };
+  } 
+
+  test("should delete MFA method correctly", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "2");
+    const response = await deleteMethodHandler(fakeEvent) 
+    expect(response.statusCode).toBe(200)
+  })
+
+  test("should 409 if user tries to delete default method", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "1");
+    const response = await deleteMethodHandler(fakeEvent) 
+    expect(response.statusCode).toBe(409)
+  })
+
+  test("should 404 if user tries to delete non existant method", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "3");
+    const response = await deleteMethodHandler(fakeEvent) 
+    expect(response.statusCode).toBe(404)
+  })
+})

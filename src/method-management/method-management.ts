@@ -150,12 +150,11 @@ export const updateMfaMethodHandler = async (
 export const deleteMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  console.log(event)
   const userId = await getUserIdFromEvent(event);
   const mfaIdentifier = event.pathParameters?.mfaIdentifier;
 
   const methods = getUserScenario(userId, "mfaMethods")
-  const methodToRemove = methods.find((m) => m.mfaIdentifier === mfaIdentifier)
+  const methodToRemove = methods.find((m) => m.mfaIdentifier == mfaIdentifier)
 
   if (!methodToRemove) { 
     return formatResponse(404, {})
