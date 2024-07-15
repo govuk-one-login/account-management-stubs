@@ -1243,13 +1243,6 @@ Resources:
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
-
-
-
-
-
-
-
   MethodManagementDeletev1ApiStubFunction:
     Type: AWS::Serverless::Function
     # checkov:skip=CKV_AWS_116
