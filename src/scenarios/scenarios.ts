@@ -12,7 +12,6 @@ export const userScenarios: UserScenarios = {
       email_verified: true,
       phone_number: "1234567890",
       phone_number_verified: true,
-      updated_at: Date.now().toString(),
     },
     mfaMethods: [
       {

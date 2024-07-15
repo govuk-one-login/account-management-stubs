@@ -155,6 +155,3 @@ components:
           example: "07777 777777"
         phone_verified:
           type: boolean
-        updated_at:
-          type: string
-          example: "1687765582"
