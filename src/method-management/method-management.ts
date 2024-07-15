@@ -146,3 +146,23 @@ export const updateMfaMethodHandler = async (
     return formatResponse(500, { error: (error as Error).message });
   }
 };
+
+export const deleteMethodHandler = async (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
+  const userId = await getUserIdFromEvent(event);
+  const mfaIdentifier = event.pathParameters?.mfaIdentifier;
+
+  const methods = getUserScenario(userId, "mfaMethods")
+  const methodToRemove = methods.find((m) => m.mfaIdentifier == mfaIdentifier)
+
+  if (!methodToRemove) { 
+    return formatResponse(404, {})
+  }
+
+  if (methodToRemove.priorityIdentifier === "DEFAULT") {
+    return formatResponse(409, {})
+  }
+
+  return formatResponse(200, methods.filter((m) => m.mfaIdentifier != mfaIdentifier))
+}

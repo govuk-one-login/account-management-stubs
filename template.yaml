@@ -1242,3 +1242,99 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-method-management-update-v1"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  MethodManagementDeletev1ApiStubFunction:
+    Type: AWS::Serverless::Function
+    # checkov:skip=CKV_AWS_116
+    DependsOn:
+      - MethodManagementDeletev1ApiStubFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-method-management-delete-v1
+      Architectures: ["arm64"]
+      CodeUri: src
+      Handler: method-management.deleteMethodHandler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 128
+      ReservedConcurrentExecutions: 30
+      Runtime: nodejs18.x
+      Role: !GetAtt MethodManagementDeletev1ApiStubFunctionRole.Arn
+      Timeout: 5
+      Events:
+        userinfo:
+          Type: Api
+          Properties:
+            Path: /v1/mfa-methods/{mfaIdentifier}
+            Method: DELETE
+            RestApiId:
+              Ref: MethodManagementv1StubsRestApi
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OidcStubDataTableName
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - method-management/method-management.ts
+
+  MethodManagementDeletev1ApiStubFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref MethodManagementDeletev1ApiStubPolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+
+  MethodManagementDeletev1ApiStubPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:Query
+              - dynamodb:GetItem
+            Resource:
+              - !GetAtt OidcStubDataStore.Arn
+              - !Sub
+                - "${Arn}/*"
+                - Arn: !GetAtt OidcStubDataStore.Arn
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Resource:
+              - !GetAtt DatabaseKmsKey.Arn
+
+  MethodManagementDeletev1ApiStubFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-method-management-delete-v1"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
