@@ -65,10 +65,12 @@ export const createMfaMethodHandler = async (
     otp,
     credential,
     mfaMethod: {
-      priorityIdentifier = undefined,
-      mfaMethodType = undefined,
+      priorityIdentifier,
+      mfaMethodType,
     } = {},
   } = JSON.parse(event.body || "{}");
+
+  console.log(`Event body is; ${JSON.stringify(event.body)}`);
 
   try {
     const userId = await getUserIdFromEvent(event);
@@ -81,8 +83,14 @@ export const createMfaMethodHandler = async (
       });
     }
 
+    console.log(`Email is" ${email}`);
+    console.log(`OTP is" ${otp}`);
+    console.log(`Credential is" ${credential}`);
+    console.log(`PriorityIdentifier is" ${priorityIdentifier}`);
+    console.log(`MfaMethodType is" ${mfaMethodType}`);
+
     validateFields(
-      { email, otp, credential, priorityIdentifier, mfaMethodType },
+      { email, otp, credential, priorityIdentifier, mfaMethodType},
       {
         priorityIdentifier: /^(DEFAULT|BACKUP)$/,
         mfaMethodType: /^(AUTH_APP|SMS)$/,
