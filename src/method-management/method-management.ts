@@ -110,21 +110,28 @@ export const updateMfaMethodHandler = async (
     }
     assert(event.body, "no body provided");
 
-    const body = JSON.parse(event.body);
-    const mfaIdentifier = event.pathParameters?.mfaIdentifier;
+    const body: components["schemas"]["MfaMethodUpdateRequest"] = JSON.parse(
+      event.body
+    );
+    const mfaIdentifierFromEvent = event.pathParameters?.mfaIdentifier;
+
+    if (!body.mfaMethod) {
+      return formatResponse(404, { error: "MFA Method not Found" });
+    }
+
     const {
       email,
       otp,
       mfaMethod: {
-        priorityIdentifier = undefined,
+        mfaIdentifier = mfaIdentifierFromEvent,
+        priorityIdentifier = "DEFAULT",
         mfaMethodType = undefined,
         endPoint = undefined,
-        methodVerified = false,
-      } = {},
+      },
     } = body;
 
     validateFields(
-      { email, otp, mfaIdentifier },
+      { email, otp, mfaIdentifierFromEvent },
       {
         priorityIdentifier: /^(DEFAULT|BACKUP)$/,
         mfaMethodType: /^(AUTH_APP|SMS)$/,
@@ -133,12 +140,13 @@ export const updateMfaMethodHandler = async (
 
     const response: components["schemas"]["MfaMethod"] = {
       mfaIdentifier: Number(mfaIdentifier),
-      priorityIdentifier,
+      priorityIdentifier:
+        priorityIdentifier === "BACKUP" ? "DEFAULT" : "BACKUP",
       method: {
         mfaMethodType,
         endPoint,
       },
-      methodVerified,
+      methodVerified: true,
     };
 
     return formatResponse(200, response);
@@ -153,16 +161,19 @@ export const deleteMethodHandler = async (
   const userId = await getUserIdFromEvent(event);
   const mfaIdentifier = event.pathParameters?.mfaIdentifier;
 
-  const methods = getUserScenario(userId, "mfaMethods")
-  const methodToRemove = methods.find((m) => m.mfaIdentifier == mfaIdentifier)
+  const methods = getUserScenario(userId, "mfaMethods");
+  const methodToRemove = methods.find((m) => m.mfaIdentifier == mfaIdentifier);
 
-  if (!methodToRemove) { 
-    return formatResponse(404, {})
+  if (!methodToRemove) {
+    return formatResponse(404, {});
   }
 
   if (methodToRemove.priorityIdentifier === "DEFAULT") {
-    return formatResponse(409, {})
+    return formatResponse(409, {});
   }
 
-  return formatResponse(200, methods.filter((m) => m.mfaIdentifier != mfaIdentifier))
-}
+  return formatResponse(
+    200,
+    methods.filter((m) => m.mfaIdentifier != mfaIdentifier)
+  );
+};

@@ -9,8 +9,9 @@ import {
   updateMfaMethodHandler,
   Response,
   createMfaMethodHandler,
-  deleteMethodHandler
+  deleteMethodHandler,
 } from "../../method-management/method-management";
+import { APIGatewayProxyEventHeaders } from "aws-lambda/trigger/api-gateway-proxy";
 
 type MfaMethod = components["schemas"]["MfaMethod"];
 
@@ -30,6 +31,12 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
     getUserIdFromEvent: jest.fn().mockImplementation((event) => {
       if (event.headers.Authorization === "errorToken") {
         return Promise.resolve("errorMfa400");
+      }
+      if (event.headers.Authorization === "reject") {
+        return Promise.reject("MFA Method could not be updated");
+      }
+      if (event.headers.Authorization === "mfaNotFound") {
+        return Promise.resolve("errorMfa404");
       }
       if (event.headers.Authorization === "delete") {
         return Promise.resolve("deleteMethod");
@@ -77,7 +84,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
                 mfaMethodType: "AUTH_APP",
               },
               methodVerified: true,
-            }
+            },
           ],
         },
         errorMfa400: {
@@ -96,6 +103,29 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
               methodVerified: true,
             },
           ],
+        },
+        errorMfa404: {
+          httpResponse: {
+            code: 200,
+            message: "",
+          },
+          mfaMethods: [
+            {
+              mfaIdentifier: 1,
+              priorityIdentifier: "DEFAULT",
+              method: {
+                mfaMethodType: "SMS",
+                endPoint: "07123456789",
+              },
+              methodVerified: true,
+            },
+          ],
+        },
+        errorMfa500: {
+          httpResponse: {
+            code: 500,
+            message: "METHOD COULD NOT BE UPDATED",
+          },
         },
       };
 
@@ -215,7 +245,7 @@ describe("updateMfaMethodHandler", () => {
       otp: "123456",
       mfaMethod: {
         mfaIdentifier: 1,
-        priorityIdentifier: "DEFAULT",
+        priorityIdentifier: "BACKUP",
         mfaMethodType: "SMS",
         endPoint: "07123456789",
         methodVerified: true,
@@ -253,7 +283,7 @@ describe("updateMfaMethodHandler", () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
       mfaIdentifier: 1,
-      priorityIdentifier: "DEFAULT",
+      priorityIdentifier: "BACKUP",
       method: {
         mfaMethodType: "AUTH_APP",
         endPoint: "",
@@ -279,7 +309,7 @@ describe("updateMfaMethodHandler", () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
       mfaIdentifier: 1,
-      priorityIdentifier: "DEFAULT",
+      priorityIdentifier: "BACKUP",
       method: {
         mfaMethodType: "SMS",
         endPoint: "07111111111",
@@ -291,6 +321,7 @@ describe("updateMfaMethodHandler", () => {
 
 describe("updateMfaMethodHandlerError", () => {
   const createFakeAPIGatewayProxyEvent = (
+    headers: APIGatewayProxyEventHeaders,
     body: unknown,
     mfaIdentifier: string
   ): APIGatewayProxyEvent => {
@@ -300,9 +331,7 @@ describe("updateMfaMethodHandlerError", () => {
       path: `/mfa-methods/${mfaIdentifier}`,
       pathParameters: { mfaIdentifier },
       isBase64Encoded: false,
-      headers: {
-        Authorization: "errorToken", // used to switch mock scenarios
-      },
+      headers,
       multiValueHeaders: {},
       queryStringParameters: null,
       multiValueQueryStringParameters: null,
@@ -313,7 +342,24 @@ describe("updateMfaMethodHandlerError", () => {
     };
   };
 
+  test("should return 404", async () => {
+    const headers = {
+      Authorization: "mfaNotFound",
+    };
+    const requestBody = {
+      email: "errorMfa404@email.com",
+      credential: "email",
+      otp: "123456",
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(headers, requestBody, "1");
+    const response = await updateMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(404);
+  });
+
   test("should return 400", async () => {
+    const headers = {
+      Authorization: "errorToken",
+    };
     const requestBody = {
       email: "errorMfa400@email.com",
       credential: "email",
@@ -326,14 +372,28 @@ describe("updateMfaMethodHandlerError", () => {
         methodVerified: true,
       },
     };
-    const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
+    const fakeEvent = createFakeAPIGatewayProxyEvent(headers, requestBody, "1");
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(400);
+  });
+
+  test("should return 500", async () => {
+    const headers = {
+      Authorization: "reject",
+    };
+    const requestBody = {
+      email: "errorMfa500@email.com",
+      credential: "email",
+      otp: "123456",
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(headers, requestBody, "1");
+    const response = await updateMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(500);
   });
 });
 
 describe("deleteMethodHandler", () => {
- const createFakeAPIGatewayProxyEvent = (
+  const createFakeAPIGatewayProxyEvent = (
     body: unknown,
     mfaIdentifier: string
   ): APIGatewayProxyEvent => {
@@ -354,23 +414,23 @@ describe("deleteMethodHandler", () => {
         {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
       resource: "",
     };
-  } 
+  };
 
   test("should delete MFA method correctly", async () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent({}, "2");
-    const response = await deleteMethodHandler(fakeEvent) 
-    expect(response.statusCode).toBe(200)
-  })
+    const response = await deleteMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(200);
+  });
 
   test("should 409 if user tries to delete default method", async () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent({}, "1");
-    const response = await deleteMethodHandler(fakeEvent) 
-    expect(response.statusCode).toBe(409)
-  })
+    const response = await deleteMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(409);
+  });
 
-  test("should 404 if user tries to delete non existant method", async () => {
+  test("should 404 if user tries to delete non existent method", async () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent({}, "3");
-    const response = await deleteMethodHandler(fakeEvent) 
-    expect(response.statusCode).toBe(404)
-  })
-})
+    const response = await deleteMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(404);
+  });
+});

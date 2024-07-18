@@ -36,8 +36,8 @@
 
 ## Testing
 
-<!-- Provide a summary of any manual testing you've done, for example deploying the branch to dev -->
+<!-- Provide a summary of any manual testing you've done, for example, deploying the branch to dev -->
 
 ## How to review
 
-<!-- Describe any non-standard steps to review this work, or higlight any areas that you'd like the reviewer's opinion on -->
+<!-- Describe any non-standard steps to review this work, or highlight any areas that you'd like the reviewer's opinion on -->

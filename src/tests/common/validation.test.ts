@@ -35,4 +35,26 @@ describe("validateFields Function", () => {
     };
     expect(() => validateFields(fields, checks)).toThrow(/invalid firstName/);
   });
+
+  it("should validate numeric fields when converted to string and match the regular expression", () => {
+    const fields = {
+      mfaIdentifier: 2,
+    };
+    const checks = {
+      mfaIdentifier: /^[0-9]+$/,
+    };
+    expect(() => validateFields(fields, checks)).not.toThrow(Error);
+  });
+
+  it("should throw an error when numeric field does not match the regular expression", () => {
+    const fields = {
+      mfaIdentifier: 2.5,
+    };
+    const checks = {
+      mfaIdentifier: /^[0-9]+$/,
+    };
+    expect(() => validateFields(fields, checks)).toThrow(
+      /invalid mfaIdentifier/
+    );
+  });
 });
