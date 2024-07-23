@@ -120,8 +120,6 @@ export const updateMfaMethodHandler = async (
     }
 
     const {
-      email,
-      otp,
       mfaMethod: {
         mfaIdentifier = mfaIdentifierFromEvent,
         priorityIdentifier = "DEFAULT",
@@ -131,11 +129,8 @@ export const updateMfaMethodHandler = async (
     } = body;
 
     validateFields(
-      { email, otp, mfaIdentifierFromEvent },
-      {
-        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
-        mfaMethodType: /^(AUTH_APP|SMS)$/,
-      }
+      { mfaIdentifierFromEvent },
+      {}
     );
 
     const response: components["schemas"]["MfaMethod"] = {
