@@ -14,11 +14,11 @@ export interface Response {
 }
 
 export const userInfoHandler = async (
-  event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent
 ): Promise<Response> => {
   const response = getUserScenario(
-    await getUserIdFromEvent(event),
-    "mfaMethods"
+      await getUserIdFromEvent(event),
+      "mfaMethods"
   );
 
   if (response.length === 0) {
@@ -32,7 +32,7 @@ export const userInfoHandler = async (
   }
 
   const defaultMethodCount = response.filter(
-    (m) => m.priorityIdentifier === "DEFAULT"
+      (m) => m.priorityIdentifier === "DEFAULT"
   ).length;
 
   if (defaultMethodCount === 0) {
@@ -46,7 +46,7 @@ export const userInfoHandler = async (
   }
 
   const appMethodCount = response.filter(
-    (m) => m.method.mfaMethodType === "AUTH_APP"
+      (m) => m.method.mfaMethodType === "AUTH_APP"
   ).length;
 
   if (appMethodCount > 1) {
@@ -58,7 +58,7 @@ export const userInfoHandler = async (
 };
 
 export const createMfaMethodHandler = async (
-  event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const {
     email,
@@ -82,11 +82,11 @@ export const createMfaMethodHandler = async (
     }
 
     validateFields(
-      { email, otp, credential, priorityIdentifier, mfaMethodType },
-      {
-        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
-        mfaMethodType: /^(AUTH_APP|SMS)$/,
-      }
+        { email, otp, credential, priorityIdentifier, mfaMethodType },
+        {
+          priorityIdentifier: /^(DEFAULT|BACKUP)$/,
+          mfaMethodType: /^(AUTH_APP|SMS)$/,
+        }
     );
   } catch (e) {
     return formatResponse(400, { error: (e as Error).message });
@@ -96,7 +96,7 @@ export const createMfaMethodHandler = async (
 };
 
 export const updateMfaMethodHandler = async (
-  event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   try {
     const userId = await getUserIdFromEvent(event);
@@ -110,35 +110,43 @@ export const updateMfaMethodHandler = async (
     }
     assert(event.body, "no body provided");
 
-    const body = JSON.parse(event.body);
-    const mfaIdentifier = event.pathParameters?.mfaIdentifier;
+    const body: components["schemas"]["MfaMethodUpdateRequest"] = JSON.parse(
+        event.body
+    );
+    const mfaIdentifierFromEvent = event.pathParameters?.mfaIdentifier;
+
+    if (!body.mfaMethod) {
+      return formatResponse(404, { error: "MFA Method not Found" });
+    }
+
     const {
       email,
       otp,
       mfaMethod: {
-        priorityIdentifier = undefined,
+        mfaIdentifier = mfaIdentifierFromEvent,
+        priorityIdentifier = "DEFAULT",
         mfaMethodType = undefined,
         endPoint = undefined,
-        methodVerified = false,
-      } = {},
+      },
     } = body;
 
     validateFields(
-      { email, otp, mfaIdentifier },
-      {
-        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
-        mfaMethodType: /^(AUTH_APP|SMS)$/,
-      }
+        { email, otp, mfaIdentifierFromEvent },
+        {
+          priorityIdentifier: /^(DEFAULT|BACKUP)$/,
+          mfaMethodType: /^(AUTH_APP|SMS)$/,
+        }
     );
 
     const response: components["schemas"]["MfaMethod"] = {
       mfaIdentifier: Number(mfaIdentifier),
-      priorityIdentifier,
+      priorityIdentifier:
+          priorityIdentifier === "BACKUP" ? "DEFAULT" : "BACKUP",
       method: {
         mfaMethodType,
         endPoint,
       },
-      methodVerified,
+      methodVerified: true,
     };
 
     return formatResponse(200, response);
@@ -148,7 +156,7 @@ export const updateMfaMethodHandler = async (
 };
 
 export const deleteMethodHandler = async (
-  event: APIGatewayProxyEvent
+    event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const userId = await getUserIdFromEvent(event);
   const mfaIdentifier = event.pathParameters?.mfaIdentifier;
@@ -165,7 +173,7 @@ export const deleteMethodHandler = async (
   }
 
   return formatResponse(
-    200,
-    methods.filter((m) => m.mfaIdentifier != mfaIdentifier)
+      200,
+      methods.filter((m) => m.mfaIdentifier != mfaIdentifier)
   );
 };
