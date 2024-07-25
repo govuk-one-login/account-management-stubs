@@ -65,12 +65,10 @@ export const createMfaMethodHandler = async (
     otp,
     credential,
     mfaMethod: {
-      priorityIdentifier=undefined,
-      mfaMethodType=undefined,
+      priorityIdentifier = undefined,
+      mfaMethodType = undefined,
     } = {},
   } = JSON.parse(event.body || "{}");
-
-  console.log(`Event body is: ${JSON.stringify(event.body)}`);
 
   try {
     const userId = await getUserIdFromEvent(event);
@@ -83,19 +81,13 @@ export const createMfaMethodHandler = async (
       });
     }
 
-    console.log(`Email is" ${email}`);
-    console.log(`OTP is" ${otp}`);
-    console.log(`Credential is" ${credential}`);
-    console.log(`PriorityIdentifier is" ${priorityIdentifier}`);
-    console.log(`MfaMethodType is" ${mfaMethodType}`);
-
-    // validateFields(
-    //   { email, otp, credential, priorityIdentifier, mfaMethodType},
-    //   {
-    //     priorityIdentifier: /^(DEFAULT|BACKUP)$/,
-    //     mfaMethodType: /^(AUTH_APP|SMS)$/,
-    //   }
-    // );
+    validateFields(
+      { email, otp, credential, priorityIdentifier, mfaMethodType },
+      {
+        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
+        mfaMethodType: /^(AUTH_APP|SMS)$/,
+      }
+    );
   } catch (e) {
     return formatResponse(400, { error: (e as Error).message });
   }
@@ -161,16 +153,19 @@ export const deleteMethodHandler = async (
   const userId = await getUserIdFromEvent(event);
   const mfaIdentifier = event.pathParameters?.mfaIdentifier;
 
-  const methods = getUserScenario(userId, "mfaMethods")
-  const methodToRemove = methods.find((m) => m.mfaIdentifier == mfaIdentifier)
+  const methods = getUserScenario(userId, "mfaMethods");
+  const methodToRemove = methods.find((m) => m.mfaIdentifier == mfaIdentifier);
 
-  if (!methodToRemove) { 
-    return formatResponse(404, {})
+  if (!methodToRemove) {
+    return formatResponse(404, {});
   }
 
   if (methodToRemove.priorityIdentifier === "DEFAULT") {
-    return formatResponse(409, {})
+    return formatResponse(409, {});
   }
 
-  return formatResponse(200, methods.filter((m) => m.mfaIdentifier != mfaIdentifier))
-}
+  return formatResponse(
+    200,
+    methods.filter((m) => m.mfaIdentifier != mfaIdentifier)
+  );
+};
