@@ -132,11 +132,9 @@ export const updateMfaMethodHandler = async (
 
     const response: components["schemas"]["MfaMethod"] = {
       mfaIdentifier: Number(mfaIdentifier),
-      priorityIdentifier:
-        priorityIdentifier === "BACKUP" ? "DEFAULT" : "BACKUP",
+      priorityIdentifier: priorityIdentifier,
       method:
-        mfaMethodType === "SMS"
-          ? {
+        mfaMethodType === "SMS" ? {
               mfaMethodType,
               phoneNumber: endPoint,
             }
@@ -144,7 +142,7 @@ export const updateMfaMethodHandler = async (
               mfaMethodType,
               credential: endPoint,
             },
-      methodVerified: true,
+      methodVerified: true
     };
 
     return formatResponse(200, response);
