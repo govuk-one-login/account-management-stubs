@@ -256,7 +256,7 @@ describe("updateMfaMethodHandler", () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
       mfaIdentifier: 1,
-      priorityIdentifier: "DEFAULT",
+      priorityIdentifier: "BACKUP",
       method: {
         mfaMethodType: "SMS",
         endPoint: "07123456789",
@@ -283,7 +283,7 @@ describe("updateMfaMethodHandler", () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
       mfaIdentifier: 1,
-      priorityIdentifier: "BACKUP",
+      priorityIdentifier: "DEFAULT",
       method: {
         mfaMethodType: "AUTH_APP",
         endPoint: "",
@@ -309,7 +309,7 @@ describe("updateMfaMethodHandler", () => {
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
       mfaIdentifier: 1,
-      priorityIdentifier: "BACKUP",
+      priorityIdentifier: "DEFAULT",
       method: {
         mfaMethodType: "SMS",
         endPoint: "07111111111",

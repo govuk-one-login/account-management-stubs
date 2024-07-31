@@ -122,21 +122,17 @@ export const updateMfaMethodHandler = async (
     const {
       mfaMethod: {
         mfaIdentifier = mfaIdentifierFromEvent,
-        priorityIdentifier = "DEFAULT",
-        mfaMethodType = undefined,
-        endPoint = undefined,
+        priorityIdentifier,
+        mfaMethodType,
+        endPoint,
       },
     } = body;
 
-    validateFields(
-      { mfaIdentifierFromEvent },
-      {}
-    );
+    validateFields({ mfaIdentifierFromEvent }, {});
 
     const response: components["schemas"]["MfaMethod"] = {
       mfaIdentifier: Number(mfaIdentifier),
-      priorityIdentifier:
-        priorityIdentifier === "BACKUP" ? "DEFAULT" : "BACKUP",
+      priorityIdentifier: priorityIdentifier,
       method: {
         mfaMethodType,
         endPoint,
