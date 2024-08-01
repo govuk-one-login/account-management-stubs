@@ -9,7 +9,7 @@ export interface Response {
 export const handler = async (
   event: APIGatewayProxyEvent
 ) => {
-  console.log(event.headers)
+  console.log(event)
   if (event?.path?.includes("send-otp-notification")) {
     const userId = await getUserIdFromEvent(event)
     const scenario = getUserScenario(userId, "otpNotification")
