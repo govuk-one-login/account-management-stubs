@@ -173,7 +173,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
-      Role: !GetAtt BaseLambdaRole.Arn
+      Role: !GetAtt AccountManagementStubFunctionRole.Arn
       Timeout: 5
       VpcConfig:
         SubnetIds:
@@ -189,6 +189,27 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - all-routes.ts
+
+  AccountManagementStubFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        - !Ref QueryOidcDynamoTablePolicy
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
 
   # APIGateway
 
