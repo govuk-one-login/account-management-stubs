@@ -166,7 +166,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-account-management-api
       Architectures: ["arm64"]
-      CodeUri: src/account-management-api
+      CodeUri: src
       Handler: all-routes.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
@@ -188,7 +188,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - all-routes.ts
+          - account-management-api/all-routes.ts
 
   AccountManagementStubFunctionRole:
     Type: AWS::IAM::Role
