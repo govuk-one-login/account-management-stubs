@@ -160,17 +160,25 @@ Resources:
   ApiGatewayLoggingRole:
     Type: AWS::IAM::Role
     Properties:
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+      RoleName: ApiGatewayLoggingRole
       AssumeRolePolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Effect: Allow
             Principal:
-              Service:
-                - apigateway.amazonaws.com
-            Action:
-              - "sts:AssumeRole"
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ApiGatewayCloudWatchLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: 'arn:aws:logs:*:*:*'
 
   ApiGatewayAccount:
     Type: AWS::ApiGateway::Account
