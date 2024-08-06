@@ -1,24 +1,23 @@
-import { APIGatewayEventDefaultAuthorizerContext, APIGatewayEventRequestContextWithAuthorizer, APIGatewayProxyEvent } from "aws-lambda";
+import { APIGatewayEventRequestContextV2, APIGatewayProxyEventV2 } from "aws-lambda";
 import { handler, Response } from "../../account-management-api/all-routes";
 
 const createFakeAPIGatewayProxyEvent = (
   body: unknown,
   path: string
-): APIGatewayProxyEvent => {
+): APIGatewayProxyEventV2 => {
   return {
     body: JSON.stringify(body),
-    httpMethod: "PUT",
-    path: path,
+    rawPath: path,
     pathParameters: {},
     isBase64Encoded: false,
     headers: {},
-    multiValueHeaders: {},
-    queryStringParameters: null,
-    multiValueQueryStringParameters: null,
-    stageVariables: null,
+    queryStringParameters: undefined,
+    stageVariables: undefined,
+    version: '2.0',
+    routeKey: '$default',
+    rawQueryString: '',
     requestContext:
-      {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
-    resource: "",
+      {} as APIGatewayEventRequestContextV2,
   };
 };
 
