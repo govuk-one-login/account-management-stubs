@@ -13,6 +13,7 @@ export const handler = async (
   if (event?.path?.includes("send-otp-notification")) {
     const userId = await getUserIdFromEvent(event)
     const scenario = getUserScenario(userId, "otpNotification")
+    console.log(scenario)
 
     return formatResponse(200, scenario)
   }
