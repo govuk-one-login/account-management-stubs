@@ -1,4 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { getUserIdFromEvent, getUserScenario } from "../scenarios/scenarios-utils";
 import { formatResponse } from "../common/response-utils";
 
