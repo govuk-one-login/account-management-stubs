@@ -190,6 +190,9 @@ Resources:
             RestApiId:
               Ref: OidcStubsRestApi
       Timeout: 5
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OidcStubDataTableName
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
