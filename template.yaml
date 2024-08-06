@@ -185,14 +185,14 @@ Resources:
             Path: /send-otp-notification
             Method: POST
             RestApiId:
-              Ref: OidcStubsRestApi
+              Ref: AccountManagementStubApi
         accountmgmt:
           Type: Api
           Properties:
             Path: /{path}
             Method: ANY
             RestApiId:
-              Ref: OidcStubsRestApi
+              Ref: AccountManagementStubApi
       Timeout: 5
       Environment:
         Variables:
