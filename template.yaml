@@ -182,7 +182,7 @@ Resources:
             Method: POST
             RestApiId:
               Ref: OidcStubsRestApi
-        sendotp:
+        accountmgmt:
           Type: Api
           Properties:
             Path: /{path}
