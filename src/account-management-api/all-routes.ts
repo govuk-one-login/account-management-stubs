@@ -15,7 +15,7 @@ export const handler = async (
     const scenario = getUserScenario(userId, "otpNotification")
     console.log(scenario)
 
-    return formatResponse(200, scenario)
+    return formatResponse(204, scenario)
   }
 
 
