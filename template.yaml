@@ -41,6 +41,10 @@ Mappings:
     demo:
       url: "https://home.demo.account.gov.uk"
   TxmaDummyInputQueue:
+    demo:
+      QueueArn: "arn:aws:sqs:eu-west-2:654654326096:home-backend-TxMAInputDummyQueue-aydSI6PG6u3g"
+      KeyArn: "arn:aws:kms:eu-west-2:654654326096:key/35234388-c3dd-4dce-85f0-cb9fef379757"
+      QueueUrl: "https://sqs.eu-west-2.amazonaws.com/654654326096/home-backend-TxMAInputDummyQueue-aydSI6PG6u3g"
     dev:
       QueueArn: "arn:aws:sqs:eu-west-2:985326104449:account-mgmt-backend-TxMAInputDummyQueue-lZORy5gLrQ4D"
       KeyArn: "arn:aws:kms:eu-west-2:985326104449:key/290ec47d-887b-4a99-a81c-4f5c3e0b04ee"
