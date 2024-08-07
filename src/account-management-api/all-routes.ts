@@ -13,7 +13,9 @@ export const handler = async (
     const userId = await getUserIdFromEvent(event)
     const scenario = getUserScenario(userId, "otpNotification")
 
-    return formatResponse(200, scenario)
+    const status = scenario.success ? 200 : 400
+
+    return formatResponse(status, scenario)
   }
 
   return {
