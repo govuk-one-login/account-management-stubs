@@ -1,5 +1,11 @@
 import { UserScenarios } from "./scenarios.interfaces";
 
+export const ERROR_CODES = {
+  NEW_PASSWORD_SAME_AS_EXISTING: 1024,
+  PASSWORD_IS_COMMON: 1040,
+  NEW_PHONE_NUMBER_SAME_AS_EXISTING: 1044,
+};
+
 export const userScenarios: UserScenarios = {
   default: {
     httpResponse: {
@@ -24,6 +30,9 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
+    otpNotification: {
+      success: true
+    }
   },
   userDEFAULTAuthApp: {
     mfaMethods: [
@@ -113,6 +122,23 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
+  },
+  userOtpNewPhoneNumberSameAsExisting: {
+    otpNotification: {
+      success: false,
+      code: ERROR_CODES.NEW_PHONE_NUMBER_SAME_AS_EXISTING
+    },
+    mfaMethods: [
+      {
+        mfaIdentifier: 1,
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          endPoint: "0123456789",
+        },
+        methodVerified: true,
+      },
+    ]
   },
   errorNoMfaMethods: {
     mfaMethods: [],
