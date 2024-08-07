@@ -20,6 +20,5 @@ export const handler = async (
 
   return {
     statusCode: 204,
-    body: 'test'
   };
 };
