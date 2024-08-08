@@ -123,7 +123,7 @@ export const userScenarios: UserScenarios = {
       },
     ],
   },
-  userOtpNewPhoneNumberSameAsExisting: {
+  userNewPhoneNumberSameAsExisting: {
     otpNotification: {
       success: false,
       code: ERROR_CODES.NEW_PHONE_NUMBER_SAME_AS_EXISTING
@@ -139,6 +139,12 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ]
+  },
+  userOtpCodeWrong: {
+    httpResponse: {
+      code: 400,
+      message: "OTP incorrect"
+    }
   },
   errorNoMfaMethods: {
     mfaMethods: [],
