@@ -14,7 +14,7 @@ import {
   validateClientIdMatches,
   validateRedirectURLSupported,
   validateSupportedGrantType,
-  verifyParametersExistAndOnlyOnce
+  verifyParametersExistAndOnlyOnce,
 } from "./validate-token";
 
 export interface Response {
@@ -86,11 +86,11 @@ export const handler = async (
 
   console.log(`Event body is: ${event.body}`);
 
-  verifyParametersExistAndOnlyOnce(event.body)
+  verifyParametersExistAndOnlyOnce(event.body);
 
   validateRedirectURLSupported(event.body);
 
-  validateSupportedGrantType(event.body)
+  validateSupportedGrantType(event.body);
 
   const code = event.body.substring(
     event.body.indexOf("&code=") + 6,

@@ -56,7 +56,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
               priorityIdentifier: "DEFAULT",
               method: {
                 mfaMethodType: "SMS",
-                endPoint: "07123456789",
+                phoneNumber: "07123456789",
               },
               methodVerified: true,
             },
@@ -73,7 +73,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
               priorityIdentifier: "DEFAULT",
               method: {
                 mfaMethodType: "SMS",
-                endPoint: "07123456789",
+                phoneNumber: "07123456789",
               },
               methodVerified: true,
             },
@@ -82,6 +82,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
               priorityIdentifier: "BACKUP",
               method: {
                 mfaMethodType: "AUTH_APP",
+                credential: "ABC",
               },
               methodVerified: true,
             },
@@ -98,7 +99,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
               priorityIdentifier: "DEFAULT",
               method: {
                 mfaMethodType: "SMS",
-                endPoint: "07123456789",
+                phoneNumber: "07123456789",
               },
               methodVerified: true,
             },
@@ -115,7 +116,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
               priorityIdentifier: "DEFAULT",
               method: {
                 mfaMethodType: "SMS",
-                endPoint: "07123456789",
+                phoneNumber: "07123456789",
               },
               methodVerified: true,
             },
@@ -168,7 +169,7 @@ describe("MFA Management API Mock", () => {
     expect(mfaMethod[0].method.mfaMethodType).toEqual("SMS");
     expect(
       mfaMethod[0].method.mfaMethodType === "SMS"
-        ? mfaMethod[0].method.endPoint
+        ? mfaMethod[0].method.phoneNumber
         : false
     ).toEqual("07123456789");
     expect(mfaMethod[0].methodVerified).toBe(true);
@@ -259,7 +260,7 @@ describe("updateMfaMethodHandler", () => {
       priorityIdentifier: "DEFAULT",
       method: {
         mfaMethodType: "SMS",
-        endPoint: "07123456789",
+        phoneNumber: "07123456789",
       },
       methodVerified: true,
     });
@@ -274,7 +275,7 @@ describe("updateMfaMethodHandler", () => {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
         mfaMethodType: "AUTH_APP",
-        endPoint: "",
+        endPoint: "ABC",
         methodVerified: true,
       },
     };
@@ -286,7 +287,7 @@ describe("updateMfaMethodHandler", () => {
       priorityIdentifier: "BACKUP",
       method: {
         mfaMethodType: "AUTH_APP",
-        endPoint: "",
+        credential: "ABC",
       },
       methodVerified: true,
     });
@@ -312,7 +313,7 @@ describe("updateMfaMethodHandler", () => {
       priorityIdentifier: "BACKUP",
       method: {
         mfaMethodType: "SMS",
-        endPoint: "07111111111",
+        phoneNumber: "07111111111",
       },
       methodVerified: true,
     });
@@ -368,7 +369,7 @@ describe("updateMfaMethodHandlerError", () => {
         mfaIdentifier: 1,
         priorityIdentifier: "DEFAULT",
         mfaMethodType: "SMS",
-        endPoint: "07123456789",
+        phoneNumber: "07123456789",
         methodVerified: true,
       },
     };

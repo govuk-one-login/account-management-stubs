@@ -43,8 +43,15 @@ export interface components {
     SmsMethod: {
       /** @enum {string} */
       mfaMethodType?: "SMS";
-      endPoint?: string;
+      phoneNumber?: string;
     };
+    /**
+     * @example {
+     *   "priorityIdentifier": "DEFAULT",
+     *   "mfaMethodType": "SMS",
+     *   "phoneNumber": "070"
+     * }
+     */
     AuthAppMethod: {
       /** @enum {string} */
       mfaMethodType?: "AUTH_APP";
@@ -54,7 +61,7 @@ export interface components {
      * @example {
      *   "priorityIdentifier": "DEFAULT",
      *   "mfaMethodType": "AUTH_APP",
-     *   "endPoint": "n/a"
+     *   "credential": "AAAABBBBCCCCCDDDDD55551111EEEE2222FFFF3333GGGG4444"
      * }
      */
     MfaMethodCreate: {

@@ -28,12 +28,10 @@ export const getUserIdFromEvent = async (
   event: APIGatewayProxyEvent | APIGatewayProxyEventV2
 ): Promise<string> => {
   const { TABLE_NAME } = process.env;
-  const authHeader = event?.headers?.Authorization || event?.headers?.authorization;
+  const authHeader =
+    event?.headers?.Authorization || event?.headers?.authorization;
   assert(TABLE_NAME, "TABLE_NAME environment variable not set");
-  assert(
-    authHeader,
-    "There is no Authorization header in the request"
-  );
+  assert(authHeader, "There is no Authorization header in the request");
 
   const jwt = parseJwt(authHeader);
 
