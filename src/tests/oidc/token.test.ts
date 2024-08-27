@@ -14,7 +14,7 @@ const oicdPersistedData = {
   nonce,
 };
 
-jest.mock('../../oidc/validate-token');
+jest.mock("../../oidc/validate-token");
 
 describe("handler", () => {
   beforeEach(() => {
@@ -52,7 +52,7 @@ describe("handler", () => {
     try {
       await handler(mockApiEvent);
     } catch (error) {
-      errorThrown= true;
+      errorThrown = true;
     }
     expect(errorThrown).toBeTruthy();
   });

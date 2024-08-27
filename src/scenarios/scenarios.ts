@@ -25,14 +25,14 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "07123456789",
+          phoneNumber: "07123456789",
         },
         methodVerified: true,
       },
     ],
     otpNotification: {
-      success: true
-    }
+      success: true,
+    },
   },
   userDEFAULTAuthApp: {
     mfaMethods: [
@@ -41,6 +41,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "AUTH_APP",
+          credential: "ABC",
         },
         methodVerified: true,
       },
@@ -53,7 +54,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "0123456789",
+          phoneNumber: "0123456789",
         },
         methodVerified: true,
       },
@@ -66,7 +67,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "0123456789",
+          phoneNumber: "0123456789",
         },
         methodVerified: true,
       },
@@ -75,6 +76,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "AUTH_APP",
+          credential: "ABC",
         },
         methodVerified: true,
       },
@@ -87,6 +89,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "AUTH_APP",
+          credential: "ABC",
         },
         methodVerified: true,
       },
@@ -95,7 +98,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "0123456789",
+          phoneNumber: "0123456789",
         },
         methodVerified: true,
       },
@@ -108,7 +111,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "0123456789",
+          phoneNumber: "0123456789",
         },
         methodVerified: true,
       },
@@ -117,7 +120,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "99940850934",
+          phoneNumber: "99940850934",
         },
         methodVerified: true,
       },
@@ -126,7 +129,7 @@ export const userScenarios: UserScenarios = {
   userNewPhoneNumberSameAsExisting: {
     otpNotification: {
       success: false,
-      code: ERROR_CODES.NEW_PHONE_NUMBER_SAME_AS_EXISTING
+      code: ERROR_CODES.NEW_PHONE_NUMBER_SAME_AS_EXISTING,
     },
     mfaMethods: [
       {
@@ -134,17 +137,17 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "0123456789",
+          phoneNumber: "0123456789",
         },
         methodVerified: true,
       },
-    ]
+    ],
   },
   userOtpCodeWrong: {
     httpResponse: {
       code: 400,
-      message: "OTP incorrect"
-    }
+      message: "OTP incorrect",
+    },
   },
   errorNoMfaMethods: {
     mfaMethods: [],
@@ -156,7 +159,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "99940850934",
+          phoneNumber: "99940850934",
         },
         methodVerified: true,
       },
@@ -165,7 +168,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "99940850934",
+          phoneNumber: "99940850934",
         },
         methodVerified: true,
       },
@@ -174,7 +177,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "99940850934",
+          phoneNumber: "99940850934",
         },
         methodVerified: true,
       },
@@ -187,7 +190,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "99940850934",
+          phoneNumber: "99940850934",
         },
         methodVerified: true,
       },
@@ -196,7 +199,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "99940850934",
+          phoneNumber: "99940850934",
         },
         methodVerified: true,
       },
@@ -209,7 +212,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "99940850934",
+          phoneNumber: "99940850934",
         },
         methodVerified: true,
       },
@@ -218,7 +221,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "99940850934",
+          phoneNumber: "99940850934",
         },
         methodVerified: true,
       },
@@ -231,6 +234,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "AUTH_APP",
+          credential: "ABC",
         },
         methodVerified: true,
       },
@@ -239,6 +243,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "AUTH_APP",
+          credential: "ABC",
         },
         methodVerified: true,
       },
@@ -255,7 +260,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "0123456789",
+          phoneNumber: "0123456789",
         },
         methodVerified: true,
       },
@@ -272,7 +277,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "0123456789",
+          phoneNumber: "0123456789",
         },
         methodVerified: true,
       },
@@ -289,7 +294,7 @@ export const userScenarios: UserScenarios = {
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
-          endPoint: "0123456789",
+          phoneNumber: "0123456789",
         },
         methodVerified: true,
       },
