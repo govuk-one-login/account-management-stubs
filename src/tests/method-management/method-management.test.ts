@@ -44,7 +44,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
       return Promise.resolve("default");
     }),
     getUserScenario: jest.fn((userId: string, type: string) => {
-      const scenarios: { [key: string]: Scenario } = {
+      const scenarios: Record<string, Scenario> = {
         default: {
           httpResponse: {
             code: 200,
