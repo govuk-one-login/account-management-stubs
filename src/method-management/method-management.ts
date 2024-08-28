@@ -134,7 +134,8 @@ export const updateMfaMethodHandler = async (
       mfaIdentifier: Number(mfaIdentifier),
       priorityIdentifier: priorityIdentifier,
       method:
-        mfaMethodType === "SMS" ? {
+        mfaMethodType === "SMS"
+          ? {
               mfaMethodType,
               phoneNumber: endPoint,
             }
@@ -142,7 +143,7 @@ export const updateMfaMethodHandler = async (
               mfaMethodType,
               credential: endPoint,
             },
-      methodVerified: true
+      methodVerified: true,
     };
 
     return formatResponse(200, response);
