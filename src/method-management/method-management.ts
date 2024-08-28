@@ -132,8 +132,7 @@ export const updateMfaMethodHandler = async (
 
     const response: components["schemas"]["MfaMethod"] = {
       mfaIdentifier: Number(mfaIdentifier),
-      priorityIdentifier:
-        priorityIdentifier === "BACKUP" ? "DEFAULT" : "BACKUP",
+      priorityIdentifier: priorityIdentifier,
       method:
         mfaMethodType === "SMS"
           ? {
