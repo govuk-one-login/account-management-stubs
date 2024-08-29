@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 
 export const validateFields = (
-  fields: { [key: string]: string | number | undefined },
-  checks: { [key: string]: RegExp }
+  fields: Record<string, string | number | undefined>,
+  checks: Record<string, RegExp>
 ) => {
   Object.entries(fields).forEach(([key, value]) => {
     assert(value, `no ${key} provided`);
