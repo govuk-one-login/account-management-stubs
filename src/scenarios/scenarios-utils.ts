@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
 import { userScenarios } from "./scenarios";
 import { OicdPersistedData, UserScenarios } from "./scenarios.interfaces";
+import { v4 as uuidv4 } from "uuid";
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -67,6 +68,10 @@ export const getUserScenario = <
 
   if ("email" in response) {
     response.email = `${id}@example.org`;
+  }
+
+  if ("sub" in response) {
+    response.sub = uuidv4();
   }
 
   return response;
