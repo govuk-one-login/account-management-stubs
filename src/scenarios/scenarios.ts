@@ -1,4 +1,5 @@
 import { UserScenarios } from "./scenarios.interfaces";
+import { v4 as uuidv4 } from "uuid";
 
 export const ERROR_CODES = {
   NEW_PASSWORD_SAME_AS_EXISTING: 1024,
@@ -299,5 +300,32 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
+  },
+  userPerformanceTest: {
+    httpResponse: {
+      code: 200,
+      message: "OK",
+    },
+    userinfo: {
+      sub: uuidv4(),
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+    },
+    mfaMethods: [
+      {
+        mfaIdentifier: 0,
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
+        methodVerified: true,
+      },
+    ],
+    otpNotification: {
+      success: true,
+    },
   },
 };
