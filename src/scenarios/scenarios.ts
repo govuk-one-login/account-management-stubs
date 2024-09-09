@@ -1,5 +1,4 @@
 import { UserScenarios } from "./scenarios.interfaces";
-import { v4 as uuidv4 } from "uuid";
 
 export const ERROR_CODES = {
   NEW_PASSWORD_SAME_AS_EXISTING: 1024,
@@ -307,7 +306,7 @@ export const userScenarios: UserScenarios = {
       message: "OK",
     },
     userinfo: {
-      sub: uuidv4(),
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
