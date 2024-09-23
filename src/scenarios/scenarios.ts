@@ -300,4 +300,31 @@ export const userScenarios: UserScenarios = {
       },
     ],
   },
+  userPerformanceTest: {
+    httpResponse: {
+      code: 200,
+      message: "OK",
+    },
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+    },
+    mfaMethods: [
+      {
+        mfaIdentifier: 0,
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
+        methodVerified: true,
+      },
+    ],
+    otpNotification: {
+      success: true,
+    },
+  },
 };

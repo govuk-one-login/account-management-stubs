@@ -502,7 +502,7 @@ Resources:
       Handler: authorize.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 128
+      MemorySize: 160
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcAuthorizeApiStubFunctionRole.Arn
@@ -802,7 +802,7 @@ Resources:
       Handler: token.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 128
+      MemorySize: 150
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
