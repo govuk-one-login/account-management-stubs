@@ -86,18 +86,22 @@ export const handler = async (
 
   console.log(`Event body is: ${event.body}`);
 
+  console.time('verify and validate')
   verifyParametersExistAndOnlyOnce(event.body);
 
   validateRedirectURLSupported(event.body);
 
   validateSupportedGrantType(event.body);
+  console.timeEnd('verify and validate')
 
   const code = event.body.substring(
     event.body.indexOf("&code=") + 6,
     event.body.indexOf("&redirect_uri=")
   );
 
+  console.time('persistedNonce')
   const nonce = await persistedNonce(code);
+  console.timeEnd('persistedNonce')
 
   const { JWK_KEY_SECRET, OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
 
@@ -112,8 +116,11 @@ export const handler = async (
     );
   }
 
+  console.time('validateClientId')
   validateClientIdMatches(event.body, OIDC_CLIENT_ID);
+  console.timeEnd('validateClientId')
 
+  console.time('token')
   const jwkSecret = JSON.parse(JWK_KEY_SECRET);
   const jwk: KeyLike = JSON.parse(jwkSecret);
   const privateKey = await importJWK(jwk, algorithm);
@@ -129,6 +136,7 @@ export const handler = async (
     expires_in: 3600,
     id_token: jwt,
   });
+  console.timeEnd('token')
 
   return {
     statusCode: 200,
