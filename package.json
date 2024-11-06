@@ -45,7 +45,7 @@
     "@aws-sdk/client-sqs": "^3.632.0",
     "@aws-sdk/lib-dynamodb": "^3.656.0",
     "@types/aws-lambda": "^8.10.143",
-    "jose": "^5.7.0",
+    "jose": "^5.9.6",
     "uuid": "^10.0.0"
   },
   "lint-staged": {
