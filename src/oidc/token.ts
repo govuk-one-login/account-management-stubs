@@ -1,11 +1,5 @@
 import { v4 as uuid } from "uuid";
-import {
-  importJWK,
-  JWTHeaderParameters,
-  JWTPayload,
-  KeyLike,
-  SignJWT,
-} from "jose";
+import { importJWK, JWK, JWTHeaderParameters, JWTPayload, SignJWT } from "jose";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
@@ -115,7 +109,7 @@ export const handler = async (
   validateClientIdMatches(event.body, OIDC_CLIENT_ID);
 
   const jwkSecret = JSON.parse(JWK_KEY_SECRET);
-  const jwk: KeyLike = JSON.parse(jwkSecret);
+  const jwk: JWK = JSON.parse(jwkSecret);
   const privateKey = await importJWK(jwk, algorithm);
   const jwt = await new SignJWT(
     newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid(), nonce)
