@@ -41,10 +41,10 @@
     "typescript-eslint": "^8.13.0"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.656.0",
-    "@aws-sdk/client-sqs": "^3.632.0",
-    "@aws-sdk/lib-dynamodb": "^3.656.0",
-    "@types/aws-lambda": "^8.10.143",
+    "@aws-sdk/client-dynamodb": "^3.699.0",
+    "@aws-sdk/client-sqs": "^3.699.0",
+    "@aws-sdk/lib-dynamodb": "^3.699.0",
+    "@types/aws-lambda": "^8.10.146",
     "jose": "^5.9.6",
     "uuid": "^10.0.0"
   },
