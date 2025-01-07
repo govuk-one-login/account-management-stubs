@@ -78,18 +78,15 @@ export const handler = async (
     throw new Error(`no request body is provided`);
   }
 
-  console.log(`Event body is: ${event.body}`);
-
   verifyParametersExistAndOnlyOnce(event.body);
 
   validateRedirectURLSupported(event.body);
 
   validateSupportedGrantType(event.body);
 
-  const code = event.body.substring(
-    event.body.indexOf("&code=") + 6,
-    event.body.indexOf("&redirect_uri=")
-  );
+  const codeStartIndex = event.body.indexOf("&code=") + 6;
+  const codeEndIndex = event.body.indexOf("&redirect_uri=");
+  const code = event.body.substring(codeStartIndex, codeEndIndex);
 
   const nonce = await persistedNonce(code);
 
