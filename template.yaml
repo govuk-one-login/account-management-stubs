@@ -174,7 +174,7 @@ Resources:
       Handler: all-routes.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 128
+      MemorySize: 256
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt AccountManagementStubFunctionRole.Arn
@@ -502,7 +502,7 @@ Resources:
       Handler: authorize.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 160
+      MemorySize: 256
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcAuthorizeApiStubFunctionRole.Arn
@@ -617,7 +617,7 @@ Resources:
       Handler: userinfo.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 128
+      MemorySize: 256
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcUserInfoApiStubFunctionRole.Arn
@@ -802,7 +802,7 @@ Resources:
       Handler: token.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 1024
+      MemorySize: 256
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
@@ -994,7 +994,7 @@ Resources:
       Handler: method-management.userInfoHandler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 128
+      MemorySize: 256
       ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt MethodManagementv1LambdaRole.Arn
