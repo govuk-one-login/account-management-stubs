@@ -130,7 +130,7 @@ export const handler = async (
     .sign(privateKey);
 
   const tokenResponse: Token = {
-    ...tokenResponseTemplate, // Use the pre-built template
+    ...tokenResponseTemplate,
     access_token: jwt,
     id_token: jwt,
   };

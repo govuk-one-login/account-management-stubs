@@ -176,9 +176,9 @@ Resources:
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 256
-      ReservedConcurrentExecutions: 30
+      ReservedConcurrentExecutions: 40
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 30
+        ProvisionedConcurrentExecutions: 40
       Runtime: nodejs18.x
       Role: !GetAtt AccountManagementStubFunctionRole.Arn
       Events:
@@ -456,7 +456,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 4
+        ProvisionedConcurrentExecutions: 2
       Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Timeout: 5
@@ -818,7 +818,7 @@ Resources:
       MemorySize: 256
       ReservedConcurrentExecutions: 30
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 16
+        ProvisionedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
       Timeout: 5
