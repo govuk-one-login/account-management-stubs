@@ -45,7 +45,6 @@ const tokenResponseTemplate: Omit<Token, "access_token" | "id_token"> = {
   token_type: "Bearer",
   expires_in: 3600,
 };
-
 let cachedPrivateKey: Uint8Array | KeyLike;
 const getPrivateKey = async () => {
   if (!cachedPrivateKey) {
@@ -58,6 +57,7 @@ const getPrivateKey = async () => {
   }
   return cachedPrivateKey;
 };
+getPrivateKey(); //populate cache on runtime
 
 const epochDateNow = (): number => Math.round(Date.now() / 1000);
 
