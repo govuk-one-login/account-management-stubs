@@ -178,7 +178,7 @@ Resources:
       MemorySize: 256
       ReservedConcurrentExecutions: 30
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 18
+        ProvisionedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt AccountManagementStubFunctionRole.Arn
       Events:
@@ -510,7 +510,7 @@ Resources:
       MemorySize: 256
       ReservedConcurrentExecutions: 30
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 6
+        ProvisionedConcurrentExecutions: 8
       Runtime: nodejs18.x
       Role: !GetAtt OidcAuthorizeApiStubFunctionRole.Arn
       Timeout: 5
@@ -707,7 +707,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 2
+        ProvisionedConcurrentExecutions: 4
       Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Events:
@@ -764,7 +764,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 2
+        ProvisionedConcurrentExecutions: 6
       Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Timeout: 5
@@ -818,7 +818,7 @@ Resources:
       MemorySize: 256
       ReservedConcurrentExecutions: 30
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 10
+        ProvisionedConcurrentExecutions: 16
       Runtime: nodejs18.x
       Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
       Timeout: 5

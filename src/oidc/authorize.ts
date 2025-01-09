@@ -30,7 +30,7 @@ const dynamoDocClient = DynamoDBDocumentClient.from(
   translateConfig
 );
 
-const { AWS_REGION } = process.env;
+const { AWS_REGION, TABLE_NAME } = process.env;
 const sqsClient = new SQSClient({ region: AWS_REGION });
 
 export interface Response {
@@ -69,8 +69,6 @@ export const writeNonce = async (
   userId = "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
   remove_at: number
 ): Promise<PutCommandOutput> => {
-  const { TABLE_NAME } = process.env;
-
   const command = new PutCommand({
     TableName: TABLE_NAME,
     Item: {
