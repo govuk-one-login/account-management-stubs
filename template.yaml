@@ -69,7 +69,6 @@ Conditions:
 
 Globals:
   Function:
-    AutoPublishAlias: live
     CodeSigningConfigArn: !If
       - UseCodeSigning
       - !Ref CodeSigningConfigArn
@@ -175,10 +174,8 @@ Resources:
       Handler: all-routes.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 256
-      ReservedConcurrentExecutions: 40
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 40
+      MemorySize: 128
+      ReservedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt AccountManagementStubFunctionRole.Arn
       Events:
@@ -455,8 +452,6 @@ Resources:
       PackageType: Zip
       MemorySize: 128
       ReservedConcurrentExecutions: 30
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 2
       Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Timeout: 5
@@ -507,10 +502,8 @@ Resources:
       Handler: authorize.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 256
+      MemorySize: 160
       ReservedConcurrentExecutions: 30
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 8
       Runtime: nodejs18.x
       Role: !GetAtt OidcAuthorizeApiStubFunctionRole.Arn
       Timeout: 5
@@ -624,10 +617,8 @@ Resources:
       Handler: userinfo.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 256
+      MemorySize: 128
       ReservedConcurrentExecutions: 30
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 8
       Runtime: nodejs18.x
       Role: !GetAtt OidcUserInfoApiStubFunctionRole.Arn
       Timeout: 5
@@ -706,8 +697,6 @@ Resources:
       PackageType: Zip
       MemorySize: 128
       ReservedConcurrentExecutions: 30
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 4
       Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Events:
@@ -763,8 +752,6 @@ Resources:
       PackageType: Zip
       MemorySize: 128
       ReservedConcurrentExecutions: 30
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 6
       Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Timeout: 5
@@ -815,10 +802,8 @@ Resources:
       Handler: token.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 256
+      MemorySize: 1024
       ReservedConcurrentExecutions: 30
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 30
       Runtime: nodejs18.x
       Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
       Timeout: 5
@@ -1009,10 +994,8 @@ Resources:
       Handler: method-management.userInfoHandler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
-      MemorySize: 256
+      MemorySize: 128
       ReservedConcurrentExecutions: 30
-      ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 8
       Runtime: nodejs18.x
       Role: !GetAtt MethodManagementv1LambdaRole.Arn
       Timeout: 5
