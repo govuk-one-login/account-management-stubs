@@ -3,9 +3,9 @@ export interface Response {
   body: string;
 }
 
-const { ENVIRONMENT } = process.env;
-
 export const handler = async () => {
+  const { ENVIRONMENT } = process.env;
+
   const configurationData = {
     authorization_endpoint: `https://oidc-stub.home.${ENVIRONMENT}.account.gov.uk/authorize`,
     token_endpoint: `https://oidc-stub.home.${ENVIRONMENT}.account.gov.uk/token`,

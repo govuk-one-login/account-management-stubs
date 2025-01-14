@@ -1,5 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config({ path: ".env.test" });
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 import { APIGatewayProxyEvent } from "aws-lambda";
