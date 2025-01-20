@@ -259,9 +259,9 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       Action: "lambda:InvokeFunction"
-      FunctionName: !Ref AccountManagementStubFunction
+      FunctionName: !Sub ${AccountManagementStubFunction}:live
       Principal: apigateway.amazonaws.com
-      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${AccountManagementStubApi}/*:live"
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${AccountManagementStubApi}/*"
 
   AccountManagementStubFunctionLogGroup:
     Type: AWS::Logs::LogGroup
