@@ -251,7 +251,9 @@ Resources:
           - HEAD
           - OPTIONS
           - POST
-      Target: !GetAtt AccountManagementStubFunction.Arn
+      Target: !Join
+        - ":"
+        - [!GetAtt AccountManagementStubFunction.Arn, "live"]
 
   AccountManagementStubApiPermission:
     Type: AWS::Lambda::Permission
