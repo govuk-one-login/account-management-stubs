@@ -458,7 +458,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       ProvisionedConcurrencyConfig:
-        ProvisionedConcurrentExecutions: 2
+        ProvisionedConcurrentExecutions: 5
       Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Timeout: 5
