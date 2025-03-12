@@ -16,14 +16,14 @@
     "url": "https://github.com/alphagov/account-management-stubs.git"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.9",
+    "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.26.9",
     "@babel/preset-typescript": "^7.26.0",
     "@eslint/js": "^9.22.0",
     "@types/jest": "^29.5.14",
     "@types/uuid": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.26.0",
-    "@typescript-eslint/parser": "^8.26.0",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
     "aws-sdk-client-mock": "^4.0.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
     "babel-jest": "^29.7.0",
@@ -38,7 +38,7 @@
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.0"
+    "typescript-eslint": "^8.26.1"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.758.0",
