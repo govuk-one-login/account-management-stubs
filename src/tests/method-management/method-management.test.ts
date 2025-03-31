@@ -10,6 +10,7 @@ import {
   Response,
   createMfaMethodHandler,
   deleteMethodHandler,
+  retrieveMfaMethodHandler,
 } from "../../method-management/method-management";
 import { APIGatewayProxyEventHeaders } from "aws-lambda/trigger/api-gateway-proxy";
 
@@ -52,7 +53,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
           },
           mfaMethods: [
             {
-              mfaIdentifier: 1,
+              mfaIdentifier: "1",
               priorityIdentifier: "DEFAULT",
               method: {
                 mfaMethodType: "SMS",
@@ -69,7 +70,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
           },
           mfaMethods: [
             {
-              mfaIdentifier: 1,
+              mfaIdentifier: "1",
               priorityIdentifier: "DEFAULT",
               method: {
                 mfaMethodType: "SMS",
@@ -78,7 +79,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
               methodVerified: true,
             },
             {
-              mfaIdentifier: 2,
+              mfaIdentifier: "2",
               priorityIdentifier: "BACKUP",
               method: {
                 mfaMethodType: "AUTH_APP",
@@ -95,7 +96,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
           },
           mfaMethods: [
             {
-              mfaIdentifier: 1,
+              mfaIdentifier: "1",
               priorityIdentifier: "DEFAULT",
               method: {
                 mfaMethodType: "SMS",
@@ -112,7 +113,7 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
           },
           mfaMethods: [
             {
-              mfaIdentifier: 1,
+              mfaIdentifier: "1",
               priorityIdentifier: "DEFAULT",
               method: {
                 mfaMethodType: "SMS",
@@ -164,7 +165,52 @@ describe("MFA Management API Mock", () => {
     expect(result.body).toBeDefined();
     const mfaMethod: MfaMethod[] = JSON.parse(result.body);
     expect(mfaMethod.length).toEqual(1);
-    expect(mfaMethod[0].mfaIdentifier).toEqual(1);
+    expect(mfaMethod[0].mfaIdentifier).toEqual("1");
+    expect(mfaMethod[0].priorityIdentifier).toEqual("DEFAULT");
+    expect(mfaMethod[0].method.mfaMethodType).toEqual("SMS");
+    expect(
+      mfaMethod[0].method.mfaMethodType === "SMS"
+        ? mfaMethod[0].method.phoneNumber
+        : false
+    ).toEqual("07123456789");
+    expect(mfaMethod[0].methodVerified).toBe(true);
+  });
+});
+
+describe("retrieveMfaMethodHandler", () => {
+  const createFakeAPIGatewayProxyEvent = (
+    body: unknown,
+    mfaIdentifier: string
+  ): APIGatewayProxyEvent => {
+    return {
+      body: JSON.stringify(body),
+      httpMethod: "GET",
+      path: `/mfa-methods/${mfaIdentifier}`,
+      pathParameters: { mfaIdentifier },
+      isBase64Encoded: false,
+      multiValueHeaders: {},
+      queryStringParameters: null,
+      headers: {
+        Authorization: "delete", // used to switch mock scenarios
+      },
+      multiValueQueryStringParameters: null,
+      stageVariables: null,
+      requestContext:
+        {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+      resource: "",
+    };
+  };
+  test("Retrieve mfa methods for identifier", async () => {
+    // Act
+    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "default");
+    const result: Response = await retrieveMfaMethodHandler(fakeEvent);
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.statusCode).toEqual(200);
+    expect(result.body).toBeDefined();
+    const mfaMethod: MfaMethod[] = JSON.parse(result.body);
+    expect(mfaMethod.length).toEqual(1);
+    expect(mfaMethod[0].mfaIdentifier).toEqual("1");
     expect(mfaMethod[0].priorityIdentifier).toEqual("DEFAULT");
     expect(mfaMethod[0].method.mfaMethodType).toEqual("SMS");
     expect(
