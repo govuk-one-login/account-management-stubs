@@ -1006,8 +1006,8 @@ Resources:
         userinfo:
           Type: Api
           Properties:
-            Path: /v1/mfa-methods/{mfaIdentifier}
-            Method: GET
+            Path: /v1/mfa-methods/retrieve
+            Method: POST
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
       VpcConfig:
