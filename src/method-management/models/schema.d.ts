@@ -32,7 +32,7 @@ export interface components {
     /** @enum {string} */
     MethodTypeEnum: "SMS" | "AUTH_APP";
     MfaMethod: {
-      mfaIdentifier?: string | number;
+      mfaIdentifier?: number;
       priorityIdentifier: components["schemas"]["PriorityEnum"];
       method:
         | components["schemas"]["SmsMethod"]
