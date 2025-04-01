@@ -69,6 +69,7 @@ Conditions:
 
 Globals:
   Function:
+    Runtime: nodejs22.x
     AutoPublishAlias: live
     CodeSigningConfigArn: !If
       - UseCodeSigning
@@ -177,7 +178,6 @@ Resources:
       PackageType: Zip
       MemorySize: 256
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt AccountManagementStubFunctionRole.Arn
       Events:
         sendotp:
@@ -455,7 +455,6 @@ Resources:
       PackageType: Zip
       MemorySize: 128
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Timeout: 5
       Events:
@@ -507,7 +506,6 @@ Resources:
       PackageType: Zip
       MemorySize: 256
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt OidcAuthorizeApiStubFunctionRole.Arn
       Timeout: 5
       Environment:
@@ -622,7 +620,6 @@ Resources:
       PackageType: Zip
       MemorySize: 256
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt OidcUserInfoApiStubFunctionRole.Arn
       Timeout: 5
       Events:
@@ -700,7 +697,6 @@ Resources:
       PackageType: Zip
       MemorySize: 128
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Events:
         config:
@@ -755,7 +751,6 @@ Resources:
       PackageType: Zip
       MemorySize: 128
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt BaseLambdaRole.Arn
       Timeout: 5
       Events:
@@ -807,7 +802,6 @@ Resources:
       PackageType: Zip
       MemorySize: 256
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt OidcTokenApiStubFunctionRole.Arn
       Timeout: 5
       Events:
@@ -999,7 +993,6 @@ Resources:
       PackageType: Zip
       MemorySize: 256
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt MethodManagementv1LambdaRole.Arn
       Timeout: 5
       Events:
@@ -1051,7 +1044,6 @@ Resources:
       PackageType: Zip
       MemorySize: 128
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt MethodManagementv1LambdaRole.Arn
       Timeout: 5
       Events:
@@ -1103,7 +1095,6 @@ Resources:
       PackageType: Zip
       MemorySize: 128
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt MethodManagementv1LambdaRole.Arn
       Timeout: 5
       Events:
@@ -1155,7 +1146,6 @@ Resources:
       PackageType: Zip
       MemorySize: 128
       ReservedConcurrentExecutions: 30
-      Runtime: nodejs18.x
       Role: !GetAtt MethodManagementv1LambdaRole.Arn
       Timeout: 5
       Events:
