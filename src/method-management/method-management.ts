@@ -20,7 +20,10 @@ export const userInfoHandler = async (
     await getUserIdFromEvent(event),
     "mfaMethods"
   );
+  return handleMFAResponse(response);
+};
 
+function handleMFAResponse(response: components["schemas"]["MfaMethod"][]) {
   if (response.length === 0) {
     // a user with no MFA factors
     return formatResponse(404, {});
@@ -55,6 +58,17 @@ export const userInfoHandler = async (
   }
 
   return formatResponse(200, response);
+}
+
+export const retrieveMfaMethodHandler = async (
+  event: APIGatewayProxyEvent
+): Promise<Response> => {
+  const mfaIdentifier = event.pathParameters?.mfaIdentifier;
+  const response = getUserScenario(
+    mfaIdentifier ? mfaIdentifier : "default",
+    "mfaMethods"
+  );
+  return handleMFAResponse(response);
 };
 
 export const createMfaMethodHandler = async (

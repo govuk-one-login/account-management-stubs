@@ -18,10 +18,11 @@ export const userScenarios: UserScenarios = {
       email_verified: true,
       phone_number: "1234567890",
       phone_number_verified: true,
+      public_subject_id: "default",
     },
     mfaMethods: [
       {
-        mfaIdentifier: 0,
+        mfaIdentifier: "0",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -34,10 +35,28 @@ export const userScenarios: UserScenarios = {
       success: true,
     },
   },
+  methodManagementDev: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "ooVD4Sm9oPoZTHdY6ekyoexHDb_AoN4uDd7uHH-eQqk",
+    },
+  },
   userDEFAULTAuthApp: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "userDEFAULTAuthApp",
+    },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "AUTH_APP",
@@ -48,9 +67,17 @@ export const userScenarios: UserScenarios = {
     ],
   },
   userDEFAULTSms: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "userDEFAULTSms",
+    },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -61,9 +88,17 @@ export const userScenarios: UserScenarios = {
     ],
   },
   userDEFAULTSmsBackupAuthApp: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "userDEFAULTSmsBackupAuthApp",
+    },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -72,7 +107,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
       {
-        mfaIdentifier: 2,
+        mfaIdentifier: "2",
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "AUTH_APP",
@@ -83,9 +118,17 @@ export const userScenarios: UserScenarios = {
     ],
   },
   userDEFAULTAuthAppBackupSms: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "userDEFAULTAuthAppBackupSms",
+    },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "AUTH_APP",
@@ -94,7 +137,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
       {
-        mfaIdentifier: 2,
+        mfaIdentifier: "2",
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
@@ -105,9 +148,17 @@ export const userScenarios: UserScenarios = {
     ],
   },
   userDEFAULTSmsBackupSms: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "userDEFAULTSmsBackupSms",
+    },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -116,7 +167,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
       {
-        mfaIdentifier: 2,
+        mfaIdentifier: "2",
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
@@ -127,13 +178,21 @@ export const userScenarios: UserScenarios = {
     ],
   },
   userNewPhoneNumberSameAsExisting: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "userNewPhoneNumberSameAsExisting",
+    },
     otpNotification: {
       success: false,
       code: ERROR_CODES.NEW_PHONE_NUMBER_SAME_AS_EXISTING,
     },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -144,18 +203,42 @@ export const userScenarios: UserScenarios = {
     ],
   },
   userOtpCodeWrong: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "userOtpCodeWrong",
+    },
     httpResponse: {
       code: 400,
       message: "OTP incorrect",
     },
   },
   errorNoMfaMethods: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "errorNoMfaMethods",
+    },
     mfaMethods: [],
   },
   errorMoreThanTwoMethods: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "errorMoreThanTwoMethods",
+    },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -164,7 +247,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
       {
-        mfaIdentifier: 2,
+        mfaIdentifier: "2",
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
@@ -173,7 +256,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
       {
-        mfaIdentifier: 3,
+        mfaIdentifier: "3",
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
@@ -184,9 +267,17 @@ export const userScenarios: UserScenarios = {
     ],
   },
   errorNoDEFAULTMethod: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "errorNoDEFAULTMethod",
+    },
     mfaMethods: [
       {
-        mfaIdentifier: 2,
+        mfaIdentifier: "2",
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
@@ -195,7 +286,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
       {
-        mfaIdentifier: 3,
+        mfaIdentifier: "3",
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
@@ -206,9 +297,17 @@ export const userScenarios: UserScenarios = {
     ],
   },
   errorMultipleDEFAULTMethods: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "errorMultipleDEFAULTMethods",
+    },
     mfaMethods: [
       {
-        mfaIdentifier: 2,
+        mfaIdentifier: "2",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -217,7 +316,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
       {
-        mfaIdentifier: 3,
+        mfaIdentifier: "3",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -228,9 +327,17 @@ export const userScenarios: UserScenarios = {
     ],
   },
   errorMultipleAuthAppMethods: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "errorMultipleAuthAppMethods",
+    },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "AUTH_APP",
@@ -239,7 +346,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
       {
-        mfaIdentifier: 2,
+        mfaIdentifier: "2",
         priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "AUTH_APP",
@@ -250,13 +357,21 @@ export const userScenarios: UserScenarios = {
     ],
   },
   errorMfa400: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "errorMfa400",
+    },
     httpResponse: {
       code: 400,
       message: "BAD REQUEST",
     },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -267,13 +382,21 @@ export const userScenarios: UserScenarios = {
     ],
   },
   errorMfa404: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "errorMfa404",
+    },
     httpResponse: {
       code: 404,
       message: "NOT FOUND",
     },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -284,13 +407,21 @@ export const userScenarios: UserScenarios = {
     ],
   },
   errorMfa500: {
+    userinfo: {
+      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "errorMfa500",
+    },
     httpResponse: {
       code: 500,
       message: "INTERNAL SERVER ERROR",
     },
     mfaMethods: [
       {
-        mfaIdentifier: 1,
+        mfaIdentifier: "1",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",
@@ -311,10 +442,11 @@ export const userScenarios: UserScenarios = {
       email_verified: true,
       phone_number: "1234567890",
       phone_number_verified: true,
+      public_subject_id: "userPerformanceTest-eQqk",
     },
     mfaMethods: [
       {
-        mfaIdentifier: 0,
+        mfaIdentifier: "0",
         priorityIdentifier: "DEFAULT",
         method: {
           mfaMethodType: "SMS",

@@ -18,6 +18,7 @@ export interface UserScenarios {
       sub: string;
       phone_number: string;
       phone_number_verified: boolean;
+      public_subject_id: string;
     };
     mfaMethods: mfaMethodComponents["schemas"]["MfaMethod"][];
     otpNotification: { success: true } | { success: false; code: number };

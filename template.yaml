@@ -988,7 +988,7 @@ Resources:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-method-management-v1
       Architectures: ["arm64"]
       CodeUri: src
-      Handler: method-management.userInfoHandler
+      Handler: method-management.retrieveMfaMethodHandler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 256
