@@ -22,8 +22,8 @@
     "@eslint/js": "^9.24.0",
     "@types/jest": "^29.5.14",
     "@types/uuid": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.29.0",
-    "@typescript-eslint/parser": "^8.29.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
     "aws-sdk-client-mock": "^4.0.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
     "babel-jest": "^29.7.0",
@@ -38,7 +38,7 @@
     "ts-jest": "^29.3.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.29.0"
+    "typescript-eslint": "^8.29.1"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.782.0",
