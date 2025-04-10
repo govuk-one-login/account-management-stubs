@@ -999,8 +999,8 @@ Resources:
         userinfo:
           Type: Api
           Properties:
-            Path: /v1/mfa-methods/retrieve
-            Method: POST
+            Path: /v1/mfa-methods/{publicSubjectId}
+            Method: GET
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
       VpcConfig:
@@ -1050,7 +1050,7 @@ Resources:
         userinfo:
           Type: Api
           Properties:
-            Path: /v1/mfa-methods
+            Path: /v1/mfa-methods/{publicSubjectId}
             Method: POST
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
@@ -1101,7 +1101,7 @@ Resources:
         putMfaMethod:
           Type: Api
           Properties:
-            Path: /v1/mfa-methods/{mfaIdentifier}
+            Path: /v1/mfa-methods/{publicSubjectId}
             Method: PUT
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
@@ -1152,7 +1152,7 @@ Resources:
         userinfo:
           Type: Api
           Properties:
-            Path: /v1/mfa-methods/{mfaIdentifier}
+            Path: /v1/mfa-methods/{publicSubjectId}/{mfaIdentifier}
             Method: DELETE
             RestApiId:
               Ref: MethodManagementv1StubsRestApi

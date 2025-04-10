@@ -63,9 +63,9 @@ function handleMFAResponse(response: components["schemas"]["MfaMethod"][]) {
 export const retrieveMfaMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
-  const mfaIdentifier = event.pathParameters?.mfaIdentifier;
+  const publicSubjectId = event.pathParameters?.publicSubjectId;
   const response = getUserScenario(
-    mfaIdentifier ? mfaIdentifier : "default",
+    publicSubjectId ? publicSubjectId : "default",
     "mfaMethods"
   );
   return handleMFAResponse(response);
