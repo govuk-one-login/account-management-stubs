@@ -13,16 +13,6 @@ export interface Response {
   body: string;
 }
 
-export const userInfoHandler = async (
-  event: APIGatewayProxyEvent
-): Promise<Response> => {
-  const response = getUserScenario(
-    await getUserIdFromEvent(event),
-    "mfaMethods"
-  );
-  return handleMFAResponse(response);
-};
-
 function handleMFAResponse(response: components["schemas"]["MfaMethod"][]) {
   if (response.length === 0) {
     // a user with no MFA factors
