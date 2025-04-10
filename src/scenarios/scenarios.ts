@@ -13,7 +13,7 @@ export const userScenarios: UserScenarios = {
       message: "OK",
     },
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:default",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -37,7 +37,7 @@ export const userScenarios: UserScenarios = {
   },
   methodManagementDev: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:methodManagementDev",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -47,7 +47,7 @@ export const userScenarios: UserScenarios = {
   },
   userDEFAULTAuthApp: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:userDEFAULTAuthApp",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -68,7 +68,7 @@ export const userScenarios: UserScenarios = {
   },
   userDEFAULTSms: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:userDEFAULTSms",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -89,7 +89,7 @@ export const userScenarios: UserScenarios = {
   },
   userDEFAULTSmsBackupAuthApp: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:userDEFAULTSmsBackupAuthApp",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -119,7 +119,7 @@ export const userScenarios: UserScenarios = {
   },
   userDEFAULTAuthAppBackupSms: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:userDEFAULTAuthAppBackupSms",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -149,7 +149,7 @@ export const userScenarios: UserScenarios = {
   },
   userDEFAULTSmsBackupSms: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:userDEFAULTSmsBackupSms",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -179,7 +179,7 @@ export const userScenarios: UserScenarios = {
   },
   userNewPhoneNumberSameAsExisting: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:userNewPhoneNumberSameAsExisting",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -204,7 +204,7 @@ export const userScenarios: UserScenarios = {
   },
   userOtpCodeWrong: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:userOtpCodeWrong",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -218,7 +218,7 @@ export const userScenarios: UserScenarios = {
   },
   errorNoMfaMethods: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:errorNoMfaMethods",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -229,7 +229,7 @@ export const userScenarios: UserScenarios = {
   },
   errorMoreThanTwoMethods: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:errorMoreThanTwoMethods",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -268,7 +268,7 @@ export const userScenarios: UserScenarios = {
   },
   errorNoDEFAULTMethod: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:errorNoDEFAULTMethod",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -298,7 +298,7 @@ export const userScenarios: UserScenarios = {
   },
   errorMultipleDEFAULTMethods: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:errorMultipleDEFAULTMethods",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -328,7 +328,7 @@ export const userScenarios: UserScenarios = {
   },
   errorMultipleAuthAppMethods: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:errorMultipleAuthAppMethods",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -358,7 +358,7 @@ export const userScenarios: UserScenarios = {
   },
   errorMfa400: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:errorMfa400",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -383,7 +383,7 @@ export const userScenarios: UserScenarios = {
   },
   errorMfa404: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:errorMfa404",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -408,7 +408,7 @@ export const userScenarios: UserScenarios = {
   },
   errorMfa500: {
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:errorMfa500",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
@@ -437,7 +437,7 @@ export const userScenarios: UserScenarios = {
       message: "OK",
     },
     userinfo: {
-      sub: "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      sub: "urn:fdc:gov.uk:userPerformanceTest",
       email: "your.name@example.com",
       email_verified: true,
       phone_number: "1234567890",
