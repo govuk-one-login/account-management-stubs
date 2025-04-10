@@ -880,7 +880,7 @@ Resources:
       CacheClusterSize: "0.5"
       MethodSettings:
         - HttpMethod: "*"
-          CachingEnabled: true
+          CachingEnabled: false
           ResourcePath: /*
       TracingEnabled: true
       AccessLogSetting:
