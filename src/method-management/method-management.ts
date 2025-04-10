@@ -13,6 +13,24 @@ export interface Response {
   body: string;
 }
 
+function createMfaMethod(
+  priorityIdentifier: string,
+  mfaMethodType: "SMS" | "AUTH_APP"
+) {
+  let method = {};
+  if (mfaMethodType == "SMS") {
+    method = { mfaMethodType, phoneNumber: "0123456789" };
+  } else if (mfaMethodType == "AUTH_APP") {
+    method = { mfaMethodType, credential: "aabbccddeeff112233" };
+  }
+
+  return {
+    mfaIdentifier: "1",
+    priorityIdentifier,
+    method,
+  };
+}
+
 function handleMFAResponse(response: components["schemas"]["MfaMethod"][]) {
   if (response.length === 0) {
     // a user with no MFA factors
@@ -65,18 +83,14 @@ export const createMfaMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const {
-    email,
-    otp,
-    credential,
-    mfaMethod: {
-      priorityIdentifier = undefined,
-      mfaMethodType = undefined,
-    } = {},
+    priorityIdentifier = undefined,
+    method: { mfaMethodType = undefined } = {},
   } = JSON.parse(event.body || "{}");
 
+  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
+  const userScenario = getUserScenario(publicSubjectId, "httpResponse");
+
   try {
-    const userId = await getUserIdFromEvent(event);
-    const userScenario = getUserScenario(userId, "httpResponse");
     const { code: responseCode, message: responseMessage } = userScenario || {};
 
     if (responseCode && responseCode !== 200) {
@@ -86,7 +100,7 @@ export const createMfaMethodHandler = async (
     }
 
     validateFields(
-      { email, otp, credential, priorityIdentifier, mfaMethodType },
+      { priorityIdentifier, mfaMethodType },
       {
         priorityIdentifier: /^(DEFAULT|BACKUP)$/,
         mfaMethodType: /^(AUTH_APP|SMS)$/,
@@ -96,7 +110,10 @@ export const createMfaMethodHandler = async (
     return formatResponse(400, { error: (e as Error).message });
   }
 
-  return formatResponse(200, {});
+  return formatResponse(
+    200,
+    createMfaMethod(priorityIdentifier, mfaMethodType)
+  );
 };
 
 export const updateMfaMethodHandler = async (

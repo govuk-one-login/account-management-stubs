@@ -107,8 +107,8 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
         },
         errorMfa404: {
           httpResponse: {
-            code: 200,
-            message: "",
+            code: 404,
+            message: "Not Found",
           },
           mfaMethods: [
             {
@@ -190,13 +190,14 @@ describe("retrieveMfaMethodHandler", () => {
 
 describe("createMfaMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
+    scenario: string,
     body: unknown
   ): APIGatewayProxyEvent => {
     return {
       body: JSON.stringify(body),
       httpMethod: "POST",
-      path: `/mfa-methods`,
-      pathParameters: null,
+      path: `/mfa-methods/${scenario}`,
+      pathParameters: { publicSubjectId: scenario },
       isBase64Encoded: false,
       headers: {},
       multiValueHeaders: {},
@@ -211,21 +212,52 @@ describe("createMfaMethodHandler", () => {
 
   test("should return 200 when adding phone number as backup method the request is valid", async () => {
     const requestBody = {
-      email: "email@email.com",
-      credential: "email",
-      otp: "123456",
-      mfaMethod: {
-        mfaIdentifier: 1,
-        priorityIdentifier: "BACKUP",
+      priorityIdentifier: "BACKUP",
+      method: {
         mfaMethodType: "SMS",
-        endPoint: "07123456789",
-        methodVerified: true,
+        phoneNumber: "07123456789",
       },
     };
-    const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody);
+    const fakeEvent = createFakeAPIGatewayProxyEvent("default", requestBody);
     const response = await createMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject({});
+    expect(JSON.parse(response.body)).toStrictEqual({
+      method: {
+        mfaMethodType: "SMS",
+        phoneNumber: "0123456789",
+      },
+      mfaIdentifier: "1",
+      priorityIdentifier: "BACKUP",
+    });
+  });
+
+  test("should return 400 when the MFA method type is not valid", async () => {
+    const requestBody = {
+      priorityIdentifier: "BAD_VALUE",
+      method: {
+        mfaMethodType: "SMS",
+        phoneNumber: "07123456789",
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent("default", requestBody);
+    const response = await createMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(400);
+  });
+
+  test("should pass through the response code from the scenario", async () => {
+    const requestBody = {
+      priorityIdentifier: "BACKUP",
+      method: {
+        mfaMethodType: "SMS",
+        phoneNumber: "07123456789",
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      "errorMfa404",
+      requestBody
+    );
+    const response = await createMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(404);
   });
 });
 
