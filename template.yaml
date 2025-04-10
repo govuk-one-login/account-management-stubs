@@ -1094,7 +1094,7 @@ Resources:
         putMfaMethod:
           Type: Api
           Properties:
-            Path: /v1/mfa-methods/{publicSubjectId}
+            Path: /v1/mfa-methods/{publicSubjectId}/{mfaIdentifier}
             Method: PUT
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
