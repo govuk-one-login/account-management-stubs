@@ -27,21 +27,6 @@ interface Scenario {
 
 jest.mock("../../scenarios/scenarios-utils.ts", () => {
   return {
-    getUserIdFromEvent: jest.fn().mockImplementation((event) => {
-      if (event.headers.Authorization === "errorToken") {
-        return Promise.resolve("errorMfa400");
-      }
-      if (event.headers.Authorization === "reject") {
-        return Promise.reject("MFA Method could not be updated");
-      }
-      if (event.headers.Authorization === "mfaNotFound") {
-        return Promise.resolve("errorMfa404");
-      }
-      if (event.headers.Authorization === "delete") {
-        return Promise.resolve("deleteMethod");
-      }
-      return Promise.resolve("default");
-    }),
     getUserScenario: jest.fn((userId: string, type: string) => {
       const scenarios: Record<string, Scenario> = {
         default: {
