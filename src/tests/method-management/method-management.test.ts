@@ -264,13 +264,14 @@ describe("createMfaMethodHandler", () => {
 describe("updateMfaMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
     body: unknown,
-    mfaIdentifier: string
+    mfaIdentifier: string,
+    scenario: string
   ): APIGatewayProxyEvent => {
     return {
       body: JSON.stringify(body),
       httpMethod: "PUT",
-      path: `/mfa-methods/${mfaIdentifier}`,
-      pathParameters: { mfaIdentifier },
+      path: `/mfa-methods/${scenario}/${mfaIdentifier}`,
+      pathParameters: { mfaIdentifier, publicSubjectId: scenario },
       isBase64Encoded: false,
       headers: {},
       multiValueHeaders: {},
@@ -285,155 +286,86 @@ describe("updateMfaMethodHandler", () => {
 
   test("should return 200 and the updated SMS method when the request is valid", async () => {
     const requestBody = {
-      email: "email@email.com",
-      credential: "email",
-      otp: "123456",
-      mfaMethod: {
-        mfaIdentifier: 1,
-        priorityIdentifier: "BACKUP",
-        mfaMethodType: "SMS",
-        endPoint: "07123456789",
-        methodVerified: true,
-      },
-    };
-    const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
-    const response = await updateMfaMethodHandler(fakeEvent);
-    expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject({
-      mfaIdentifier: 1,
       priorityIdentifier: "BACKUP",
       method: {
         mfaMethodType: "SMS",
-        phoneNumber: "07123456789",
+        phoneNumber: "0123456789",
       },
-      methodVerified: true,
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      requestBody,
+      "1",
+      "default"
+    );
+    const response = await updateMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.body)).toStrictEqual({
+      mfaIdentifier: "1",
+      priorityIdentifier: "BACKUP",
+      method: {
+        mfaMethodType: "SMS",
+        phoneNumber: "0123456789",
+      },
     });
   });
 
   test("should return 200 and the updated auth app method when the request is valid", async () => {
     const requestBody = {
-      email: "email@email.com",
-      credential: "email",
-      otp: "123456",
-      mfaMethod: {
-        mfaIdentifier: 1,
-        priorityIdentifier: "DEFAULT",
-        mfaMethodType: "AUTH_APP",
-        endPoint: "ABC",
-        methodVerified: true,
-      },
-    };
-    const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
-    const response = await updateMfaMethodHandler(fakeEvent);
-    expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toMatchObject({
-      mfaIdentifier: 1,
       priorityIdentifier: "DEFAULT",
       method: {
         mfaMethodType: "AUTH_APP",
-        credential: "ABC",
-      },
-      methodVerified: true,
-    });
-  });
-
-  test("should return 200 even when credential is not provided", async () => {
-    const requestBody = {
-      email: "email@email.com",
-      otp: "123456",
-      mfaMethod: {
-        mfaIdentifier: 1,
-        priorityIdentifier: "DEFAULT",
-        mfaMethodType: "SMS",
-        endPoint: "07111111111",
-        methodVerified: true,
+        credential: "aabbccddeeff112233",
       },
     };
-    const fakeEvent = createFakeAPIGatewayProxyEvent(requestBody, "1");
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      requestBody,
+      "1",
+      "default"
+    );
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
     expect(JSON.parse(response.body)).toMatchObject({
-      mfaIdentifier: 1,
+      mfaIdentifier: "1",
       priorityIdentifier: "DEFAULT",
       method: {
-        mfaMethodType: "SMS",
-        phoneNumber: "07111111111",
+        mfaMethodType: "AUTH_APP",
+        credential: "aabbccddeeff112233",
       },
-      methodVerified: true,
     });
   });
-});
 
-describe("updateMfaMethodHandlerError", () => {
-  const createFakeAPIGatewayProxyEvent = (
-    headers: APIGatewayProxyEventHeaders,
-    body: unknown,
-    mfaIdentifier: string
-  ): APIGatewayProxyEvent => {
-    return {
-      body: JSON.stringify(body),
-      httpMethod: "PUT",
-      path: `/mfa-methods/${mfaIdentifier}`,
-      pathParameters: { mfaIdentifier },
-      isBase64Encoded: false,
-      headers,
-      multiValueHeaders: {},
-      queryStringParameters: null,
-      multiValueQueryStringParameters: null,
-      stageVariables: null,
-      requestContext:
-        {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
-      resource: "",
-    };
-  };
-
-  test("should return 404", async () => {
-    const headers = {
-      Authorization: "mfaNotFound",
-    };
+  test("should return 400 when the MFA method type is not valid", async () => {
     const requestBody = {
-      email: "errorMfa404@email.com",
-      credential: "email",
-      otp: "123456",
-    };
-    const fakeEvent = createFakeAPIGatewayProxyEvent(headers, requestBody, "1");
-    const response = await updateMfaMethodHandler(fakeEvent);
-    expect(response.statusCode).toBe(404);
-  });
-
-  test("should return 400", async () => {
-    const headers = {
-      Authorization: "errorToken",
-    };
-    const requestBody = {
-      email: "errorMfa400@email.com",
-      credential: "email",
-      otp: "123456",
-      mfaMethod: {
-        mfaIdentifier: 1,
-        priorityIdentifier: "DEFAULT",
+      priorityIdentifier: "BAD_VALUE",
+      method: {
         mfaMethodType: "SMS",
         phoneNumber: "07123456789",
-        methodVerified: true,
       },
     };
-    const fakeEvent = createFakeAPIGatewayProxyEvent(headers, requestBody, "1");
-    const response = await updateMfaMethodHandler(fakeEvent);
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      requestBody,
+      "1",
+      "default"
+    );
+    const response = await createMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(400);
   });
 
-  test("should return 500", async () => {
-    const headers = {
-      Authorization: "reject",
-    };
+  test("should pass through the response code from the scenario", async () => {
     const requestBody = {
-      email: "errorMfa500@email.com",
-      credential: "email",
-      otp: "123456",
+      priorityIdentifier: "BACKUP",
+      method: {
+        mfaMethodType: "SMS",
+        phoneNumber: "07123456789",
+      },
     };
-    const fakeEvent = createFakeAPIGatewayProxyEvent(headers, requestBody, "1");
-    const response = await updateMfaMethodHandler(fakeEvent);
-    expect(response.statusCode).toBe(500);
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      requestBody,
+      "1",
+      "errorMfa404"
+    );
+    const response = await createMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(404);
   });
 });
 

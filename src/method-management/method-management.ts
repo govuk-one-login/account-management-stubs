@@ -15,7 +15,8 @@ export interface Response {
 
 function createMfaMethod(
   priorityIdentifier: string,
-  mfaMethodType: "SMS" | "AUTH_APP"
+  mfaMethodType: "SMS" | "AUTH_APP",
+  mfaIdentifier = "1"
 ) {
   let method = {};
   if (mfaMethodType == "SMS") {
@@ -25,7 +26,7 @@ function createMfaMethod(
   }
 
   return {
-    mfaIdentifier: "1",
+    mfaIdentifier,
     priorityIdentifier,
     method,
   };
@@ -119,9 +120,17 @@ export const createMfaMethodHandler = async (
 export const updateMfaMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const {
+    priorityIdentifier = undefined,
+    method: { mfaMethodType = undefined } = {},
+  } = JSON.parse(event.body || "{}");
+
+  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
+  const mfaIdentifier = event.pathParameters?.mfaIdentifier;
+  const userScenario = getUserScenario(publicSubjectId, "httpResponse");
+
   try {
-    const userId = await getUserIdFromEvent(event);
-    const userScenario = getUserScenario(userId, "httpResponse");
+    assert(mfaIdentifier, "mfaIdentifier not present");
     const { code: responseCode, message: responseMessage } = userScenario || {};
 
     if (responseCode && responseCode !== 200) {
@@ -129,48 +138,22 @@ export const updateMfaMethodHandler = async (
         error: responseMessage || "Unknown error",
       });
     }
-    assert(event.body, "no body provided");
 
-    const body: components["schemas"]["MfaMethodUpdateRequest"] = JSON.parse(
-      event.body
+    validateFields(
+      { priorityIdentifier, mfaMethodType },
+      {
+        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
+        mfaMethodType: /^(AUTH_APP|SMS)$/,
+      }
     );
-    const mfaIdentifierFromEvent = event.pathParameters?.mfaIdentifier;
-
-    if (!body.mfaMethod) {
-      return formatResponse(404, { error: "MFA Method not Found" });
-    }
-
-    const {
-      mfaMethod: {
-        mfaIdentifier = mfaIdentifierFromEvent,
-        priorityIdentifier = "DEFAULT",
-        mfaMethodType = undefined,
-        endPoint = undefined,
-      },
-    } = body;
-
-    validateFields({ mfaIdentifierFromEvent }, {});
-
-    const response: components["schemas"]["MfaMethod"] = {
-      mfaIdentifier: Number(mfaIdentifier),
-      priorityIdentifier: priorityIdentifier,
-      method:
-        mfaMethodType === "SMS"
-          ? {
-              mfaMethodType,
-              phoneNumber: endPoint,
-            }
-          : {
-              mfaMethodType,
-              credential: endPoint,
-            },
-      methodVerified: true,
-    };
-
-    return formatResponse(200, response);
-  } catch (error) {
-    return formatResponse(500, { error: (error as Error).message });
+  } catch (e) {
+    return formatResponse(400, { error: (e as Error).message });
   }
+
+  return formatResponse(
+    200,
+    createMfaMethod(priorityIdentifier, mfaMethodType, mfaIdentifier)
+  );
 };
 
 export const deleteMethodHandler = async (
