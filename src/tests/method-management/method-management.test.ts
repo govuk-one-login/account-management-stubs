@@ -11,7 +11,6 @@ import {
   deleteMethodHandler,
   retrieveMfaMethodHandler,
 } from "../../method-management/method-management";
-import { APIGatewayProxyEventHeaders } from "aws-lambda/trigger/api-gateway-proxy";
 
 type MfaMethod = components["schemas"]["MfaMethod"];
 
@@ -372,13 +371,14 @@ describe("updateMfaMethodHandler", () => {
 describe("deleteMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
     body: unknown,
-    mfaIdentifier: string
+    mfaIdentifier: string,
+    scenario: string
   ): APIGatewayProxyEvent => {
     return {
       body: JSON.stringify(body),
       httpMethod: "DELETE",
-      path: `/mfa-methods/${mfaIdentifier}`,
-      pathParameters: { mfaIdentifier },
+      path: `/mfa-methods/${scenario}/${mfaIdentifier}`,
+      pathParameters: { mfaIdentifier, publicSubjectId: scenario },
       isBase64Encoded: false,
       multiValueHeaders: {},
       queryStringParameters: null,
@@ -393,20 +393,20 @@ describe("deleteMethodHandler", () => {
     };
   };
 
-  test("should delete MFA method correctly", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "2");
+  test("should delete MFA method and return status 204", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "2", "deleteMethod");
     const response = await deleteMethodHandler(fakeEvent);
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(204);
   });
 
   test("should 409 if user tries to delete default method", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "1");
+    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "1", "default");
     const response = await deleteMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(409);
   });
 
   test("should 404 if user tries to delete non existent method", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "3");
+    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "3", "default");
     const response = await deleteMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(404);
   });

@@ -2,10 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import assert from "node:assert/strict";
 import { validateFields } from "../common/validation";
 import { formatResponse } from "../common/response-utils";
-import {
-  getUserIdFromEvent,
-  getUserScenario,
-} from "../scenarios/scenarios-utils";
+import { getUserScenario } from "../scenarios/scenarios-utils";
 import { components } from "./models/schema";
 
 export interface Response {
@@ -159,10 +156,10 @@ export const updateMfaMethodHandler = async (
 export const deleteMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const userId = await getUserIdFromEvent(event);
+  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
   const mfaIdentifier = event.pathParameters?.mfaIdentifier;
 
-  const methods = getUserScenario(userId, "mfaMethods");
+  const methods = getUserScenario(publicSubjectId, "mfaMethods");
   const methodToRemove = methods.find((m) => m.mfaIdentifier == mfaIdentifier);
 
   if (!methodToRemove) {
@@ -173,8 +170,5 @@ export const deleteMethodHandler = async (
     return formatResponse(409, {});
   }
 
-  return formatResponse(
-    200,
-    methods.filter((m) => m.mfaIdentifier != mfaIdentifier)
-  );
+  return formatResponse(204, {});
 };
