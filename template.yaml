@@ -372,6 +372,29 @@ Resources:
       AliasName: !Sub "alias/${AWS::StackName}/${Environment}/DatabaseKmsKey"
       TargetKeyId: !Ref DatabaseKmsKey
 
+  QueryOidcDynamoTablePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:Query
+              - dynamodb:GetItem
+            Resource:
+              - !GetAtt OidcStubDataStore.Arn
+              - !Sub
+                - "${Arn}/*"
+                - Arn: !GetAtt OidcStubDataStore.Arn
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Resource:
+              - !GetAtt DatabaseKmsKey.Arn
+
   ######################################
   # OIDC API Stub API Gateway
   ######################################
@@ -945,7 +968,6 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
-        - !Ref QueryOidcDynamoTablePolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -955,29 +977,6 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - "sts:AssumeRole"
-
-  QueryOidcDynamoTablePolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - dynamodb:Query
-              - dynamodb:GetItem
-            Resource:
-              - !GetAtt OidcStubDataStore.Arn
-              - !Sub
-                - "${Arn}/*"
-                - Arn: !GetAtt OidcStubDataStore.Arn
-          - Effect: Allow
-            Action:
-              - kms:Decrypt
-              - kms:GenerateDataKey*
-              - kms:ReEncrypt*
-            Resource:
-              - !GetAtt DatabaseKmsKey.Arn
 
   MethodManagementv1ApiStubFunction:
     Type: AWS::Serverless::Function
@@ -1009,9 +1008,6 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -1060,9 +1056,6 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -1101,7 +1094,7 @@ Resources:
         putMfaMethod:
           Type: Api
           Properties:
-            Path: /v1/mfa-methods/{publicSubjectId}
+            Path: /v1/mfa-methods/{publicSubjectId}/{mfaIdentifier}
             Method: PUT
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
@@ -1111,9 +1104,6 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -1162,9 +1152,6 @@ Resources:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
         SecurityGroupIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref OidcStubDataTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

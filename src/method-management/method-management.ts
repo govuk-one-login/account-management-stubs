@@ -2,10 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import assert from "node:assert/strict";
 import { validateFields } from "../common/validation";
 import { formatResponse } from "../common/response-utils";
-import {
-  getUserIdFromEvent,
-  getUserScenario,
-} from "../scenarios/scenarios-utils";
+import { getUserScenario } from "../scenarios/scenarios-utils";
 import { components } from "./models/schema";
 
 export interface Response {
@@ -13,15 +10,24 @@ export interface Response {
   body: string;
 }
 
-export const userInfoHandler = async (
-  event: APIGatewayProxyEvent
-): Promise<Response> => {
-  const response = getUserScenario(
-    await getUserIdFromEvent(event),
-    "mfaMethods"
-  );
-  return handleMFAResponse(response);
-};
+function createMfaMethod(
+  priorityIdentifier: string,
+  mfaMethodType: "SMS" | "AUTH_APP",
+  mfaIdentifier = "1"
+) {
+  let method = {};
+  if (mfaMethodType == "SMS") {
+    method = { mfaMethodType, phoneNumber: "0123456789" };
+  } else if (mfaMethodType == "AUTH_APP") {
+    method = { mfaMethodType, credential: "aabbccddeeff112233" };
+  }
+
+  return {
+    mfaIdentifier,
+    priorityIdentifier,
+    method,
+  };
+}
 
 function handleMFAResponse(response: components["schemas"]["MfaMethod"][]) {
   if (response.length === 0) {
@@ -75,18 +81,14 @@ export const createMfaMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const {
-    email,
-    otp,
-    credential,
-    mfaMethod: {
-      priorityIdentifier = undefined,
-      mfaMethodType = undefined,
-    } = {},
+    priorityIdentifier = undefined,
+    method: { mfaMethodType = undefined } = {},
   } = JSON.parse(event.body || "{}");
 
+  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
+  const userScenario = getUserScenario(publicSubjectId, "httpResponse");
+
   try {
-    const userId = await getUserIdFromEvent(event);
-    const userScenario = getUserScenario(userId, "httpResponse");
     const { code: responseCode, message: responseMessage } = userScenario || {};
 
     if (responseCode && responseCode !== 200) {
@@ -96,7 +98,7 @@ export const createMfaMethodHandler = async (
     }
 
     validateFields(
-      { email, otp, credential, priorityIdentifier, mfaMethodType },
+      { priorityIdentifier, mfaMethodType },
       {
         priorityIdentifier: /^(DEFAULT|BACKUP)$/,
         mfaMethodType: /^(AUTH_APP|SMS)$/,
@@ -106,15 +108,26 @@ export const createMfaMethodHandler = async (
     return formatResponse(400, { error: (e as Error).message });
   }
 
-  return formatResponse(200, {});
+  return formatResponse(
+    200,
+    createMfaMethod(priorityIdentifier, mfaMethodType)
+  );
 };
 
 export const updateMfaMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const {
+    priorityIdentifier = undefined,
+    method: { mfaMethodType = undefined } = {},
+  } = JSON.parse(event.body || "{}");
+
+  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
+  const mfaIdentifier = event.pathParameters?.mfaIdentifier;
+  const userScenario = getUserScenario(publicSubjectId, "httpResponse");
+
   try {
-    const userId = await getUserIdFromEvent(event);
-    const userScenario = getUserScenario(userId, "httpResponse");
+    assert(mfaIdentifier, "mfaIdentifier not present");
     const { code: responseCode, message: responseMessage } = userScenario || {};
 
     if (responseCode && responseCode !== 200) {
@@ -122,57 +135,31 @@ export const updateMfaMethodHandler = async (
         error: responseMessage || "Unknown error",
       });
     }
-    assert(event.body, "no body provided");
 
-    const body: components["schemas"]["MfaMethodUpdateRequest"] = JSON.parse(
-      event.body
+    validateFields(
+      { priorityIdentifier, mfaMethodType },
+      {
+        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
+        mfaMethodType: /^(AUTH_APP|SMS)$/,
+      }
     );
-    const mfaIdentifierFromEvent = event.pathParameters?.mfaIdentifier;
-
-    if (!body.mfaMethod) {
-      return formatResponse(404, { error: "MFA Method not Found" });
-    }
-
-    const {
-      mfaMethod: {
-        mfaIdentifier = mfaIdentifierFromEvent,
-        priorityIdentifier = "DEFAULT",
-        mfaMethodType = undefined,
-        endPoint = undefined,
-      },
-    } = body;
-
-    validateFields({ mfaIdentifierFromEvent }, {});
-
-    const response: components["schemas"]["MfaMethod"] = {
-      mfaIdentifier: Number(mfaIdentifier),
-      priorityIdentifier: priorityIdentifier,
-      method:
-        mfaMethodType === "SMS"
-          ? {
-              mfaMethodType,
-              phoneNumber: endPoint,
-            }
-          : {
-              mfaMethodType,
-              credential: endPoint,
-            },
-      methodVerified: true,
-    };
-
-    return formatResponse(200, response);
-  } catch (error) {
-    return formatResponse(500, { error: (error as Error).message });
+  } catch (e) {
+    return formatResponse(400, { error: (e as Error).message });
   }
+
+  return formatResponse(
+    200,
+    createMfaMethod(priorityIdentifier, mfaMethodType, mfaIdentifier)
+  );
 };
 
 export const deleteMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const userId = await getUserIdFromEvent(event);
+  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
   const mfaIdentifier = event.pathParameters?.mfaIdentifier;
 
-  const methods = getUserScenario(userId, "mfaMethods");
+  const methods = getUserScenario(publicSubjectId, "mfaMethods");
   const methodToRemove = methods.find((m) => m.mfaIdentifier == mfaIdentifier);
 
   if (!methodToRemove) {
@@ -183,8 +170,5 @@ export const deleteMethodHandler = async (
     return formatResponse(409, {});
   }
 
-  return formatResponse(
-    200,
-    methods.filter((m) => m.mfaIdentifier != mfaIdentifier)
-  );
+  return formatResponse(204, {});
 };
