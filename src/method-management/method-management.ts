@@ -83,7 +83,7 @@ export const createMfaMethodHandler = async (
   const {
     priorityIdentifier = undefined,
     method: { mfaMethodType = undefined } = {},
-  } = JSON.parse(event.body || "{}");
+  } = JSON.parse(event.body || "{}").mfaMethod ?? {};
 
   const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
   const userScenario = getUserScenario(publicSubjectId, "httpResponse");
