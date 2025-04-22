@@ -196,10 +196,12 @@ describe("createMfaMethodHandler", () => {
 
   test("should return 200 when adding phone number as backup method the request is valid", async () => {
     const requestBody = {
-      priorityIdentifier: "BACKUP",
-      method: {
-        mfaMethodType: "SMS",
-        phoneNumber: "07123456789",
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
       },
     };
     const fakeEvent = createFakeAPIGatewayProxyEvent("default", requestBody);
@@ -217,10 +219,12 @@ describe("createMfaMethodHandler", () => {
 
   test("should return 400 when the MFA method type is not valid", async () => {
     const requestBody = {
-      priorityIdentifier: "BAD_VALUE",
-      method: {
-        mfaMethodType: "SMS",
-        phoneNumber: "07123456789",
+      mfaMethod: {
+        priorityIdentifier: "BAD_VALUE",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
       },
     };
     const fakeEvent = createFakeAPIGatewayProxyEvent("default", requestBody);
@@ -230,10 +234,12 @@ describe("createMfaMethodHandler", () => {
 
   test("should pass through the response code from the scenario", async () => {
     const requestBody = {
-      priorityIdentifier: "BACKUP",
-      method: {
-        mfaMethodType: "SMS",
-        phoneNumber: "07123456789",
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
       },
     };
     const fakeEvent = createFakeAPIGatewayProxyEvent(
