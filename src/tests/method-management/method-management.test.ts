@@ -276,10 +276,12 @@ describe("updateMfaMethodHandler", () => {
 
   test("should return 200 and the updated SMS method when the request is valid", async () => {
     const requestBody = {
-      priorityIdentifier: "BACKUP",
-      method: {
-        mfaMethodType: "SMS",
-        phoneNumber: "0123456789",
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "0123456789",
+        },
       },
     };
     const fakeEvent = createFakeAPIGatewayProxyEvent(
@@ -301,10 +303,12 @@ describe("updateMfaMethodHandler", () => {
 
   test("should return 200 and the updated auth app method when the request is valid", async () => {
     const requestBody = {
-      priorityIdentifier: "DEFAULT",
-      method: {
-        mfaMethodType: "AUTH_APP",
-        credential: "aabbccddeeff112233",
+      mfaMethod: {
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "AUTH_APP",
+          credential: "aabbccddeeff112233",
+        },
       },
     };
     const fakeEvent = createFakeAPIGatewayProxyEvent(
@@ -326,10 +330,12 @@ describe("updateMfaMethodHandler", () => {
 
   test("should return 400 when the MFA method type is not valid", async () => {
     const requestBody = {
-      priorityIdentifier: "BAD_VALUE",
-      method: {
-        mfaMethodType: "SMS",
-        phoneNumber: "07123456789",
+      mfaMethod: {
+        priorityIdentifier: "BAD_VALUE",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
       },
     };
     const fakeEvent = createFakeAPIGatewayProxyEvent(
@@ -343,10 +349,12 @@ describe("updateMfaMethodHandler", () => {
 
   test("should pass through the response code from the scenario", async () => {
     const requestBody = {
-      priorityIdentifier: "BACKUP",
-      method: {
-        mfaMethodType: "SMS",
-        phoneNumber: "07123456789",
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
       },
     };
     const fakeEvent = createFakeAPIGatewayProxyEvent(
