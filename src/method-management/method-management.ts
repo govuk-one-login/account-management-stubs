@@ -98,10 +98,9 @@ export const createMfaMethodHandler = async (
     }
 
     validateFields(
-      { priorityIdentifier, mfaMethodType },
+      { priorityIdentifier },
       {
         priorityIdentifier: /^(DEFAULT|BACKUP)$/,
-        mfaMethodType: /^(AUTH_APP|SMS)$/,
       }
     );
   } catch (e) {
