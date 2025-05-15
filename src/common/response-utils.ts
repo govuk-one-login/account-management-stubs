@@ -1,5 +1,3 @@
-import { Response } from "../method-management/method-management";
-
 export const formatResponse = (
   statusCode: number,
   body: unknown
@@ -7,3 +5,8 @@ export const formatResponse = (
   statusCode,
   body: JSON.stringify(body),
 });
+
+export interface Response {
+  statusCode: number;
+  body: string;
+}

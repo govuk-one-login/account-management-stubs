@@ -5,10 +5,6 @@ import {
 } from "../scenarios/scenarios-utils";
 import { formatResponse } from "../common/response-utils";
 
-export interface Response {
-  statusCode: number;
-}
-
 export const handler = async (event: APIGatewayProxyEventV2) => {
   if (event?.rawPath.includes("send-otp-notification")) {
     const userId = await getUserIdFromEvent(event);
@@ -17,6 +13,21 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     const status = scenario.success ? 204 : 400;
 
     return formatResponse(status, scenario);
+  } else if (event?.rawPath.includes("/authenticate")) {
+    const userId = await getUserIdFromEvent(event);
+    const scenario = await getUserScenario(userId, "interventions");
+
+    if (scenario?.blocked) {
+      return formatResponse(403, {
+        code: 1084,
+        message: "User's account is blocked",
+      });
+    } else if (scenario?.suspended) {
+      return formatResponse(403, {
+        code: 1083,
+        message: "User's account is suspended",
+      });
+    }
   }
 
   return {

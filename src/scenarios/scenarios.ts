@@ -459,4 +459,100 @@ export const userScenarios: UserScenarios = {
       success: true,
     },
   },
+  permanentlySuspended: {
+    httpResponse: {
+      code: 200,
+      message: "OK",
+    },
+    userinfo: {
+      sub: "urn:fdc:gov.uk:default",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "default",
+    },
+    mfaMethods: [
+      {
+        mfaIdentifier: "0",
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
+        methodVerified: true,
+      },
+    ],
+    otpNotification: {
+      success: true,
+    },
+    interventions: {
+      suspended: true,
+      blocked: false,
+    },
+  },
+  temporarilySuspended: {
+    httpResponse: {
+      code: 200,
+      message: "OK",
+    },
+    userinfo: {
+      sub: "urn:fdc:gov.uk:default",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "default",
+    },
+    mfaMethods: [
+      {
+        mfaIdentifier: "0",
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
+        methodVerified: true,
+      },
+    ],
+    otpNotification: {
+      success: true,
+    },
+    interventions: {
+      suspended: true,
+      blocked: false,
+    },
+  },
+  suspendedAndBlocked: {
+    httpResponse: {
+      code: 200,
+      message: "OK",
+    },
+    userinfo: {
+      sub: "urn:fdc:gov.uk:default",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "default",
+    },
+    mfaMethods: [
+      {
+        mfaIdentifier: "0",
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
+        methodVerified: true,
+      },
+    ],
+    otpNotification: {
+      success: true,
+    },
+    interventions: {
+      suspended: true,
+      blocked: true,
+    },
+  },
 };

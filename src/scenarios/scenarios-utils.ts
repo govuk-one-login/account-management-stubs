@@ -67,12 +67,14 @@ export const getUserScenario = <
   const response =
     userScenarios[id][scenario] || userScenarios.default[scenario];
 
-  if ("email" in response) {
-    response.email = `${id}@example.org`;
-  }
+  if (response) {
+    if ("email" in response) {
+      response.email = `${id}@example.org`;
+    }
 
-  if (id === "userPerformanceTest" && "sub" in response) {
-    response.sub = uuidv4();
+    if (id === "userPerformanceTest" && "sub" in response) {
+      response.sub = uuidv4();
+    }
   }
 
   return response;
