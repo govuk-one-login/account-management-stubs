@@ -46,7 +46,7 @@
     "@aws-sdk/lib-dynamodb": "^3.808.0",
     "@types/aws-lambda": "^8.10.149",
     "dotenv": "^16.5.0",
-    "jose": "^5.9.6",
+    "jose": "^6.0.11",
     "uuid": "^11.1.0"
   },
   "lint-staged": {
