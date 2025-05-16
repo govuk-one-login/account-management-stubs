@@ -6,11 +6,11 @@ import {
 import { components } from "../../method-management/models/schema";
 import {
   updateMfaMethodHandler,
-  Response,
   createMfaMethodHandler,
   deleteMethodHandler,
   retrieveMfaMethodHandler,
 } from "../../method-management/method-management";
+import { Response } from "../../common/response-utils";
 
 type MfaMethod = components["schemas"]["MfaMethod"];
 

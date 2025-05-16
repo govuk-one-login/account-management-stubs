@@ -1,14 +1,9 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import assert from "node:assert/strict";
 import { validateFields } from "../common/validation";
-import { formatResponse } from "../common/response-utils";
+import { formatResponse, Response } from "../common/response-utils";
 import { getUserScenario } from "../scenarios/scenarios-utils";
 import { components } from "./models/schema";
-
-export interface Response {
-  statusCode: number;
-  body: string;
-}
 
 function createMfaMethod(
   priorityIdentifier: string,
