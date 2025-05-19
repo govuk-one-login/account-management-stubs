@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { RedirectResponse } from "../common/response-utils";
 import assert from "node:assert/strict";
+import { validateSameHostname } from "../common/validation";
 
 const VALID_HOSTNAMES = [
   "home.dev.account.gov.uk",
@@ -43,8 +44,10 @@ export const handler = async (
   assert(redirectUri, "No post_logout_redirect_uri provided");
   assert(referrer, "No Origin header");
 
-  validateRedirectUri(redirectUri);
   validateReferrer(referrer);
+
+  validateRedirectUri(redirectUri);
+  validateSameHostname(redirectUri, referrer);
   return {
     statusCode: 302,
     headers: {

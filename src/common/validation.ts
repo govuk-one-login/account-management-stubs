@@ -15,3 +15,14 @@ export const validateFields = (
     }
   });
 };
+
+export const validateSameHostname = (firstUri: string, secondUri: string) => {
+  const first = new URL(firstUri);
+  const second = new URL(secondUri);
+
+  if (first.hostname != second.hostname) {
+    throw new Error(
+      `Hostnames ${first.hostname} and ${second.hostname} do not match`
+    );
+  }
+};

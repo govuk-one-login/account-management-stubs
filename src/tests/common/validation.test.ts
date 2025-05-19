@@ -1,4 +1,4 @@
-import { validateFields } from "../../common/validation";
+import { validateFields, validateSameHostname } from "../../common/validation";
 
 describe("validateFields Function", () => {
   it("should validate required fields successfully", () => {
@@ -56,5 +56,29 @@ describe("validateFields Function", () => {
     expect(() => validateFields(fields, checks)).toThrow(
       /invalid mfaIdentifier/
     );
+  });
+});
+
+describe(validateSameHostname, () => {
+  test("it throws an error if either URI is malformed", () => {
+    expect(() => {
+      validateSameHostname("Not a URI", "http://example.com");
+    }).toThrow();
+
+    expect(() => {
+      validateSameHostname("http://example.com", "Not a URI");
+    }).toThrow();
+  });
+
+  test("it throws an error if the hostnames don't match", () => {
+    expect(() => {
+      validateSameHostname("http://not-example.com", "http://example.com");
+    }).toThrow();
+  });
+
+  test("it doesn't throw an error when the hostnames match", () => {
+    expect(() => {
+      validateSameHostname("http://example.com", "http://example.com");
+    }).not.toThrow();
   });
 });

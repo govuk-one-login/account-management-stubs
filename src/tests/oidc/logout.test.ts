@@ -140,4 +140,17 @@ describe(handler, () => {
     };
     expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
   });
+
+  test("throws an error when referrer and redirect domains don't match", async () => {
+    const event: Partial<APIGatewayProxyEvent> = {
+      queryStringParameters: {
+        post_logout_redirect_uri: VALID_REDIRECT_URI,
+        id_token_hint: "id-token",
+      },
+      headers: {
+        Referer: "http://localhost/logout",
+      },
+    };
+    expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
+  });
 });
