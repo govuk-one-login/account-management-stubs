@@ -24,10 +24,33 @@ export const validateRedirectUri = (redirectUri: string) => {
   }
 };
 
-export const validateReferrer = (referrer: string) => {
-  const url = new URL(referrer);
-  if (!VALID_HOSTNAMES.includes(url.hostname)) {
-    throw new Error("Referrer must be an allowed domain");
+export const validateReferrerAndOrigin = (
+  referrerUri: string | undefined,
+  originUri: string | undefined
+) => {
+  if (!referrerUri && !originUri) {
+    throw new Error("Must provide at least one of Origin or Referer headers");
+  }
+
+  let referrer: URL;
+  let origin: URL;
+
+  if (referrerUri) {
+    referrer = new URL(referrerUri);
+    if (!VALID_HOSTNAMES.includes(referrer.hostname)) {
+      throw new Error("Referrer must be an allowed domain");
+    }
+  }
+
+  if (originUri) {
+    origin = new URL(originUri);
+    if (!VALID_HOSTNAMES.includes(origin.hostname)) {
+      throw new Error("Origin must be an allowed domain");
+    }
+  }
+
+  if (referrerUri && originUri) {
+    validateSameHostname(referrerUri, originUri);
   }
 };
 
@@ -39,15 +62,21 @@ export const handler = async (
   const token = event.queryStringParameters.id_token_hint;
   const redirectUri = event.queryStringParameters.post_logout_redirect_uri;
   const referrer = event.headers.Referer;
+  const origin = event.headers.Origin;
 
   assert(token, "No id_token_hint provided");
   assert(redirectUri, "No post_logout_redirect_uri provided");
-  assert(referrer, "No Origin header");
 
-  validateReferrer(referrer);
-
+  validateReferrerAndOrigin(referrer, origin);
   validateRedirectUri(redirectUri);
-  validateSameHostname(redirectUri, referrer);
+
+  if (referrer) {
+    validateSameHostname(redirectUri, referrer);
+  }
+  if (origin) {
+    validateSameHostname(redirectUri, origin);
+  }
+
   return {
     statusCode: 302,
     headers: {

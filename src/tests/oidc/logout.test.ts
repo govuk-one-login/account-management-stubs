@@ -1,11 +1,11 @@
 import {
   handler,
   validateRedirectUri,
-  validateReferrer,
+  validateReferrerAndOrigin,
 } from "../../oidc/logout";
 import { APIGatewayProxyEvent } from "aws-lambda";
 
-const VALID_REDIRECT_URI = "https://home.dev.account.gov.uk/logout";
+const VALID_REDIRECT_OR_HEADER_URI = "https://home.dev.account.gov.uk/logout";
 
 describe(validateRedirectUri, () => {
   test("throws an error with a malformed URI", () => {
@@ -34,60 +34,113 @@ describe(validateRedirectUri, () => {
 
   test("doesn't throw an error when redirecting to a valid domain on https", () => {
     expect(() => {
-      validateRedirectUri(VALID_REDIRECT_URI);
+      validateRedirectUri(VALID_REDIRECT_OR_HEADER_URI);
     }).not.toThrow();
   });
 });
 
-describe(validateReferrer, () => {
-  test("throws an error with a malformed URI", () => {
+describe(validateReferrerAndOrigin, () => {
+  test("throws an error if either parameter is malformed", () => {
     expect(() => {
-      validateReferrer("Not a URL");
+      validateReferrerAndOrigin("Not a URL", VALID_REDIRECT_OR_HEADER_URI);
+    }).toThrow();
+
+    expect(() => {
+      validateReferrerAndOrigin(VALID_REDIRECT_OR_HEADER_URI, "Not a URL");
     }).toThrow();
   });
 
-  test("throws an error when the domain is not allowed", () => {
+  test("throws an error if either URI isn't on the allow list", () => {
     expect(() => {
-      validateReferrer("https://example.com/logout");
+      validateReferrerAndOrigin(
+        "http://example.com",
+        VALID_REDIRECT_OR_HEADER_URI
+      );
+    }).toThrow();
+
+    expect(() => {
+      validateReferrerAndOrigin(
+        VALID_REDIRECT_OR_HEADER_URI,
+        "http://example.com"
+      );
     }).toThrow();
   });
 
-  test("doesn't throw an error when referrer is localhost", () => {
+  test("throws an error if both parameters are undefined", () => {
     expect(() => {
-      validateReferrer("http://localhost/logout");
+      validateReferrerAndOrigin(undefined, undefined);
+    }).toThrow();
+  });
+
+  test("throws an error when the domains don't match", () => {
+    expect(() => {
+      validateReferrerAndOrigin(
+        VALID_REDIRECT_OR_HEADER_URI,
+        "https://home.build.account.gov.uk/logout"
+      );
+    }).toThrow();
+  });
+
+  test("doesn't throw an error when only a valid referrer is passed ", () => {
+    expect(() => {
+      validateReferrerAndOrigin(VALID_REDIRECT_OR_HEADER_URI, undefined);
     }).not.toThrow();
   });
 
-  test("doesn't throw an error when redirecting to a valid domain on https", () => {
+  test("doesn't throw an error when only a valid origin is passed ", () => {
     expect(() => {
-      validateReferrer(VALID_REDIRECT_URI);
+      validateReferrerAndOrigin(undefined, VALID_REDIRECT_OR_HEADER_URI);
+    }).not.toThrow();
+  });
+
+  test("doesn't throw an error when both valid referrer and origin is passed ", () => {
+    expect(() => {
+      validateReferrerAndOrigin(
+        VALID_REDIRECT_OR_HEADER_URI,
+        VALID_REDIRECT_OR_HEADER_URI
+      );
     }).not.toThrow();
   });
 });
 
 describe(handler, () => {
-  test("returns a redirect response from a valid request", async () => {
+  test("returns a redirect response from a valid request with a referrer header", async () => {
     const event: Partial<APIGatewayProxyEvent> = {
       queryStringParameters: {
-        post_logout_redirect_uri: VALID_REDIRECT_URI,
+        post_logout_redirect_uri: VALID_REDIRECT_OR_HEADER_URI,
         id_token_hint: "id-token",
       },
       headers: {
-        Referer: VALID_REDIRECT_URI,
+        Referer: VALID_REDIRECT_OR_HEADER_URI,
       },
     };
     const response = await handler(event as APIGatewayProxyEvent);
     expect(response.statusCode).toBe(302);
-    expect(response.headers.Location).toBe(VALID_REDIRECT_URI);
+    expect(response.headers.Location).toBe(VALID_REDIRECT_OR_HEADER_URI);
+  });
+
+  test("returns a redirect response from a valid request with an origin header", async () => {
+    const event: Partial<APIGatewayProxyEvent> = {
+      queryStringParameters: {
+        post_logout_redirect_uri: VALID_REDIRECT_OR_HEADER_URI,
+        id_token_hint: "id-token",
+      },
+      headers: {
+        Origin: VALID_REDIRECT_OR_HEADER_URI,
+      },
+    };
+    const response = await handler(event as APIGatewayProxyEvent);
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.Location).toBe(VALID_REDIRECT_OR_HEADER_URI);
   });
 
   test("throws an error when ID token is missing", async () => {
     const event: Partial<APIGatewayProxyEvent> = {
       queryStringParameters: {
-        post_logout_redirect_uri: VALID_REDIRECT_URI,
+        post_logout_redirect_uri: VALID_REDIRECT_OR_HEADER_URI,
       },
       headers: {
-        Referer: VALID_REDIRECT_URI,
+        Referer: VALID_REDIRECT_OR_HEADER_URI,
       },
     };
     expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
@@ -99,7 +152,7 @@ describe(handler, () => {
         id_token_hint: "id-token",
       },
       headers: {
-        Referer: VALID_REDIRECT_URI,
+        Referer: VALID_REDIRECT_OR_HEADER_URI,
       },
     };
     expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
@@ -112,16 +165,16 @@ describe(handler, () => {
         id_token_hint: "id-token",
       },
       headers: {
-        Referer: VALID_REDIRECT_URI,
+        Referer: VALID_REDIRECT_OR_HEADER_URI,
       },
     };
     expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
   });
 
-  test("throws an error when referrer header is missing", async () => {
+  test("throws an error when referrer and origin headers are missing", async () => {
     const event: Partial<APIGatewayProxyEvent> = {
       queryStringParameters: {
-        post_logout_redirect_uri: VALID_REDIRECT_URI,
+        post_logout_redirect_uri: VALID_REDIRECT_OR_HEADER_URI,
         id_token_hint: "id-token",
       },
     };
@@ -131,7 +184,7 @@ describe(handler, () => {
   test("throws an error when referrer is not on the allow list", async () => {
     const event: Partial<APIGatewayProxyEvent> = {
       queryStringParameters: {
-        post_logout_redirect_uri: VALID_REDIRECT_URI,
+        post_logout_redirect_uri: VALID_REDIRECT_OR_HEADER_URI,
         id_token_hint: "id-token",
       },
       headers: {
@@ -141,14 +194,40 @@ describe(handler, () => {
     expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
   });
 
+  test("throws an error when origin is not on the allow list", async () => {
+    const event: Partial<APIGatewayProxyEvent> = {
+      queryStringParameters: {
+        post_logout_redirect_uri: VALID_REDIRECT_OR_HEADER_URI,
+        id_token_hint: "id-token",
+      },
+      headers: {
+        Origin: "https://example.com/logout",
+      },
+    };
+    expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
+  });
+
   test("throws an error when referrer and redirect domains don't match", async () => {
     const event: Partial<APIGatewayProxyEvent> = {
       queryStringParameters: {
-        post_logout_redirect_uri: VALID_REDIRECT_URI,
+        post_logout_redirect_uri: VALID_REDIRECT_OR_HEADER_URI,
         id_token_hint: "id-token",
       },
       headers: {
         Referer: "http://localhost/logout",
+      },
+    };
+    expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
+  });
+
+  test("throws an error when origin and redirect domains don't match", async () => {
+    const event: Partial<APIGatewayProxyEvent> = {
+      queryStringParameters: {
+        post_logout_redirect_uri: VALID_REDIRECT_OR_HEADER_URI,
+        id_token_hint: "id-token",
+      },
+      headers: {
+        Origin: "http://localhost/logout",
       },
     };
     expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
