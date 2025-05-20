@@ -2,17 +2,16 @@ import { APIGatewayProxyEvent } from "aws-lambda";
 import { RedirectResponse } from "../common/response-utils";
 import { validateSameHostname } from "../common/validation";
 
-const VALID_HOSTNAMES = [
-  "home.dev.account.gov.uk",
-  "home.build.account.gov.uk",
-  "localhost",
-];
+export const validateHostname = (host: string) => {
+  // Domain is localhost OR ends in .account.gov.uk
+  if (!host.match(/(?:.+\.account\.gov\.uk$)|^localhost$/)) {
+    throw new Error(`Hostname ${host} is not allowed`);
+  }
+};
 
 export const validateRedirectUri = (redirectUri: string) => {
   const url = new URL(redirectUri);
-  if (!VALID_HOSTNAMES.includes(url.hostname)) {
-    throw new Error("Redirect URI must be to an allowed domain");
-  }
+  validateHostname(url.hostname);
 
   if (url.hostname === "localhost" && url.protocol === "http:") {
     return;
@@ -31,21 +30,14 @@ export const validateReferrerAndOrigin = (
     throw new Error("Must provide at least one of Origin or Referer headers");
   }
 
-  let referrer: URL;
-  let origin: URL;
-
   if (referrerUri) {
-    referrer = new URL(referrerUri);
-    if (!VALID_HOSTNAMES.includes(referrer.hostname)) {
-      throw new Error("Referrer must be an allowed domain");
-    }
+    const referrer = new URL(referrerUri);
+    validateHostname(referrer.hostname);
   }
 
   if (originUri) {
-    origin = new URL(originUri);
-    if (!VALID_HOSTNAMES.includes(origin.hostname)) {
-      throw new Error("Origin must be an allowed domain");
-    }
+    const origin = new URL(originUri);
+    validateHostname(origin.hostname);
   }
 
   if (referrerUri && originUri) {
@@ -53,21 +45,8 @@ export const validateReferrerAndOrigin = (
   }
 };
 
-export const inferRedirectUriFromReferrer = (
-  referrer: string | undefined,
-  origin: string | undefined
-): string => {
-  const targetUri = referrer ? referrer : origin;
-
-  if (!targetUri) {
-    throw new Error(
-      "Can't infer redirect URI without one of Referer or Origin headers"
-    );
-  }
-
-  const target = new URL(targetUri);
-  target.pathname = "/logout-return";
-  return target.href;
+const buildDefaultRedirectUri = (): string => {
+  return `https://signin.${process.env?.ENVIRONMENT}.account.gov.uk/signed-out`;
 };
 
 export const handler = async (
@@ -81,9 +60,18 @@ export const handler = async (
 
   validateReferrerAndOrigin(referrer, origin);
 
+  if (redirectUri) {
+    if (referrer) {
+      validateSameHostname(redirectUri, referrer);
+    }
+    if (origin) {
+      validateSameHostname(redirectUri, origin);
+    }
+  }
+
   if (!redirectUri || !token) {
     if (!redirectUri && !token) {
-      redirectUri = inferRedirectUriFromReferrer(referrer, origin);
+      redirectUri = buildDefaultRedirectUri();
     } else {
       throw new Error(
         "Must provide both id_token_hint and post_logout_redirect_uri or neither"
@@ -92,13 +80,6 @@ export const handler = async (
   }
 
   validateRedirectUri(redirectUri);
-
-  if (referrer) {
-    validateSameHostname(redirectUri, referrer);
-  }
-  if (origin) {
-    validateSameHostname(redirectUri, origin);
-  }
 
   if (state) {
     const url = new URL(redirectUri);

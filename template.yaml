@@ -905,6 +905,9 @@ Resources:
       ReservedConcurrentExecutions: 30
       Role: !GetAtt OidcLogoutApiStubFunctionRole.Arn
       Timeout: 5
+      Environment:
+        Variables:
+          ENVIRONMENT: !Ref Environment
       Events:
         logout:
           Type: Api

@@ -1,14 +1,14 @@
 import {
   handler,
-  inferRedirectUriFromReferrer,
   validateRedirectUri,
   validateReferrerAndOrigin,
+  validateHostname,
 } from "../../oidc/logout";
 import { APIGatewayProxyEvent } from "aws-lambda";
 
 const VALID_REDIRECT_OR_HEADER_URI = "https://home.dev.account.gov.uk/logout";
 const EXPECTED_INFERRED_REDIRECT_URI =
-  "https://home.dev.account.gov.uk/logout-return";
+  "https://signin.test.account.gov.uk/signed-out";
 
 describe(validateRedirectUri, () => {
   test("throws an error with a malformed URI", () => {
@@ -106,34 +106,58 @@ describe(validateReferrerAndOrigin, () => {
   });
 });
 
-describe(inferRedirectUriFromReferrer, () => {
-  test("throws an error if both referrer and origin are undefined", () => {
+describe(validateHostname, () => {
+  test("doesn't throw an error with localhost", () => {
     expect(() => {
-      inferRedirectUriFromReferrer(undefined, undefined);
+      validateHostname("localhost");
+    }).not.toThrow();
+  });
+
+  test("doesn't throw an error with our dev domain", () => {
+    expect(() => {
+      validateHostname("home.dev.account.gov.uk");
+    }).not.toThrow();
+  });
+
+  test("doesn't throw an error with Auths dev domain", () => {
+    expect(() => {
+      validateHostname("signin.dev.account.gov.uk");
+    }).not.toThrow();
+  });
+
+  test("throws an error when the hostname is not allowed", () => {
+    expect(() => {
+      validateHostname("example.com");
     }).toThrow();
   });
 
-  test("builds the URL from referrer", () => {
-    expect(
-      inferRedirectUriFromReferrer(VALID_REDIRECT_OR_HEADER_URI, undefined)
-    ).toBe(EXPECTED_INFERRED_REDIRECT_URI);
-
-    expect(
-      inferRedirectUriFromReferrer(
-        VALID_REDIRECT_OR_HEADER_URI,
-        "http://example.com"
-      )
-    ).toBe(EXPECTED_INFERRED_REDIRECT_URI);
+  test("throws an error when the hostname is another GOV.UK domain", () => {
+    expect(() => {
+      validateHostname("www.gov.uk");
+    }).toThrow();
   });
 
-  test("builds the URL from origin if referrer not present", () => {
-    expect(
-      inferRedirectUriFromReferrer(undefined, VALID_REDIRECT_OR_HEADER_URI)
-    ).toBe(EXPECTED_INFERRED_REDIRECT_URI);
+  test("throws an error when the hostname is the root account.gov.uk", () => {
+    expect(() => {
+      validateHostname("account.gov.uk");
+    }).toThrow();
+  });
+
+  test("throws an error when the hostname only contains localhost", () => {
+    expect(() => {
+      validateHostname("localhost.example.com");
+    }).toThrow();
   });
 });
 
 describe(handler, () => {
+  beforeAll(() => {
+    process.env.ENVIRONMENT = "test";
+  });
+
+  afterAll(() => {
+    delete process.env.ENVIRONMENT;
+  });
   test("returns a redirect response from a valid request with a referrer header", async () => {
     const event: Partial<APIGatewayProxyEvent> = {
       queryStringParameters: {
