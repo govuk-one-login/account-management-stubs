@@ -116,6 +116,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserInfo"
+  /logout:
+    get:
+      description: |-
+        Log the user out and return them to either the supplied redirect URI or a default one if none is provided.
+        Requires at least one of an `Origin` or `Referer` header to validate the calling app and construct the default return URL.
+      parameters:
+        - in: query
+          name: id_token_hint
+          schema:
+            type: string
+          required: false
+          description: The user's ID token.
+        - in: query
+          name: post_logout_redirect_uri
+          schema:
+            type: string
+          required: false
+          description: The URI to redirect the user back to after logout. If provided, id_token_hint must also be present.
+        - in: header
+          name: Origin
+          schema:
+            type: string
+          required: false
+        - in: header
+          name: Referer
+          schema:
+            type: string
+          required: false
+
+      responses:
+        "302":
+          description: |-
+            After a successful logout, return the user to either the supplied redirect URI or the default.
 
 components:
   schemas:
