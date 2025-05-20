@@ -887,7 +887,7 @@ Resources:
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
   ######################################
-  # OIDC Token API Stub
+  # OIDC Logout API Stub
   ######################################
   OidcLogoutApiStubFunction:
     Type: AWS::Serverless::Function
@@ -897,7 +897,7 @@ Resources:
     Properties:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-oidc-logout
       Architectures: ["arm64"]
-      CodeUri: src/oidc
+      CodeUri: src
       Handler: logout.handler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
@@ -926,7 +926,7 @@ Resources:
         Target: "es2020"
         Sourcemap: true
         EntryPoints:
-          - logout.ts
+          - oidc/logout.ts
 
   OidcLogoutApiStubFunctionRole:
     Type: AWS::IAM::Role
