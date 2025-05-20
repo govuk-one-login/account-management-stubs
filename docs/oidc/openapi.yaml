@@ -121,6 +121,7 @@ paths:
       description: |-
         Log the user out and return them to either the supplied redirect URI or a default one if none is provided.
         Requires at least one of an `Origin` or `Referer` header to validate the calling app and construct the default return URL.
+        If `state` query parameter is passed, the value is appended to the redirect URL.
       parameters:
         - in: query
           name: id_token_hint
@@ -134,6 +135,11 @@ paths:
             type: string
           required: false
           description: The URI to redirect the user back to after logout. If provided, id_token_hint must also be present.
+        - in: query
+          name: state
+          schema:
+            type: string
+          required: false
         - in: header
           name: Origin
           schema:

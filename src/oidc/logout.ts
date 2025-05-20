@@ -75,6 +75,7 @@ export const handler = async (
 ): Promise<RedirectResponse> => {
   const token = event.queryStringParameters?.id_token_hint;
   let redirectUri = event.queryStringParameters?.post_logout_redirect_uri;
+  const state = event.queryStringParameters?.state;
   const referrer = event.headers.Referer;
   const origin = event.headers.Origin;
 
@@ -97,6 +98,12 @@ export const handler = async (
   }
   if (origin) {
     validateSameHostname(redirectUri, origin);
+  }
+
+  if (state) {
+    const url = new URL(redirectUri);
+    url.searchParams.append("state", state);
+    redirectUri = url.href;
   }
 
   return {

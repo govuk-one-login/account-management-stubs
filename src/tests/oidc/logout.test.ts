@@ -172,8 +172,22 @@ describe(handler, () => {
     };
     const response = await handler(event as APIGatewayProxyEvent);
     expect(response.statusCode).toBe(302);
+    expect(response.headers.Location).toBe(EXPECTED_INFERRED_REDIRECT_URI);
+  });
+
+  test("appends the state parameter to the redirect URL if provided", async () => {
+    const event: Partial<APIGatewayProxyEvent> = {
+      queryStringParameters: {
+        state: "stateValue",
+      },
+      headers: {
+        Origin: VALID_REDIRECT_OR_HEADER_URI,
+      },
+    };
+    const response = await handler(event as APIGatewayProxyEvent);
+    expect(response.statusCode).toBe(302);
     expect(response.headers.Location).toBe(
-      "https://home.dev.account.gov.uk/logout-return"
+      `${EXPECTED_INFERRED_REDIRECT_URI}?state=stateValue`
     );
   });
 
