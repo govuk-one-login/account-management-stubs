@@ -1,11 +1,14 @@
 import {
   handler,
+  inferRedirectUriFromReferrer,
   validateRedirectUri,
   validateReferrerAndOrigin,
 } from "../../oidc/logout";
 import { APIGatewayProxyEvent } from "aws-lambda";
 
 const VALID_REDIRECT_OR_HEADER_URI = "https://home.dev.account.gov.uk/logout";
+const EXPECTED_INFERRED_REDIRECT_URI =
+  "https://home.dev.account.gov.uk/logout-return";
 
 describe(validateRedirectUri, () => {
   test("throws an error with a malformed URI", () => {
@@ -103,6 +106,33 @@ describe(validateReferrerAndOrigin, () => {
   });
 });
 
+describe(inferRedirectUriFromReferrer, () => {
+  test("throws an error if both referrer and origin are undefined", () => {
+    expect(() => {
+      inferRedirectUriFromReferrer(undefined, undefined);
+    }).toThrow();
+  });
+
+  test("builds the URL from referrer", () => {
+    expect(
+      inferRedirectUriFromReferrer(VALID_REDIRECT_OR_HEADER_URI, undefined)
+    ).toBe(EXPECTED_INFERRED_REDIRECT_URI);
+
+    expect(
+      inferRedirectUriFromReferrer(
+        VALID_REDIRECT_OR_HEADER_URI,
+        "http://example.com"
+      )
+    ).toBe(EXPECTED_INFERRED_REDIRECT_URI);
+  });
+
+  test("builds the URL from origin if referrer not present", () => {
+    expect(
+      inferRedirectUriFromReferrer(undefined, VALID_REDIRECT_OR_HEADER_URI)
+    ).toBe(EXPECTED_INFERRED_REDIRECT_URI);
+  });
+});
+
 describe(handler, () => {
   test("returns a redirect response from a valid request with a referrer header", async () => {
     const event: Partial<APIGatewayProxyEvent> = {
@@ -134,7 +164,20 @@ describe(handler, () => {
     expect(response.headers.Location).toBe(VALID_REDIRECT_OR_HEADER_URI);
   });
 
-  test("throws an error when ID token is missing", async () => {
+  test("returns a redirect response when neither redirect URI nor ID token are passed", async () => {
+    const event: Partial<APIGatewayProxyEvent> = {
+      headers: {
+        Origin: VALID_REDIRECT_OR_HEADER_URI,
+      },
+    };
+    const response = await handler(event as APIGatewayProxyEvent);
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.Location).toBe(
+      "https://home.dev.account.gov.uk/logout-return"
+    );
+  });
+
+  test("throws an error when redirect URI is passed but not ID token", async () => {
     const event: Partial<APIGatewayProxyEvent> = {
       queryStringParameters: {
         post_logout_redirect_uri: VALID_REDIRECT_OR_HEADER_URI,
@@ -146,7 +189,7 @@ describe(handler, () => {
     expect(handler(event as APIGatewayProxyEvent)).rejects.toThrow();
   });
 
-  test("throws an error when redirect URI is missing", async () => {
+  test("throws an error when ID token is passed but not redirect URI", async () => {
     const event: Partial<APIGatewayProxyEvent> = {
       queryStringParameters: {
         id_token_hint: "id-token",

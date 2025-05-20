@@ -1,6 +1,5 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { RedirectResponse } from "../common/response-utils";
-import assert from "node:assert/strict";
 import { validateSameHostname } from "../common/validation";
 
 const VALID_HOSTNAMES = [
@@ -54,20 +53,43 @@ export const validateReferrerAndOrigin = (
   }
 };
 
+export const inferRedirectUriFromReferrer = (
+  referrer: string | undefined,
+  origin: string | undefined
+): string => {
+  const targetUri = referrer ? referrer : origin;
+
+  if (!targetUri) {
+    throw new Error(
+      "Can't infer redirect URI without one of Referer or Origin headers"
+    );
+  }
+
+  const target = new URL(targetUri);
+  target.pathname = "/logout-return";
+  return target.href;
+};
+
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<RedirectResponse> => {
-  assert(event.queryStringParameters, "No query parameters provided");
-
-  const token = event.queryStringParameters.id_token_hint;
-  const redirectUri = event.queryStringParameters.post_logout_redirect_uri;
+  const token = event.queryStringParameters?.id_token_hint;
+  let redirectUri = event.queryStringParameters?.post_logout_redirect_uri;
   const referrer = event.headers.Referer;
   const origin = event.headers.Origin;
 
-  assert(token, "No id_token_hint provided");
-  assert(redirectUri, "No post_logout_redirect_uri provided");
-
   validateReferrerAndOrigin(referrer, origin);
+
+  if (!redirectUri || !token) {
+    if (!redirectUri && !token) {
+      redirectUri = inferRedirectUriFromReferrer(referrer, origin);
+    } else {
+      throw new Error(
+        "Must provide both id_token_hint and post_logout_redirect_uri or neither"
+      );
+    }
+  }
+
   validateRedirectUri(redirectUri);
 
   if (referrer) {
