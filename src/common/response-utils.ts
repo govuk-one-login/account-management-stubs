@@ -10,3 +10,10 @@ export interface Response {
   statusCode: number;
   body: string;
 }
+
+export interface RedirectResponse {
+  statusCode: 302;
+  headers: {
+    Location: string;
+  };
+}

@@ -32,7 +32,7 @@ export const handler = async () => {
     trustmarks: "https://unsuported-by-stub.gov.uk/",
     subject_types_supported: ["public", "pairwise"],
     userinfo_endpoint: `https://oidc-stub.home.${ENVIRONMENT}.account.gov.uk/userinfo`,
-    end_session_endpoint: "https://signin.build.account.gov.uk/signed-out",
+    end_session_endpoint: `https://oidc-stub.home.${ENVIRONMENT}.account.gov.uk/logout`,
     id_token_signing_alg_values_supported: ["ES256", "RS256"],
     claim_types_supported: ["normal"],
     claims_supported: [
