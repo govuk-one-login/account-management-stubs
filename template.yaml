@@ -1,7 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Transform:
-  - AWS::Serverless-2016-10-31
-  - AWS::LanguageExtensions
+Transform: AWS::Serverless-2016-10-31
 Description: "A template to create the GOV.UK One login Account backend infrastructure."
 
 Parameters:
@@ -44,17 +42,11 @@ Mappings:
       url: "https://home.demo.account.gov.uk"
   PostLogoutRedirectUris:
     dev:
-      uris:
-        Fn::ToJsonString:
-          - "https://home.dev.account.gov.uk/logout-return"
+      uris: '["https://home.dev.account.gov.uk/logout-return"]'
     build:
-      uris:
-        Fn::ToJsonString:
-          - "https://home.build.account.gov.uk/logout-return"
+      uris: '["https://home.build.account.gov.uk/logout-return"]'
     demo:
-      uris:
-        Fn::ToJsonString:
-          - "https://home.demo.account.gov.uk/logout-return"
+      uris: '["https://home.demo.account.gov.uk/logout-return"]'
   TxmaDummyInputQueue:
     demo:
       QueueArn: "arn:aws:sqs:eu-west-2:654654326096:home-backend-TxMAInputDummyQueue-aydSI6PG6u3g"
