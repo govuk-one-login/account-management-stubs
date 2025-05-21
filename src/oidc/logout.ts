@@ -5,13 +5,13 @@ import * as v from "valibot";
 export const validateRedirectUri = (rawRedirectUri: string) => {
   const redirectUri = v.parse(v.pipe(v.string(), v.url()), rawRedirectUri);
 
-  const rawLogoutRedirectUrisConfiguredForRp = JSON.parse(
+  const rawPostLogoutRedirectUrisConfiguredForRp = JSON.parse(
     process.env.POST_LOGOUT_REDIRECT_URIS ?? "[]"
   );
 
   const postLogoutRedirectUrisConfiguredForRp = v.parse(
     v.pipe(v.array(v.pipe(v.string(), v.url())), v.minLength(1)),
-    rawLogoutRedirectUrisConfiguredForRp
+    rawPostLogoutRedirectUrisConfiguredForRp
   );
 
   for (const postLogoutRedirectUriConfiguredForRp of postLogoutRedirectUrisConfiguredForRp) {
