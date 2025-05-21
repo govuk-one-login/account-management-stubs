@@ -47,7 +47,8 @@
     "@types/aws-lambda": "^8.10.149",
     "dotenv": "^16.5.0",
     "jose": "^5.9.6",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "valibot": "^1.1.0"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json,css,scss,md,yaml}": [

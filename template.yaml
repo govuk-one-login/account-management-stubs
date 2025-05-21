@@ -40,6 +40,19 @@ Mappings:
       url: "https://home.build.account.gov.uk"
     demo:
       url: "https://home.demo.account.gov.uk"
+  PostLogoutRedirectUris:
+    dev:
+      uris:
+        Fn::ToJsonString:
+          - "https://home.dev.account.gov.uk/logout-return"
+    build:
+      uris:
+        Fn::ToJsonString:
+          - "https://home.build.account.gov.uk/logout-return"
+    demo:
+      uris:
+        Fn::ToJsonString:
+          - "https://home.demo.account.gov.uk/logout-return"
   TxmaDummyInputQueue:
     demo:
       QueueArn: "arn:aws:sqs:eu-west-2:654654326096:home-backend-TxMAInputDummyQueue-aydSI6PG6u3g"
@@ -908,6 +921,8 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !Ref Environment
+          POST_LOGOUT_REDIRECT_URIS:
+            !FindInMap [PostLogoutRedirectUris, !Ref Environment, uris]
       Events:
         logout:
           Type: Api
