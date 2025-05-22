@@ -42,11 +42,11 @@ Mappings:
       url: "https://home.demo.account.gov.uk"
   PostLogoutRedirectUris:
     dev:
-      uris: '["https://home.dev.account.gov.uk/logout-return"]'
+      uris: '["http://localhost:6001/logout-redirect", "https://home.dev.account.gov.uk/logout-redirect"]'
     build:
-      uris: '["https://home.build.account.gov.uk/logout-return"]'
+      uris: '["https://home.build.account.gov.uk/logout-redirect"]'
     demo:
-      uris: '["https://home.demo.account.gov.uk/logout-return"]'
+      uris: '["https://home.demo.account.gov.uk/logout-redirect"]'
   TxmaDummyInputQueue:
     demo:
       QueueArn: "arn:aws:sqs:eu-west-2:654654326096:home-backend-TxMAInputDummyQueue-aydSI6PG6u3g"
