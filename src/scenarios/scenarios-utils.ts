@@ -51,8 +51,7 @@ export const getUserIdFromEvent = async (
     throw new Error("nonce not found in DB");
   }
   return (
-    (results.Items[0] as OicdPersistedData).userId ||
-    "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA"
+    (results.Items[0] as OicdPersistedData).userId || "urn:fdc:gov.uk:default"
   );
 };
 

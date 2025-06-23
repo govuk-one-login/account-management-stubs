@@ -40,13 +40,13 @@ export interface Response {
   };
 }
 
-const newTxmaEvent = (): TxmaEvent => ({
+const newTxmaEvent = (user_id: string): TxmaEvent => ({
   event_id: uuid(),
   timestamp: Date.now(),
   event_name: "AUTH_AUTH_CODE_ISSUED",
   client_id: "vehicleOperatorLicense",
   user: {
-    user_id: "user_id",
+    user_id: user_id,
     session_id: uuid(),
   },
 });
@@ -66,7 +66,7 @@ export const sendSqsMessage = async (
 export const writeNonce = async (
   code: string,
   nonce: string,
-  userId = "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+  userId = "urn:fdc:gov.uk:default",
   remove_at: number
 ): Promise<PutCommandOutput> => {
   const command = new PutCommand({
@@ -146,7 +146,10 @@ export const handler = async (
   try {
     await Promise.all([
       writeNonce(code, nonce, scenario, remove_at),
-      sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL),
+      sendSqsMessage(
+        JSON.stringify(newTxmaEvent(scenario)),
+        DUMMY_TXMA_QUEUE_URL
+      ),
     ]);
 
     return {
