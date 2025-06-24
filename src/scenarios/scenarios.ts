@@ -487,8 +487,8 @@ export const userScenarios: UserScenarios = {
       success: true,
     },
     interventions: {
-      suspended: true,
-      blocked: false,
+      suspended: false,
+      blocked: true,
     },
   },
   temporarilySuspended: {
