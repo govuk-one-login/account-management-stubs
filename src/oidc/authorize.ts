@@ -115,6 +115,7 @@ export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
   assert(event.body, "no body");
+  console.log(event);
 
   const properties = new URLSearchParams(event.body);
   const nonce = properties.get("nonce");
