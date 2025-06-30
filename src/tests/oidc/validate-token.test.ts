@@ -56,9 +56,17 @@ describe("validation for token", () => {
     ).not.toThrow("Invalid grant - Invalid redirect URL");
   });
 
-  test("should ensure localhost redirect url works", async () => {
+  test("should ensure http localhost redirect url works", async () => {
     const withInvalidRedirectUrl =
       "&client_assertion=xxxx&grant_type=authorization_code&code=xxxx&redirect_uri=http%3A%2F%2Flocalhost%3A6001%2Fauth%2Fcallback";
+    expect(() =>
+      validateRedirectURLSupported(withInvalidRedirectUrl)
+    ).not.toThrow("Invalid grant - Invalid redirect URL");
+  });
+
+  test("should ensure https localhost redirect url works", async () => {
+    const withInvalidRedirectUrl =
+      "&client_assertion=xxxx&grant_type=authorization_code&code=xxxx&redirect_uri=https%3A%2F%2Flocalhost%3A6001%2Fauth%2Fcallback";
     expect(() =>
       validateRedirectURLSupported(withInvalidRedirectUrl)
     ).not.toThrow("Invalid grant - Invalid redirect URL");
