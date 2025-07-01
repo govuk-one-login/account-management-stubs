@@ -3,7 +3,6 @@ import { decodeJwt } from "jose";
 const SUPPORTED_REDIRECT_URLS = [
   "https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback",
   "http%3A%2F%2Flocalhost%3A6001%2Fauth%2Fcallback",
-  "https%3A%2F%2Flocalhost%3A6001%2Fauth%2Fcallback",
   "https%3A%2F%2Fhome.build.account.gov.uk%2Fauth%2Fcallback",
 ];
 const ALLOWED_GRANT_TYPES = ["authorization_code"];
