@@ -75,94 +75,17 @@ export const retrieveMfaMethodHandler = async (
 export const createMfaMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const {
-    priorityIdentifier = undefined,
-    method: { mfaMethodType = undefined } = {},
-  } = JSON.parse(event.body || "{}").mfaMethod ?? {};
-
-  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
-  const userScenario = getUserScenario(publicSubjectId, "httpResponse");
-
-  try {
-    const { code: responseCode, message: responseMessage } = userScenario || {};
-
-    if (responseCode && responseCode !== 200) {
-      return formatResponse(responseCode, {
-        error: responseMessage || "Unknown error",
-      });
-    }
-
-    validateFields(
-      { priorityIdentifier, mfaMethodType },
-      {
-        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
-        mfaMethodType: /^(AUTH_APP|SMS)$/,
-      }
-    );
-  } catch (e) {
-    return formatResponse(400, { error: (e as Error).message });
-  }
-
-  return formatResponse(
-    200,
-    createMfaMethod(priorityIdentifier, mfaMethodType)
-  );
+  return formatResponse(401, { error: "Test 401" });
 };
 
 export const updateMfaMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const {
-    priorityIdentifier = undefined,
-    method: { mfaMethodType = undefined } = {},
-  } = JSON.parse(event.body || "{}").mfaMethod ?? {};
-
-  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
-  const mfaIdentifier = event.pathParameters?.mfaIdentifier;
-  const userScenario = getUserScenario(publicSubjectId, "httpResponse");
-
-  try {
-    assert(mfaIdentifier, "mfaIdentifier not present");
-    const { code: responseCode, message: responseMessage } = userScenario || {};
-
-    if (responseCode && responseCode !== 200) {
-      return formatResponse(responseCode, {
-        error: responseMessage || "Unknown error",
-      });
-    }
-
-    validateFields(
-      { priorityIdentifier },
-      {
-        priorityIdentifier: /^(DEFAULT|BACKUP)$/,
-      }
-    );
-  } catch (e) {
-    return formatResponse(400, { error: (e as Error).message });
-  }
-
-  return formatResponse(
-    200,
-    createMfaMethod(priorityIdentifier, mfaMethodType, mfaIdentifier)
-  );
+  return formatResponse(401, { error: "Test 401" });
 };
 
 export const deleteMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
-  const mfaIdentifier = event.pathParameters?.mfaIdentifier;
-
-  const methods = getUserScenario(publicSubjectId, "mfaMethods");
-  const methodToRemove = methods.find((m) => m.mfaIdentifier == mfaIdentifier);
-
-  if (!methodToRemove) {
-    return formatResponse(404, {});
-  }
-
-  if (methodToRemove.priorityIdentifier === "DEFAULT") {
-    return formatResponse(409, {});
-  }
-
-  return formatResponse(204, {});
+  return formatResponse(401, { error: "Test 401" });
 };
