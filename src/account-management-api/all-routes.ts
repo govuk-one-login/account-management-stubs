@@ -7,12 +7,7 @@ import { formatResponse } from "../common/response-utils";
 
 export const handler = async (event: APIGatewayProxyEventV2) => {
   if (event?.rawPath.includes("send-otp-notification")) {
-    const userId = await getUserIdFromEvent(event);
-    const scenario = getUserScenario(userId, "otpNotification");
-
-    const status = scenario.success ? 204 : 400;
-
-    return formatResponse(status, scenario);
+    return formatResponse(401, { error: "Test 401" });
   } else if (event?.rawPath.includes("/authenticate")) {
     const userId = await getUserIdFromEvent(event);
     const scenario = await getUserScenario(userId, "interventions");
