@@ -1,28 +1,7 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import assert from "node:assert/strict";
-import { validateFields } from "../common/validation";
 import { formatResponse, Response } from "../common/response-utils";
 import { getUserScenario } from "../scenarios/scenarios-utils";
 import { components } from "./models/schema";
-
-function createMfaMethod(
-  priorityIdentifier: string,
-  mfaMethodType: "SMS" | "AUTH_APP",
-  mfaIdentifier = "1"
-) {
-  let method = {};
-  if (mfaMethodType == "SMS") {
-    method = { mfaMethodType, phoneNumber: "0123456789" };
-  } else if (mfaMethodType == "AUTH_APP") {
-    method = { mfaMethodType, credential: "aabbccddeeff112233" };
-  }
-
-  return {
-    mfaIdentifier,
-    priorityIdentifier,
-    method,
-  };
-}
 
 function handleMFAResponse(response: components["schemas"]["MfaMethod"][]) {
   if (response.length === 0) {
@@ -72,20 +51,16 @@ export const retrieveMfaMethodHandler = async (
   return handleMFAResponse(response);
 };
 
-export const createMfaMethodHandler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  return formatResponse(401, { error: "Test 401" });
-};
+export const createMfaMethodHandler =
+  async (): Promise<APIGatewayProxyResult> => {
+    return formatResponse(401, { error: "Test 401" });
+  };
 
-export const updateMfaMethodHandler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  return formatResponse(401, { error: "Test 401" });
-};
+export const updateMfaMethodHandler =
+  async (): Promise<APIGatewayProxyResult> => {
+    return formatResponse(401, { error: "Test 401" });
+  };
 
-export const deleteMethodHandler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
+export const deleteMethodHandler = async (): Promise<APIGatewayProxyResult> => {
   return formatResponse(401, { error: "Test 401" });
 };
