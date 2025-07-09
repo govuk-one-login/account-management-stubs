@@ -201,6 +201,7 @@ describe("createMfaMethodHandler", () => {
         method: {
           mfaMethodType: "SMS",
           phoneNumber: "07123456789",
+          otp: "987654",
         },
       },
     };
