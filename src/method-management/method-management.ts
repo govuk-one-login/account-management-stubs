@@ -77,7 +77,11 @@ export const createMfaMethodHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   const {
     priorityIdentifier = undefined,
-    method: { mfaMethodType = undefined } = {},
+    method: {
+      mfaMethodType = undefined,
+      phoneNumber = undefined,
+      otp = undefined,
+    } = {},
   } = JSON.parse(event.body || "{}").mfaMethod ?? {};
 
   const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
@@ -99,6 +103,19 @@ export const createMfaMethodHandler = async (
         mfaMethodType: /^(AUTH_APP|SMS)$/,
       }
     );
+
+    if (mfaMethodType === "SMS") {
+      assert.notEqual(
+        typeof phoneNumber,
+        "undefined",
+        "Phone number is undefined"
+      );
+      assert.notEqual(typeof otp, "undefined", "OTP is undefined");
+      assert.notEqual(phoneNumber, null, "Phone number is null");
+      assert.notEqual(otp, null, "OTP is null");
+      assert.notEqual(phoneNumber.trim(), "", "Phone number is empty");
+      assert.notEqual(otp.trim(), "", "OTP is empty");
+    }
   } catch (e) {
     return formatResponse(400, { error: (e as Error).message });
   }
