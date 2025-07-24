@@ -44,7 +44,7 @@ Mappings:
     dev:
       uris: '["http://localhost:6001/logout-redirect", "https://home.dev.account.gov.uk/logout-redirect"]'
     build:
-      uris: '["https://home.build.account.gov.uk/logout-redirect"]'
+      uris: '["http://localhost:6001/logout-redirect", "https://home.build.account.gov.uk/logout-redirect"]'
     demo:
       uris: '["https://home.demo.account.gov.uk/logout-redirect"]'
   TxmaDummyInputQueue:
