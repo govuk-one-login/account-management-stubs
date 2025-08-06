@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 import {
+  extractGrantType,
   validateClientIdMatches,
   validateRedirectURLSupported,
   validateSupportedGrantType,
@@ -92,5 +93,23 @@ describe("validation for token", () => {
     ).toThrow("Invalid client");
 
     expect(mockedDecodeJwt).toHaveBeenCalledWith("mockToken");
+  });
+});
+
+describe("extractGrantType", () => {
+  const eventBody =
+    "client_assertion_type=type&client_assertion=xxxx&grant_type=authorization_code&code=xxxx&redirect_uri=xxxxxx";
+
+  test("should extract grant type from event body", () => {
+    const result = extractGrantType(eventBody);
+    expect(result).toBe("authorization_code");
+  });
+
+  test("should return null if grant type is not present", () => {
+    const bodyWithoutGrantType =
+      "client_assertion_type=type&client_assertion=xxxx&code=xxxx&redirect_uri=xxxxxx";
+    expect(() => {
+      extractGrantType(bodyWithoutGrantType);
+    }).toThrow("grant_type not found in the event body");
   });
 });

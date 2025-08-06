@@ -74,14 +74,17 @@ export const validateRedirectURLSupported = (eventBody: string) => {
   }
 };
 
-export const validateSupportedGrantType = (eventBody: string) => {
-  const regex = /grant_type=([^ ]+)/;
+export const extractGrantType = (eventBody: string): string => {
+  const regex = /grant_type=(?<grantType>[^ ]+?)&|$/;
   const match = eventBody.match(regex);
-  const grantPreSplit = match ? match[1] : null;
-  if (grantPreSplit) {
-    const grantType = grantPreSplit.split("&")[0];
-    if (!ALLOWED_GRANT_TYPES.includes(grantType)) {
-      throw new Error("Unauthorized Client - unsupported_grant_type");
-    }
+  if (!match || !match.groups || !match.groups.grantType) {
+    throw new Error("grant_type not found in the event body");
+  }
+  return match.groups.grantType;
+};
+
+export const validateSupportedGrantType = (eventBody: string) => {
+  if (!ALLOWED_GRANT_TYPES.includes(extractGrantType(eventBody))) {
+    throw new Error("Unauthorized Client - unsupported_grant_type");
   }
 };
