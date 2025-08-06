@@ -12,6 +12,8 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { Token } from "../common/models";
 import {
+  extractGrantType,
+  GRANT_TYPES,
   validateClientIdMatches,
   validateRedirectURLSupported,
   validateSupportedGrantType,
@@ -94,20 +96,16 @@ const persistedNonce = async (code: string): Promise<string> => {
   return (results.Item as OicdPersistedData).nonce;
 };
 
-export const handler = async (
-  event: APIGatewayProxyEvent
+export const handleAuthorisationCodeFlow = async (
+  body: string
 ): Promise<Response> => {
-  if (!event.body) {
-    throw new Error(`no request body is provided`);
-  }
+  verifyParametersExistAndOnlyOnce(body);
+  validateRedirectURLSupported(body);
+  validateSupportedGrantType(body);
 
-  verifyParametersExistAndOnlyOnce(event.body);
-  validateRedirectURLSupported(event.body);
-  validateSupportedGrantType(event.body);
-
-  const codeStartIndex = event.body.indexOf("&code=") + 6;
-  const codeEndIndex = event.body.indexOf("&redirect_uri=");
-  const code = event.body.substring(codeStartIndex, codeEndIndex);
+  const codeStartIndex = body.indexOf("&code=") + 6;
+  const codeEndIndex = body.indexOf("&redirect_uri=");
+  const code = body.substring(codeStartIndex, codeEndIndex);
 
   const nonce = await persistedNonce(code);
 
@@ -120,7 +118,7 @@ export const handler = async (
     );
   }
 
-  validateClientIdMatches(event.body, OIDC_CLIENT_ID);
+  validateClientIdMatches(body, OIDC_CLIENT_ID);
 
   const privateKey = await getPrivateKey(); // Retrieve cached private key
   const jwt = await new SignJWT(
@@ -139,4 +137,25 @@ export const handler = async (
     statusCode: 200,
     body: JSON.stringify(tokenResponse),
   };
+};
+
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<Response> => {
+  if (!event.body) {
+    throw new Error(`no request body is provided`);
+  }
+
+  const grantType = extractGrantType(event.body);
+
+  switch (grantType) {
+    case GRANT_TYPES.AUTHORIZATION_CODE:
+      return handleAuthorisationCodeFlow(event.body);
+
+    case GRANT_TYPES.REFRESH_TOKEN:
+      throw new Error("Refresh token flow is not implemented");
+
+    default:
+      throw new Error("Unrecognised grant type");
+  }
 };

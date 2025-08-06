@@ -15,8 +15,16 @@ const oicdPersistedData = {
   code,
   nonce,
 };
+jest.mock("../../oidc/validate-token", () => {
+  const originalModule = jest.requireActual("../../oidc/validate-token");
 
-jest.mock("../../oidc/validate-token");
+  //Mock just the function we need
+  return {
+    __esModule: true,
+    ...originalModule,
+    validateClientIdMatches: jest.fn(),
+  };
+});
 
 describe("handler", () => {
   beforeEach(() => {
@@ -44,6 +52,20 @@ describe("handler", () => {
     expect(body.id_token).toContain(
       "eyJraWQiOiJCLVFNVXhkSk9KOHVia21BcmM0aTFTR21mWm5OTmxNLXZhOWgwSEowakNvIiwiYWxnIjoiRVMyNTYifQ."
     );
+  });
+
+  test("throws an error when called with grant type refresh_token ", async () => {
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: "client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=refresh_token&refresh_token=abc123",
+    } as never;
+
+    let errorThrown = false;
+    try {
+      await handler(mockApiEvent);
+    } catch (error) {
+      errorThrown = true;
+    }
+    expect(errorThrown).toBeTruthy();
   });
 
   test("returns 500 error response if event body is undefined", async () => {

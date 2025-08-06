@@ -5,7 +5,11 @@ const SUPPORTED_REDIRECT_URLS = [
   "http%3A%2F%2Flocalhost%3A6001%2Fauth%2Fcallback",
   "https%3A%2F%2Fhome.build.account.gov.uk%2Fauth%2Fcallback",
 ];
-const ALLOWED_GRANT_TYPES = ["authorization_code"];
+
+export enum GRANT_TYPES {
+  AUTHORIZATION_CODE = "authorization_code",
+  REFRESH_TOKEN = "refresh_token",
+}
 
 export const getIssuerFromJWT = (token: string): string | undefined => {
   try {
@@ -84,7 +88,14 @@ export const extractGrantType = (eventBody: string): string => {
 };
 
 export const validateSupportedGrantType = (eventBody: string) => {
-  if (!ALLOWED_GRANT_TYPES.includes(extractGrantType(eventBody))) {
+  const grantType = extractGrantType(eventBody);
+
+  if (
+    !(
+      grantType == GRANT_TYPES.AUTHORIZATION_CODE ||
+      grantType == GRANT_TYPES.REFRESH_TOKEN
+    )
+  ) {
     throw new Error("Unauthorized Client - unsupported_grant_type");
   }
 };

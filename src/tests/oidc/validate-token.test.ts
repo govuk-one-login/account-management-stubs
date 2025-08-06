@@ -103,13 +103,36 @@ describe("extractGrantType", () => {
   test("should extract grant type from event body", () => {
     const result = extractGrantType(eventBody);
     expect(result).toBe("authorization_code");
+
+    const otherBody =
+      "client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback";
+    expect(extractGrantType(otherBody)).toBe("authorization_code");
   });
 
-  test("should return null if grant type is not present", () => {
+  test("should throw an error if grant type is not present", () => {
     const bodyWithoutGrantType =
       "client_assertion_type=type&client_assertion=xxxx&code=xxxx&redirect_uri=xxxxxx";
     expect(() => {
       extractGrantType(bodyWithoutGrantType);
     }).toThrow("grant_type not found in the event body");
+  });
+});
+
+describe("validateSupportedGrantType", () => {
+  const eventBody =
+    "client_assertion_type=type&client_assertion=xxxx&grant_type=authorization_code&code=xxxx&redirect_uri=xxxxxx";
+  const unsupportedGrantTypeBody =
+    "client_assertion_type=type&client_assertion=xxxx&grant_type=unsupported_grant_type&code=xxxx&redirect_uri=xxxxxx";
+
+  test("should not throw an error for a supported grant type", () => {
+    expect(() => {
+      validateSupportedGrantType(eventBody);
+    }).not.toThrow();
+  });
+
+  test("should throw an error for an unsupported grant type", () => {
+    expect(() => {
+      validateSupportedGrantType(unsupportedGrantTypeBody);
+    }).toThrow("Unauthorized Client - unsupported_grant_type");
   });
 });
