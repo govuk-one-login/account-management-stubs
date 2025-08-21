@@ -259,6 +259,9 @@ Resources:
       Target: !Join
         - ":"
         - [!GetAtt AccountManagementStubFunction.Arn, "live"]
+      Tags:
+        FMSRegionalPolicy: false
+        CustomPolicy: true
 
   AccountManagementStubApiPermission:
     Type: AWS::Lambda::Permission
@@ -420,6 +423,9 @@ Resources:
       TracingEnabled: true
       AccessLogSetting:
         DestinationArn: !GetAtt ApiGatewayApiLogGroup.Arn
+      Tags:
+        FMSRegionalPolicy: false
+        CustomPolicy: true
 
   ApiGatewayApiLogGroup:
     Type: AWS::Logs::LogGroup
