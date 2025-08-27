@@ -411,6 +411,8 @@ Resources:
   OidcStubsRestApi:
     Type: AWS::Serverless::Api
     Properties:
+      AlwaysDeploy: true
+      PropagateTags: true
       Name: oidc-api-stub
       Description: HTTP API to emulate a token issuer for authorization in non-prod environments
       StageName: !Ref Environment
@@ -985,6 +987,8 @@ Resources:
   MethodManagementv1StubsRestApi:
     Type: AWS::Serverless::Api
     Properties:
+      AlwaysDeploy: true
+      PropagateTags: true
       Name: method-management-api-stub
       Description: HTTP API to simulate the Method Management API in non-prod environments
       StageName: !Ref Environment
@@ -997,6 +1001,9 @@ Resources:
       TracingEnabled: true
       AccessLogSetting:
         DestinationArn: !GetAtt MethodManagementv1ApiGatewayApiLogGroup.Arn
+      Tags:
+        FMSRegionalPolicy: false
+        CustomPolicy: true
 
   MethodManagementv1ApiGatewayApiLogGroup:
     Type: AWS::Logs::LogGroup
