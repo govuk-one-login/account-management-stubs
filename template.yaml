@@ -73,6 +73,7 @@ Conditions:
       - Fn::Equals:
           - !Ref PermissionsBoundary
           - "none"
+  IsDev: !Equals [!Ref Environment, dev]
 
 Globals:
   Function:
@@ -260,8 +261,8 @@ Resources:
         - ":"
         - [!GetAtt AccountManagementStubFunction.Arn, "live"]
       Tags:
-        FMSRegionalPolicy: false
-        CustomPolicy: true
+        FMSRegionalPolicy: !If [IsDev, false, ""]
+        CustomPolicy: !If [IsDev, true, ""]
 
   AccountManagementStubApiPermission:
     Type: AWS::Lambda::Permission
@@ -426,8 +427,8 @@ Resources:
       AccessLogSetting:
         DestinationArn: !GetAtt ApiGatewayApiLogGroup.Arn
       Tags:
-        FMSRegionalPolicy: false
-        CustomPolicy: true
+        FMSRegionalPolicy: !If [IsDev, false, ""]
+        CustomPolicy: !If [IsDev, true, ""]
 
   ApiGatewayApiLogGroup:
     Type: AWS::Logs::LogGroup
@@ -1002,8 +1003,8 @@ Resources:
       AccessLogSetting:
         DestinationArn: !GetAtt MethodManagementv1ApiGatewayApiLogGroup.Arn
       Tags:
-        FMSRegionalPolicy: false
-        CustomPolicy: true
+        FMSRegionalPolicy: !If [IsDev, false, ""]
+        CustomPolicy: !If [IsDev, true, ""]
 
   MethodManagementv1ApiGatewayApiLogGroup:
     Type: AWS::Logs::LogGroup
