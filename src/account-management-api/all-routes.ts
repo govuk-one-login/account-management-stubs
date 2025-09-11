@@ -16,6 +16,8 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   } else if (event.rawPath.includes("/update-email")) {
     const body = JSON.parse(event.body ?? "{}");
 
+    console.log(event);
+
     if (body.replacementEmailAddress.includes("fail.email.check")) {
       return formatResponse(403, {
         code: 1089,

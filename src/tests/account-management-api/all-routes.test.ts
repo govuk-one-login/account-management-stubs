@@ -47,6 +47,7 @@ describe("handler", () => {
     );
     expect(result.statusCode).toEqual(204);
   });
+
   test("returns status code 403 for SUSPENDED intervention", async () => {
     mockedGetUserIdFromEvent.mockResolvedValue("temporarilySuspended");
     mockedGetUserScenario.mockResolvedValue({
@@ -62,6 +63,7 @@ describe("handler", () => {
       '{"code":1083,"message":"User\'s account is suspended"}'
     );
   });
+
   test("returns status code 403 for BLOCKED intervention", async () => {
     mockedGetUserIdFromEvent.mockResolvedValue("permanentlySuspended");
     mockedGetUserScenario.mockResolvedValue({
@@ -93,6 +95,23 @@ describe("handler", () => {
     expect(result.statusCode).toEqual(403);
     expect(result.body).toEqual(
       '{"code":1084,"message":"User\'s account is blocked"}'
+    );
+  });
+
+  test("/update-email returns status code 403 when email check has failed", async () => {
+    const result: Response | ResponseWithOptionalBody = await handler(
+      createFakeAPIGatewayProxyEvent(
+        {
+          body: JSON.stringify({
+            replacementEmailAddress: "fail.email.check@test.com",
+          }),
+        },
+        "/update-email"
+      )
+    );
+    expect(result.statusCode).toEqual(403);
+    expect(result.body).toEqual(
+      '{"code":1089,"message":"Email address is denied"}'
     );
   });
 });
