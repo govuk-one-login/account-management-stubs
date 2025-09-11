@@ -102,9 +102,7 @@ describe("handler", () => {
     const result: Response | ResponseWithOptionalBody = await handler(
       createFakeAPIGatewayProxyEvent(
         {
-          body: JSON.stringify({
-            replacementEmailAddress: "fail.email.check@test.com",
-          }),
+          replacementEmailAddress: "fail.email.check@test.com",
         },
         "/update-email"
       )
@@ -113,5 +111,17 @@ describe("handler", () => {
     expect(result.body).toEqual(
       '{"code":1089,"message":"Email address is denied"}'
     );
+  });
+
+  test("/update-email returns status code 204 when email check has passed", async () => {
+    const result: Response | ResponseWithOptionalBody = await handler(
+      createFakeAPIGatewayProxyEvent(
+        {
+          replacementEmailAddress: "test@test.com",
+        },
+        "/update-email"
+      )
+    );
+    expect(result.statusCode).toEqual(204);
   });
 });
