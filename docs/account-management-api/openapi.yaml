@@ -66,6 +66,8 @@ paths:
       responses:
         "204":
           description: Successful operation
+        "403":
+          description: Forbidden
 
   /update-phone-number:
     post:
