@@ -19,13 +19,14 @@ const mockedGetUserScenario =
 
 const createFakeAPIGatewayProxyEvent = (
   body: unknown,
-  path: string
+  path: string,
+  base64EncodeBody = false
 ): APIGatewayProxyEventV2 => {
   return {
-    body: JSON.stringify(body),
+    body: base64EncodeBody ? btoa(JSON.stringify(body)) : JSON.stringify(body),
     rawPath: path,
     pathParameters: {},
-    isBase64Encoded: false,
+    isBase64Encoded: base64EncodeBody,
     headers: {},
     queryStringParameters: undefined,
     stageVariables: undefined,
@@ -120,6 +121,35 @@ describe("handler", () => {
           replacementEmailAddress: "test@test.com",
         },
         "/update-email"
+      )
+    );
+    expect(result.statusCode).toEqual(204);
+  });
+
+  test("/update-email returns status code 403 when email check has failed (base64 encoded body)", async () => {
+    const result: Response | ResponseWithOptionalBody = await handler(
+      createFakeAPIGatewayProxyEvent(
+        {
+          replacementEmailAddress: "fail.email.check@test.com",
+        },
+        "/update-email",
+        true
+      )
+    );
+    expect(result.statusCode).toEqual(403);
+    expect(result.body).toEqual(
+      '{"code":1089,"message":"Email address is denied"}'
+    );
+  });
+
+  test("/update-email returns status code 204 when email check has passed (base64 encoded body)", async () => {
+    const result: Response | ResponseWithOptionalBody = await handler(
+      createFakeAPIGatewayProxyEvent(
+        {
+          replacementEmailAddress: "test@test.com",
+        },
+        "/update-email",
+        true
       )
     );
     expect(result.statusCode).toEqual(204);

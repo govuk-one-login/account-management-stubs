@@ -19,9 +19,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         (event.isBase64Encoded ? atob(event.body) : event.body) ?? "{}"
       );
 
-      console.log(event);
-
-      if (body.replacementEmailAddress.includes("fail.email.check")) {
+      if (body.replacementEmailAddress?.includes("fail.email.check")) {
         return formatResponse(403, {
           code: 1089,
           message: "Email address is denied",
