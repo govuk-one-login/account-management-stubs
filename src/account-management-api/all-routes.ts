@@ -4,6 +4,7 @@ import {
   getUserScenario,
 } from "../scenarios/scenarios-utils";
 import { formatResponse } from "../common/response-utils";
+import { parseFormBody } from "../common/request-utils";
 
 export const handler = async (event: APIGatewayProxyEventV2) => {
   if (event?.rawPath.includes("send-otp-notification")) {
@@ -13,8 +14,8 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     const status = scenario.success ? 204 : 400;
 
     return formatResponse(status, scenario);
-  } else if (event?.rawPath.includes("/update-email")) {
-    console.log(JSON.stringify(event, null, 2));
+  } else if (event.rawPath.includes("/update-email")) {
+    console.log(parseFormBody(event));
   } else if (event?.rawPath.includes("/authenticate")) {
     const userId = await getUserIdFromEvent(event);
     const scenario = await getUserScenario(userId, "interventions");
