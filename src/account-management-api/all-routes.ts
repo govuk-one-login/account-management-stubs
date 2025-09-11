@@ -4,7 +4,6 @@ import {
   getUserScenario,
 } from "../scenarios/scenarios-utils";
 import { formatResponse } from "../common/response-utils";
-import { parseFormBody } from "../common/request-utils";
 
 export const handler = async (event: APIGatewayProxyEventV2) => {
   if (event?.rawPath.includes("send-otp-notification")) {
@@ -15,7 +14,14 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
     return formatResponse(status, scenario);
   } else if (event.rawPath.includes("/update-email")) {
-    console.log(parseFormBody(event));
+    const body = JSON.parse(event.body ?? "{}");
+
+    if (body.replacementEmailAddress.includes("fail.email.check")) {
+      return formatResponse(403, {
+        code: 1089,
+        message: "Email address is denied",
+      });
+    }
   } else if (event?.rawPath.includes("/authenticate")) {
     const userId = await getUserIdFromEvent(event);
     const scenario = await getUserScenario(userId, "interventions");
