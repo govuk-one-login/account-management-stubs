@@ -14,15 +14,19 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
     return formatResponse(status, scenario);
   } else if (event.rawPath.includes("/update-email")) {
-    const body = JSON.parse(event.body ?? "{}");
+    if (typeof event.body == "string") {
+      const body = JSON.parse(
+        (event.isBase64Encoded ? atob(event.body) : event.body) ?? "{}"
+      );
 
-    console.log(event);
+      console.log(event);
 
-    if (body.replacementEmailAddress.includes("fail.email.check")) {
-      return formatResponse(403, {
-        code: 1089,
-        message: "Email address is denied",
-      });
+      if (body.replacementEmailAddress.includes("fail.email.check")) {
+        return formatResponse(403, {
+          code: 1089,
+          message: "Email address is denied",
+        });
+      }
     }
   } else if (event?.rawPath.includes("/authenticate")) {
     const userId = await getUserIdFromEvent(event);
