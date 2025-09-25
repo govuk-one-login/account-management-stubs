@@ -87,6 +87,12 @@ Globals:
       - UsePermissionsBoundary
       - !Ref PermissionsBoundary
       - !Ref AWS::NoValue
+    VpcConfig:
+      SubnetIds:
+        - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+        - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+      SecurityGroupIds:
+        - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
 
 Resources:
   ######################################
@@ -206,12 +212,6 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref OidcStubDataTableName
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -504,12 +504,6 @@ Resources:
             Method: GET
             RestApiId:
               Ref: OidcStubsRestApi
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -564,12 +558,6 @@ Resources:
               Ref: OidcStubsRestApi
             RequestParameters:
               - method.request.header.Cookie
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -672,12 +660,6 @@ Resources:
             RequestParameters:
               method.request.header.Authorization:
                 Caching: false
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
       Environment:
         Variables:
           TABLE_NAME: !Ref OidcStubDataTableName
@@ -749,12 +731,6 @@ Resources:
       Environment:
         Variables:
           ENVIRONMENT: !Ref Environment
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -800,12 +776,6 @@ Resources:
             Method: GET
             RestApiId:
               Ref: OidcStubsRestApi
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -851,12 +821,6 @@ Resources:
             Method: POST
             RestApiId:
               Ref: OidcStubsRestApi
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
       Environment:
         Variables:
           OIDC_CLIENT_ID: "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
@@ -934,12 +898,6 @@ Resources:
             Method: GET
             RestApiId:
               Ref: OidcStubsRestApi
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -1099,12 +1057,6 @@ Resources:
             Method: GET
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -1147,12 +1099,6 @@ Resources:
             Method: POST
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -1195,12 +1141,6 @@ Resources:
             Method: PUT
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -1243,12 +1183,6 @@ Resources:
             Method: DELETE
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
-      VpcConfig:
-        SubnetIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
-          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
-        SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
