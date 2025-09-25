@@ -14,10 +14,10 @@ Parameters:
     ConstraintDescription: must be dev or build or demo
   VpcStackName:
     Description: >
-      The name of the stack that defines the VPC in which this container will
+      The name of the stack that defines the VPC in which these lambdas will
       run.
     Type: String
-    Default: vpc-enhanced
+    Default: dev-platform-vpc
   CodeSigningConfigArn:
     Type: String
     Description: >
