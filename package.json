@@ -46,7 +46,7 @@
     "@aws-sdk/lib-dynamodb": "^3.896.0",
     "@types/aws-lambda": "^8.10.152",
     "dotenv": "^17.2.1",
-    "jose": "^5.9.6",
+    "jose": "^6.1.0",
     "uuid": "^11.1.0",
     "valibot": "^1.1.0"
   },
