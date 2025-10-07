@@ -41,11 +41,11 @@
     "typescript-eslint": "^8.39.0"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.896.0",
-    "@aws-sdk/client-sqs": "^3.896.0",
-    "@aws-sdk/lib-dynamodb": "^3.896.0",
-    "@types/aws-lambda": "^8.10.152",
-    "dotenv": "^17.2.1",
+    "@aws-sdk/client-dynamodb": "^3.902.0",
+    "@aws-sdk/client-sqs": "^3.901.0",
+    "@aws-sdk/lib-dynamodb": "^3.902.0",
+    "@types/aws-lambda": "^8.10.155",
+    "dotenv": "^17.2.3",
     "jose": "^5.9.6",
     "uuid": "^11.1.0",
     "valibot": "^1.1.0"
