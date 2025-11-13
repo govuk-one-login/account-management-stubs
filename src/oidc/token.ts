@@ -4,9 +4,9 @@ import {
   JWK,
   JWTHeaderParameters,
   JWTPayload,
-  KeyLike,
+  CryptoKey,
   SignJWT,
-} from "jose";
+} from "jose";c
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
@@ -45,7 +45,7 @@ const tokenResponseTemplate: Omit<Token, "access_token" | "id_token"> = {
   token_type: "Bearer",
   expires_in: 3600,
 };
-let cachedPrivateKey: Uint8Array | KeyLike;
+let cachedPrivateKey: Uint8Array | CryptoKey;
 const getPrivateKey = async () => {
   if (!cachedPrivateKey) {
     if (typeof JWK_KEY_SECRET === "undefined") {
