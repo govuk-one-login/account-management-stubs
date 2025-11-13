@@ -1,4 +1,4 @@
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "node:crypto";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
@@ -41,13 +41,13 @@ export interface Response {
 }
 
 const newTxmaEvent = (): TxmaEvent => ({
-  event_id: uuid(),
+  event_id: randomUUID(),
   timestamp: Date.now(),
   event_name: "AUTH_AUTH_CODE_ISSUED",
   client_id: "vehicleOperatorLicense",
   user: {
     user_id: "user_id",
-    session_id: uuid(),
+    session_id: randomUUID(),
   },
 });
 
@@ -128,7 +128,7 @@ export const handler = async (
 
   const { DUMMY_TXMA_QUEUE_URL } = process.env;
 
-  const code = uuid();
+  const code = randomUUID();
 
   if (
     typeof DUMMY_TXMA_QUEUE_URL === "undefined" ||

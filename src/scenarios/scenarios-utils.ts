@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
 import { userScenarios } from "./scenarios";
 import { OicdPersistedData, UserScenarios } from "./scenarios.interfaces";
-import { v4 as uuidv4 } from "uuid";
+import { randomUUID } from "node:crypto";
 
 const marshallOptions = {
   convertClassInstanceToMap: true,
@@ -73,7 +73,7 @@ export const getUserScenario = <
     }
 
     if (id === "userPerformanceTest" && "sub" in response) {
-      response.sub = uuidv4();
+      response.sub = randomUUID();
     }
   }
 
