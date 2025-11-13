@@ -6,7 +6,7 @@ import {
   JWTPayload,
   CryptoKey,
   SignJWT,
-} from "jose";c
+} from "jose";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
