@@ -1,4 +1,4 @@
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "node:crypto";
 import {
   importJWK,
   JWK,
@@ -72,7 +72,7 @@ const newClaims = (
   aud: oidcClientId,
   exp: epochDateNow() + 3600,
   iat: epochDateNow(),
-  sid: uuid(),
+  sid: randomUUID(),
   nonce,
   vot: "Cl.Cm",
 });
@@ -124,7 +124,7 @@ export const handler = async (
 
   const privateKey = await getPrivateKey(); // Retrieve cached private key
   const jwt = await new SignJWT(
-    newClaims(OIDC_CLIENT_ID, ENVIRONMENT, uuid(), nonce)
+    newClaims(OIDC_CLIENT_ID, ENVIRONMENT, randomUUID(), nonce)
   )
     .setProtectedHeader(jwtHeader)
     .sign(privateKey);
