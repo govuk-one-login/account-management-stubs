@@ -5,6 +5,10 @@ import {
 } from "../scenarios/scenarios-utils";
 import { formatResponse } from "../common/response-utils";
 
+const OTP_REGEX = /^[0-9]{6}$/;
+const EMAIL_REGEX = /[a-z0-9\\._%+!$&*=^|~#{}-]+@([a-z0-9-]+\.)+([a-z]{2,22})$/;
+const OTP_DIGITS_ARE_ALL_THE_SAME = /^(.)\1*$/;
+
 export const handler = async (event: APIGatewayProxyEventV2) => {
   if (event?.rawPath.includes("send-otp-notification")) {
     const userId = await getUserIdFromEvent(event);
@@ -39,6 +43,38 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
       return formatResponse(403, {
         code: 1083,
         message: "User's account is suspended",
+      });
+    }
+  } else if (event.rawPath.startsWith("/verify-otp")) {
+    if (typeof event.body == "string") {
+      const body = JSON.parse(event.body);
+      if (
+        !Object.prototype.hasOwnProperty.call(body, "email") ||
+        !Object.prototype.hasOwnProperty.call(body, "otp") ||
+        !Object.prototype.hasOwnProperty.call(body, "otpType")
+      )
+        return formatResponse(400, {
+          code: 1001,
+          message: "Request is missing parameters",
+        });
+
+      if (
+        body.otpType !== "VERIFY_EMAIL" ||
+        !OTP_REGEX.test(body.otp) ||
+        !EMAIL_REGEX.test(body.email)
+      )
+        return formatResponse(400, {
+          message: "bad request",
+        });
+
+      if (OTP_DIGITS_ARE_ALL_THE_SAME.test(body.otp))
+        return formatResponse(400, {
+          code: 1020,
+          message: "Invalid OTP code",
+        });
+    } else {
+      return formatResponse(400, {
+        message: "bad request",
       });
     }
   }

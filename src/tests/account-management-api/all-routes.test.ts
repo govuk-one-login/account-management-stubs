@@ -154,4 +154,159 @@ describe("handler", () => {
     );
     expect(result.statusCode).toEqual(204);
   });
+
+  describe("/verify-otp", () => {
+    const EXPECTED_BAD_REQUEST_STATUS = 400;
+    const EXPECTED_MISSING_PARAMS_ERROR = {
+      code: 1001,
+      message: "Request is missing parameters",
+    };
+    const EXPECTED_INVALID_OTP = {
+      code: 1020,
+      message: "Invalid OTP code",
+    };
+    const BAD_REQUEST = {
+      message: "bad request",
+    };
+
+    const expectBadRequestError = (
+      result: Response | ResponseWithOptionalBody,
+      expectedError: { code?: number; message: string }
+    ) => {
+      expect(result.statusCode).toEqual(EXPECTED_BAD_REQUEST_STATUS);
+      const errorBody = JSON.parse(result.body as string);
+      expect(errorBody).toMatchObject(expectedError);
+    };
+
+    test("returns status code 400 if body is empty", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent({}, "/verify-otp", false)
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR);
+    });
+
+    test("returns status code 400 if body is null", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(undefined, "/verify-otp", false)
+      );
+      expectBadRequestError(result, BAD_REQUEST);
+    });
+
+    test("returns status code 400 if body does not contain 'otpType'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test@test.com",
+            otp: "123456",
+          },
+          "/verify-otp",
+          false
+        )
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR);
+    });
+
+    test("returns status code 400 if body does not contain 'otp'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test@test.com",
+            otpType: "VERIFY_EMAIL",
+          },
+          "/verify-otp",
+          false
+        )
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR);
+    });
+
+    test("returns status code 400 if body does not contain 'email'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            otp: "123456",
+            otpType: "VERIFY_EMAIL",
+          },
+          "/verify-otp",
+          false
+        )
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR);
+    });
+
+    test("returns status code 400 if body does not contain a valid 'email'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test&test.com",
+            otp: "123456",
+            otpType: "VERIFY_EMAIL",
+          },
+          "/verify-otp",
+          false
+        )
+      );
+      expectBadRequestError(result, BAD_REQUEST);
+    });
+
+    test("returns status code 400 if body does not contain a valid 'otpType'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test@test.com",
+            otp: "123456",
+            otpType: "VERIFY_XYZ",
+          },
+          "/verify-otp",
+          false
+        )
+      );
+      expectBadRequestError(result, BAD_REQUEST);
+    });
+
+    test("returns status code 400 if body does not contain a valid 'otp'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test@test.com",
+            otp: "abcdef",
+            otpType: "VERIFY_EMAIL",
+          },
+          "/verify-otp",
+          false
+        )
+      );
+      expectBadRequestError(result, BAD_REQUEST);
+    });
+
+    test("returns status code 400 if OTP is invalid (all digits the same)", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test@test.com",
+            otp: "000000",
+            otpType: "VERIFY_EMAIL",
+          },
+          "/verify-otp",
+          false
+        )
+      );
+      expectBadRequestError(result, EXPECTED_INVALID_OTP);
+    });
+
+    test("returns status code 204 when OTP check has passed", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test@test.com",
+            otp: "123456",
+            otpType: "VERIFY_EMAIL",
+          },
+          "/verify-otp",
+          false
+        )
+      );
+      expect(result.statusCode).toEqual(204);
+    });
+  });
 });
