@@ -4,12 +4,19 @@ import {
   getUserScenario,
 } from "../scenarios/scenarios-utils";
 import { formatResponse } from "../common/response-utils";
+import { validateBearerToken } from "../common/validation";
 
 const OTP_REGEX = /^[0-9]{6}$/;
 const EMAIL_REGEX = /[a-z0-9\\._%+!$&*=^|~#{}-]+@([a-z0-9-]+\.)+([a-z]{2,22})$/;
 const OTP_DIGITS_ARE_ALL_THE_SAME = /^(.)\1*$/;
 
 export const handler = async (event: APIGatewayProxyEventV2) => {
+  try {
+    validateBearerToken(event.headers?.authorization);
+  } catch (e) {
+    return formatResponse(403, { error: (e as Error).message });
+  }
+
   if (event?.rawPath.includes("send-otp-notification")) {
     const userId = await getUserIdFromEvent(event);
     const scenario = getUserScenario(userId, "otpNotification");

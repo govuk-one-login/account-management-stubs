@@ -1,4 +1,4 @@
-import { validateFields } from "../../common/validation";
+import { validateFields, validateBearerToken } from "../../common/validation";
 
 describe("validateFields Function", () => {
   it("should validate required fields successfully", () => {
@@ -55,6 +55,48 @@ describe("validateFields Function", () => {
     };
     expect(() => validateFields(fields, checks)).toThrow(
       /invalid mfaIdentifier/
+    );
+  });
+});
+
+describe("validateBearerToken Function", () => {
+  it("should validate a valid Bearer token successfully", () => {
+    expect(() => validateBearerToken("Bearer token123")).not.toThrow();
+  });
+
+  it("should throw an error when Authorization header is missing", () => {
+    expect(() => validateBearerToken(undefined)).toThrow(
+      /Authorization header must be in format 'Bearer token'/
+    );
+  });
+
+  it("should throw an error when Authorization header does not start with Bearer", () => {
+    expect(() => validateBearerToken("Basic token123")).toThrow(
+      /Authorization header must be in format 'Bearer token'/
+    );
+  });
+
+  it("should throw an error when Authorization header is 'Bearer ' without token", () => {
+    expect(() => validateBearerToken("Bearer ")).toThrow(
+      /Authorization header must be in format 'Bearer token'/
+    );
+  });
+
+  it("should throw an error when Authorization header is missing the space", () => {
+    expect(() => validateBearerToken("Bearertoken")).toThrow(
+      /Authorization header must be in format 'Bearer token'/
+    );
+  });
+
+  it("should throw an error when Authorization header has multiple spaces", () => {
+    expect(() => validateBearerToken("Bearer  token")).toThrow(
+      /Authorization header must be in format 'Bearer token'/
+    );
+  });
+
+  it("should throw an error when Authorization header is empty string", () => {
+    expect(() => validateBearerToken("")).toThrow(
+      /Authorization header must be in format 'Bearer token'/
     );
   });
 });
