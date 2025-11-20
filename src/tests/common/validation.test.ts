@@ -82,6 +82,18 @@ describe("validateBearerToken Function", () => {
     );
   });
 
+  it("should throw an error when Authorization header is missing the space", () => {
+    expect(() => validateBearerToken("Bearertoken")).toThrow(
+      /Authorization header must be in format 'Bearer token'/
+    );
+  });
+
+  it("should throw an error when Authorization header has multiple spaces", () => {
+    expect(() => validateBearerToken("Bearer  token")).toThrow(
+      /Authorization header must be in format 'Bearer token'/
+    );
+  });
+
   it("should throw an error when Authorization header is empty string", () => {
     expect(() => validateBearerToken("")).toThrow(
       /Authorization header must be in format 'Bearer token'/
