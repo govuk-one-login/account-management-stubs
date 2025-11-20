@@ -15,3 +15,10 @@ export const validateFields = (
     }
   });
 };
+
+export const validateBearerToken = (authHeader: string | undefined): void => {
+  assert(
+    authHeader && /^Bearer \S+$/.test(authHeader),
+    "Authorization header must be in format 'Bearer token'"
+  );
+};

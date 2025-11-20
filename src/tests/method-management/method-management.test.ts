@@ -130,7 +130,8 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
 describe("retrieveMfaMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
     body: unknown,
-    mfaIdentifier: string
+    mfaIdentifier: string,
+    authHeader?: string
   ): APIGatewayProxyEvent => {
     return {
       body: JSON.stringify(body),
@@ -141,7 +142,7 @@ describe("retrieveMfaMethodHandler", () => {
       multiValueHeaders: {},
       queryStringParameters: null,
       headers: {
-        Authorization: "delete", // used to switch mock scenarios
+        Authorization: authHeader || "Bearer token",
       },
       multiValueQueryStringParameters: null,
       stageVariables: null,
@@ -170,12 +171,36 @@ describe("retrieveMfaMethodHandler", () => {
     ).toEqual("07123456789");
     expect(mfaMethod[0].methodVerified).toBe(true);
   });
+
+  test("should return 403 when Authorization header is missing", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "default", undefined);
+    fakeEvent.headers = {};
+    const result = await retrieveMfaMethodHandler(fakeEvent);
+    expect(result.statusCode).toBe(403);
+  });
+
+  test("should return 403 when Authorization header does not start with Bearer", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      {},
+      "default",
+      "Basic token"
+    );
+    const result = await retrieveMfaMethodHandler(fakeEvent);
+    expect(result.statusCode).toBe(403);
+  });
+
+  test("should return 403 when Authorization header is 'Bearer ' without token", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent({}, "default", "Bearer ");
+    const result = await retrieveMfaMethodHandler(fakeEvent);
+    expect(result.statusCode).toBe(403);
+  });
 });
 
 describe("createMfaMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
     scenario: string,
-    body: unknown
+    body: unknown,
+    authHeader?: string
   ): APIGatewayProxyEvent => {
     return {
       body: JSON.stringify(body),
@@ -183,7 +208,9 @@ describe("createMfaMethodHandler", () => {
       path: `/mfa-methods/${scenario}`,
       pathParameters: { publicSubjectId: scenario },
       isBase64Encoded: false,
-      headers: {},
+      headers: {
+        Authorization: authHeader || "Bearer token",
+      },
       multiValueHeaders: {},
       queryStringParameters: null,
       multiValueQueryStringParameters: null,
@@ -250,13 +277,75 @@ describe("createMfaMethodHandler", () => {
     const response = await createMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(404);
   });
+
+  test("should return 403 when Authorization header is missing", async () => {
+    const requestBody = {
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+          otp: "987654",
+        },
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      "default",
+      requestBody,
+      undefined
+    );
+    fakeEvent.headers = {};
+    const response = await createMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(403);
+  });
+
+  test("should return 403 when Authorization header does not start with Bearer", async () => {
+    const requestBody = {
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+          otp: "987654",
+        },
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      "default",
+      requestBody,
+      "Basic token"
+    );
+    const response = await createMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(403);
+  });
+
+  test("should return 403 when Authorization header is 'Bearer ' without token", async () => {
+    const requestBody = {
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+          otp: "987654",
+        },
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      "default",
+      requestBody,
+      "Bearer "
+    );
+    const response = await createMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(403);
+  });
 });
 
 describe("updateMfaMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
     body: unknown,
     mfaIdentifier: string,
-    scenario: string
+    scenario: string,
+    authHeader?: string
   ): APIGatewayProxyEvent => {
     return {
       body: JSON.stringify(body),
@@ -264,7 +353,9 @@ describe("updateMfaMethodHandler", () => {
       path: `/mfa-methods/${scenario}/${mfaIdentifier}`,
       pathParameters: { mfaIdentifier, publicSubjectId: scenario },
       isBase64Encoded: false,
-      headers: {},
+      headers: {
+        Authorization: authHeader || "Bearer token",
+      },
       multiValueHeaders: {},
       queryStringParameters: null,
       multiValueQueryStringParameters: null,
@@ -366,13 +457,75 @@ describe("updateMfaMethodHandler", () => {
     const response = await createMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(404);
   });
+
+  test("should return 403 when Authorization header is missing", async () => {
+    const requestBody = {
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "0123456789",
+        },
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      requestBody,
+      "1",
+      "default",
+      undefined
+    );
+    fakeEvent.headers = {};
+    const response = await updateMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(403);
+  });
+
+  test("should return 403 when Authorization header does not start with Bearer", async () => {
+    const requestBody = {
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "0123456789",
+        },
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      requestBody,
+      "1",
+      "default",
+      "Basic token"
+    );
+    const response = await updateMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(403);
+  });
+
+  test("should return 403 when Authorization header is 'Bearer ' without token", async () => {
+    const requestBody = {
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "0123456789",
+        },
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      requestBody,
+      "1",
+      "default",
+      "Bearer "
+    );
+    const response = await updateMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(403);
+  });
 });
 
 describe("deleteMethodHandler", () => {
   const createFakeAPIGatewayProxyEvent = (
     body: unknown,
     mfaIdentifier: string,
-    scenario: string
+    scenario: string,
+    authHeader?: string
   ): APIGatewayProxyEvent => {
     return {
       body: JSON.stringify(body),
@@ -383,7 +536,7 @@ describe("deleteMethodHandler", () => {
       multiValueHeaders: {},
       queryStringParameters: null,
       headers: {
-        Authorization: "delete", // used to switch mock scenarios
+        Authorization: authHeader || "Bearer token",
       },
       multiValueQueryStringParameters: null,
       stageVariables: null,
@@ -409,5 +562,39 @@ describe("deleteMethodHandler", () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent({}, "3", "default");
     const response = await deleteMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(404);
+  });
+
+  test("should return 403 when Authorization header is missing", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      {},
+      "2",
+      "deleteMethod",
+      undefined
+    );
+    fakeEvent.headers = {};
+    const response = await deleteMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(403);
+  });
+
+  test("should return 403 when Authorization header does not start with Bearer", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      {},
+      "2",
+      "deleteMethod",
+      "Basic token"
+    );
+    const response = await deleteMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(403);
+  });
+
+  test("should return 403 when Authorization header is 'Bearer ' without token", async () => {
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      {},
+      "2",
+      "deleteMethod",
+      "Bearer "
+    );
+    const response = await deleteMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(403);
   });
 });

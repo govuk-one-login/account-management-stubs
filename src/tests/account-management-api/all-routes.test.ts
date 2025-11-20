@@ -20,14 +20,17 @@ const mockedGetUserScenario =
 const createFakeAPIGatewayProxyEvent = (
   body: unknown,
   path: string,
-  base64EncodeBody = false
+  base64EncodeBody = false,
+  authHeader?: string
 ): APIGatewayProxyEventV2 => {
   return {
     body: base64EncodeBody ? btoa(JSON.stringify(body)) : JSON.stringify(body),
     rawPath: path,
     pathParameters: {},
     isBase64Encoded: base64EncodeBody,
-    headers: {},
+    headers: {
+      authorization: authHeader || "Bearer token",
+    },
     queryStringParameters: undefined,
     stageVariables: undefined,
     version: "2.0",
@@ -42,6 +45,27 @@ interface ResponseWithOptionalBody extends Omit<Response, "body"> {
 }
 
 describe("handler", () => {
+  test("returns status code 403 when Authorization header is missing", async () => {
+    const event = createFakeAPIGatewayProxyEvent({}, "test", false, undefined);
+    event.headers = {};
+    const result: Response | ResponseWithOptionalBody = await handler(event);
+    expect(result.statusCode).toEqual(403);
+  });
+
+  test("returns status code 403 when Authorization header does not start with Bearer", async () => {
+    const result: Response | ResponseWithOptionalBody = await handler(
+      createFakeAPIGatewayProxyEvent({}, "test", false, "Basic token")
+    );
+    expect(result.statusCode).toEqual(403);
+  });
+
+  test("returns status code 403 when Authorization header is 'Bearer ' without token", async () => {
+    const result: Response | ResponseWithOptionalBody = await handler(
+      createFakeAPIGatewayProxyEvent({}, "test", false, "Bearer ")
+    );
+    expect(result.statusCode).toEqual(403);
+  });
+
   test("returns status code 204", async () => {
     const result: Response | ResponseWithOptionalBody = await handler(
       createFakeAPIGatewayProxyEvent({}, "test")

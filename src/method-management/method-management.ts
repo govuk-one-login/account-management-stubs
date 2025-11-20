@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import assert from "node:assert/strict";
-import { validateFields } from "../common/validation";
+import { validateFields, validateBearerToken } from "../common/validation";
 import { formatResponse, Response } from "../common/response-utils";
 import { getUserScenario } from "../scenarios/scenarios-utils";
 import { components } from "./models/schema";
@@ -64,6 +64,12 @@ function handleMFAResponse(response: components["schemas"]["MfaMethod"][]) {
 export const retrieveMfaMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
+  try {
+    validateBearerToken(event.headers?.Authorization);
+  } catch (e) {
+    return formatResponse(403, { error: (e as Error).message });
+  }
+
   const publicSubjectId = event.pathParameters?.publicSubjectId;
   const response = getUserScenario(
     publicSubjectId ? publicSubjectId : "default",
@@ -86,6 +92,12 @@ export const createMfaMethodHandler = async (
 
   const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
   const userScenario = getUserScenario(publicSubjectId, "httpResponse");
+
+  try {
+    validateBearerToken(event.headers?.Authorization);
+  } catch (e) {
+    return formatResponse(403, { error: (e as Error).message });
+  }
 
   try {
     const { code: responseCode, message: responseMessage } = userScenario || {};
@@ -139,6 +151,12 @@ export const updateMfaMethodHandler = async (
   const userScenario = getUserScenario(publicSubjectId, "httpResponse");
 
   try {
+    validateBearerToken(event.headers?.Authorization);
+  } catch (e) {
+    return formatResponse(403, { error: (e as Error).message });
+  }
+
+  try {
     assert(mfaIdentifier, "mfaIdentifier not present");
     const { code: responseCode, message: responseMessage } = userScenario || {};
 
@@ -167,6 +185,12 @@ export const updateMfaMethodHandler = async (
 export const deleteMethodHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  try {
+    validateBearerToken(event.headers?.Authorization);
+  } catch (e) {
+    return formatResponse(403, { error: (e as Error).message });
+  }
+
   const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
   const mfaIdentifier = event.pathParameters?.mfaIdentifier;
 
