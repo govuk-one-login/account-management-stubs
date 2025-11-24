@@ -11,7 +11,7 @@ const EMAIL_REGEX = /[a-z0-9\\._%+!$&*=^|~#{}-]+@([a-z0-9-]+\.)+([a-z]{2,22})$/;
 const OTP_DIGITS_ARE_ALL_THE_SAME = /^(.)\1*$/;
 
 export const handler = async (event: APIGatewayProxyEventV2) => {
-  let body: any;
+  let body;
   if (typeof event.body == "string") {
     body = JSON.parse(
       (event.isBase64Encoded ? atob(event.body ?? "") : event.body) ?? "{}"
