@@ -11,6 +11,12 @@ const EMAIL_REGEX = /[a-z0-9\\._%+!$&*=^|~#{}-]+@([a-z0-9-]+\.)+([a-z]{2,22})$/;
 const OTP_DIGITS_ARE_ALL_THE_SAME = /^(.)\1*$/;
 
 export const handler = async (event: APIGatewayProxyEventV2) => {
+  let body;
+  if (typeof event.body == "string") {
+    body = JSON.parse(
+      (event.isBase64Encoded ? atob(event.body ?? "") : event.body) ?? "{}"
+    );
+  }
   try {
     validateBearerToken(event.headers?.authorization);
   } catch (e) {
@@ -25,21 +31,28 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
     return formatResponse(status, scenario);
   } else if (event.rawPath.includes("/update-email")) {
-    if (typeof event.body == "string") {
-      const body = JSON.parse(
-        (event.isBase64Encoded ? atob(event.body) : event.body) ?? "{}"
-      );
-
-      if (body.replacementEmailAddress?.includes("fail.email.check")) {
-        return formatResponse(403, {
-          code: 1089,
-          message: "Email address is denied",
-        });
-      }
+    if (body.replacementEmailAddress?.includes("fail.email.check")) {
+      return formatResponse(403, {
+        code: 1089,
+        message: "Email address is denied",
+      });
     }
   } else if (event?.rawPath.includes("/authenticate")) {
     const userId = await getUserIdFromEvent(event);
     const scenario = await getUserScenario(userId, "interventions");
+    if (
+      !Object.prototype.hasOwnProperty.call(body, "email") ||
+      !Object.prototype.hasOwnProperty.call(body, "password")
+    )
+      return formatResponse(400, {
+        code: 1001,
+        message: "Request is missing parameters",
+      });
+
+    if (!EMAIL_REGEX.test(body.email))
+      return formatResponse(400, {
+        message: "bad request",
+      });
 
     if (scenario?.blocked) {
       return formatResponse(403, {
@@ -52,38 +65,47 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         message: "User's account is suspended",
       });
     }
-  } else if (event.rawPath.startsWith("/verify-otp")) {
-    if (typeof event.body == "string") {
-      const body = JSON.parse(event.body);
-      if (
-        !Object.prototype.hasOwnProperty.call(body, "email") ||
-        !Object.prototype.hasOwnProperty.call(body, "otp") ||
-        !Object.prototype.hasOwnProperty.call(body, "otpType")
-      )
-        return formatResponse(400, {
-          code: 1001,
-          message: "Request is missing parameters",
-        });
+  } else if (event.rawPath.startsWith("/verify-otp-challenge")) {
+    if (
+      !body ||
+      !Object.prototype.hasOwnProperty.call(body, "email") ||
+      !Object.prototype.hasOwnProperty.call(body, "otp") ||
+      !Object.prototype.hasOwnProperty.call(body, "mfaMethodType")
+    )
+      return formatResponse(400, {
+        code: 1001,
+        message: "Request is missing parameters",
+      });
 
-      if (
-        body.otpType !== "VERIFY_EMAIL" ||
-        !OTP_REGEX.test(body.otp) ||
-        !EMAIL_REGEX.test(body.email)
-      )
-        return formatResponse(400, {
-          message: "bad request",
-        });
-
-      if (OTP_DIGITS_ARE_ALL_THE_SAME.test(body.otp))
-        return formatResponse(400, {
-          code: 1020,
-          message: "Invalid OTP code",
-        });
-    } else {
+    if (
+      body.mfaMethodType !== "EMAIL" ||
+      !OTP_REGEX.test(body.otp) ||
+      !EMAIL_REGEX.test(body.email)
+    )
       return formatResponse(400, {
         message: "bad request",
       });
-    }
+
+    if (OTP_DIGITS_ARE_ALL_THE_SAME.test(body.otp))
+      return formatResponse(400, {
+        code: 1020,
+        message: "Invalid OTP code",
+      });
+  } else if (event.rawPath.startsWith("/send-otp-challenge")) {
+    if (
+      !body ||
+      !Object.prototype.hasOwnProperty.call(body, "email") ||
+      !Object.prototype.hasOwnProperty.call(body, "mfaMethodType")
+    )
+      return formatResponse(400, {
+        code: 1001,
+        message: "Request is missing parameters",
+      });
+
+    if (body.mfaMethodType !== "EMAIL" || !EMAIL_REGEX.test(body.email))
+      return formatResponse(400, {
+        message: "bad request",
+      });
   }
 
   return {

@@ -40,6 +40,28 @@ const createFakeAPIGatewayProxyEvent = (
   };
 };
 
+const EXPECTED_MISSING_PARAMS_ERROR = {
+  code: 1001,
+  message: "Request is missing parameters",
+};
+const EXPECTED_INVALID_OTP = {
+  code: 1020,
+  message: "Invalid OTP code",
+};
+const BAD_REQUEST = {
+  message: "bad request",
+};
+
+const expectBadRequestError = (
+  result: Response | ResponseWithOptionalBody,
+  expectedError: { code?: number; message: string },
+  statusCode: number
+) => {
+  expect(result.statusCode).toEqual(statusCode);
+  const errorBody = JSON.parse(result.body as string);
+  expect(errorBody).toMatchObject(expectedError);
+};
+
 interface ResponseWithOptionalBody extends Omit<Response, "body"> {
   body?: string;
 }
@@ -73,161 +95,193 @@ describe("handler", () => {
     expect(result.statusCode).toEqual(204);
   });
 
-  test("returns status code 403 for SUSPENDED intervention", async () => {
-    mockedGetUserIdFromEvent.mockResolvedValue("temporarilySuspended");
-    mockedGetUserScenario.mockResolvedValue({
-      suspended: true,
-      blocked: false,
-    } as never);
-    // Call the function
-    const result: Response | ResponseWithOptionalBody = await handler(
-      createFakeAPIGatewayProxyEvent({}, "/authenticate")
-    );
-    expect(result.statusCode).toEqual(403);
-    expect(result.body).toEqual(
-      '{"code":1083,"message":"User\'s account is suspended"}'
-    );
+  describe("/authenticate", () => {
+    test("returns status code 204", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          { email: "test@test.com", password: "password" },
+          "/authenticate"
+        )
+      );
+      expect(result.statusCode).toEqual(204);
+    });
+
+    test("returns status code 400 when 'email' is missing", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          { password: "password" },
+          "/authenticate"
+        )
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
+    });
+
+    test("returns status code 400 when 'password' is missing", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          { email: "test@test.com" },
+          "/authenticate"
+        )
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
+    });
+
+    test("returns status code 403 for SUSPENDED intervention", async () => {
+      mockedGetUserIdFromEvent.mockResolvedValue("temporarilySuspended");
+      mockedGetUserScenario.mockResolvedValue({
+        suspended: true,
+        blocked: false,
+      } as never);
+      // Call the function
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          { email: "test@test.com", password: "password" },
+          "/authenticate"
+        )
+      );
+      expectBadRequestError(
+        result,
+        { code: 1083, message: "User's account is suspended" },
+        403
+      );
+    });
+
+    test("returns status code 403 for BLOCKED intervention", async () => {
+      mockedGetUserIdFromEvent.mockResolvedValue("permanentlySuspended");
+      mockedGetUserScenario.mockResolvedValue({
+        suspended: false,
+        blocked: true,
+      } as never);
+
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          { email: "test@test.com", password: "password" },
+          "/authenticate"
+        )
+      );
+
+      expectBadRequestError(
+        result,
+        { code: 1084, message: "User's account is blocked" },
+        403
+      );
+    });
+
+    test("returns status code 403 with BLOCKED if suspended and blocked is true", async () => {
+      mockedGetUserIdFromEvent.mockResolvedValue("suspendedAndBlocked");
+      mockedGetUserScenario.mockResolvedValue({
+        suspended: true,
+        blocked: true,
+      } as never);
+
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          { email: "test@test.com", password: "password" },
+          "/authenticate"
+        )
+      );
+
+      expectBadRequestError(
+        result,
+        { code: 1084, message: "User's account is blocked" },
+        403
+      );
+    });
   });
 
-  test("returns status code 403 for BLOCKED intervention", async () => {
-    mockedGetUserIdFromEvent.mockResolvedValue("permanentlySuspended");
-    mockedGetUserScenario.mockResolvedValue({
-      suspended: false,
-      blocked: true,
-    } as never);
+  describe("/update-email", () => {
+    test("returns status code 403 when email check has failed", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            replacementEmailAddress: "fail.email.check@test.com",
+          },
+          "/update-email"
+        )
+      );
 
-    const result: Response | ResponseWithOptionalBody = await handler(
-      createFakeAPIGatewayProxyEvent({}, "/authenticate")
-    );
+      expectBadRequestError(
+        result,
+        { code: 1089, message: "Email address is denied" },
+        403
+      );
+    });
 
-    expect(result.statusCode).toEqual(403);
-    expect(result.body).toEqual(
-      '{"code":1084,"message":"User\'s account is blocked"}'
-    );
+    test("returns status code 204 when email check has passed", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            replacementEmailAddress: "test@test.com",
+          },
+          "/update-email"
+        )
+      );
+      expect(result.statusCode).toEqual(204);
+    });
+
+    test("returns status code 403 when email check has failed (base64 encoded body)", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            replacementEmailAddress: "fail.email.check@test.com",
+          },
+          "/update-email",
+          true
+        )
+      );
+
+      expectBadRequestError(
+        result,
+        { code: 1089, message: "Email address is denied" },
+        403
+      );
+    });
+
+    test("returns status code 204 when email check has passed (base64 encoded body)", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            replacementEmailAddress: "test@test.com",
+          },
+          "/update-email",
+          true
+        )
+      );
+      expect(result.statusCode).toEqual(204);
+    });
   });
 
-  test("returns status code 403 with BLOCKED if suspended and blocked is true", async () => {
-    mockedGetUserIdFromEvent.mockResolvedValue("suspendedAndBlocked");
-    mockedGetUserScenario.mockResolvedValue({
-      suspended: true,
-      blocked: true,
-    } as never);
-
-    const result: Response | ResponseWithOptionalBody = await handler(
-      createFakeAPIGatewayProxyEvent({}, "/authenticate")
-    );
-
-    expect(result.statusCode).toEqual(403);
-    expect(result.body).toEqual(
-      '{"code":1084,"message":"User\'s account is blocked"}'
-    );
-  });
-
-  test("/update-email returns status code 403 when email check has failed", async () => {
-    const result: Response | ResponseWithOptionalBody = await handler(
-      createFakeAPIGatewayProxyEvent(
-        {
-          replacementEmailAddress: "fail.email.check@test.com",
-        },
-        "/update-email"
-      )
-    );
-    expect(result.statusCode).toEqual(403);
-    expect(result.body).toEqual(
-      '{"code":1089,"message":"Email address is denied"}'
-    );
-  });
-
-  test("/update-email returns status code 204 when email check has passed", async () => {
-    const result: Response | ResponseWithOptionalBody = await handler(
-      createFakeAPIGatewayProxyEvent(
-        {
-          replacementEmailAddress: "test@test.com",
-        },
-        "/update-email"
-      )
-    );
-    expect(result.statusCode).toEqual(204);
-  });
-
-  test("/update-email returns status code 403 when email check has failed (base64 encoded body)", async () => {
-    const result: Response | ResponseWithOptionalBody = await handler(
-      createFakeAPIGatewayProxyEvent(
-        {
-          replacementEmailAddress: "fail.email.check@test.com",
-        },
-        "/update-email",
-        true
-      )
-    );
-    expect(result.statusCode).toEqual(403);
-    expect(result.body).toEqual(
-      '{"code":1089,"message":"Email address is denied"}'
-    );
-  });
-
-  test("/update-email returns status code 204 when email check has passed (base64 encoded body)", async () => {
-    const result: Response | ResponseWithOptionalBody = await handler(
-      createFakeAPIGatewayProxyEvent(
-        {
-          replacementEmailAddress: "test@test.com",
-        },
-        "/update-email",
-        true
-      )
-    );
-    expect(result.statusCode).toEqual(204);
-  });
-
-  describe("/verify-otp", () => {
-    const EXPECTED_BAD_REQUEST_STATUS = 400;
-    const EXPECTED_MISSING_PARAMS_ERROR = {
-      code: 1001,
-      message: "Request is missing parameters",
-    };
-    const EXPECTED_INVALID_OTP = {
-      code: 1020,
-      message: "Invalid OTP code",
-    };
-    const BAD_REQUEST = {
-      message: "bad request",
-    };
-
-    const expectBadRequestError = (
-      result: Response | ResponseWithOptionalBody,
-      expectedError: { code?: number; message: string }
-    ) => {
-      expect(result.statusCode).toEqual(EXPECTED_BAD_REQUEST_STATUS);
-      const errorBody = JSON.parse(result.body as string);
-      expect(errorBody).toMatchObject(expectedError);
-    };
-
+  describe("/verify-otp-challenge", () => {
     test("returns status code 400 if body is empty", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
-        createFakeAPIGatewayProxyEvent({}, "/verify-otp", false)
+        createFakeAPIGatewayProxyEvent({}, "/verify-otp-challenge", false)
       );
-      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR);
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
     test("returns status code 400 if body is null", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
-        createFakeAPIGatewayProxyEvent(undefined, "/verify-otp", false)
+        createFakeAPIGatewayProxyEvent(
+          undefined,
+          "/verify-otp-challenge",
+          false
+        )
       );
-      expectBadRequestError(result, BAD_REQUEST);
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
-    test("returns status code 400 if body does not contain 'otpType'", async () => {
+    test("returns status code 400 if body does not contain 'mfaMethodType'", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
             email: "test@test.com",
             otp: "123456",
           },
-          "/verify-otp",
+          "/verify-otp-challenge",
           false
         )
       );
-      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR);
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
     test("returns status code 400 if body does not contain 'otp'", async () => {
@@ -235,13 +289,13 @@ describe("handler", () => {
         createFakeAPIGatewayProxyEvent(
           {
             email: "test@test.com",
-            otpType: "VERIFY_EMAIL",
+            mfaMethodType: "EMAIL",
           },
-          "/verify-otp",
+          "/verify-otp-challenge",
           false
         )
       );
-      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR);
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
     test("returns status code 400 if body does not contain 'email'", async () => {
@@ -249,13 +303,13 @@ describe("handler", () => {
         createFakeAPIGatewayProxyEvent(
           {
             otp: "123456",
-            otpType: "VERIFY_EMAIL",
+            mfaMethodType: "EMAIL",
           },
-          "/verify-otp",
+          "/verify-otp-challenge",
           false
         )
       );
-      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR);
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
     test("returns status code 400 if body does not contain a valid 'email'", async () => {
@@ -264,28 +318,28 @@ describe("handler", () => {
           {
             email: "test&test.com",
             otp: "123456",
-            otpType: "VERIFY_EMAIL",
+            mfaMethodType: "EMAIL",
           },
-          "/verify-otp",
+          "/verify-otp-challenge",
           false
         )
       );
-      expectBadRequestError(result, BAD_REQUEST);
+      expectBadRequestError(result, BAD_REQUEST, 400);
     });
 
-    test("returns status code 400 if body does not contain a valid 'otpType'", async () => {
+    test("returns status code 400 if body does not contain a valid 'mfaMethodType'", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
             email: "test@test.com",
             otp: "123456",
-            otpType: "VERIFY_XYZ",
+            mfaMethodType: "XYZ",
           },
-          "/verify-otp",
+          "/verify-otp-challenge",
           false
         )
       );
-      expectBadRequestError(result, BAD_REQUEST);
+      expectBadRequestError(result, BAD_REQUEST, 400);
     });
 
     test("returns status code 400 if body does not contain a valid 'otp'", async () => {
@@ -294,13 +348,13 @@ describe("handler", () => {
           {
             email: "test@test.com",
             otp: "abcdef",
-            otpType: "VERIFY_EMAIL",
+            mfaMethodType: "EMAIL",
           },
-          "/verify-otp",
+          "/verify-otp-challenge",
           false
         )
       );
-      expectBadRequestError(result, BAD_REQUEST);
+      expectBadRequestError(result, BAD_REQUEST, 400);
     });
 
     test("returns status code 400 if OTP is invalid (all digits the same)", async () => {
@@ -309,13 +363,13 @@ describe("handler", () => {
           {
             email: "test@test.com",
             otp: "000000",
-            otpType: "VERIFY_EMAIL",
+            mfaMethodType: "EMAIL",
           },
-          "/verify-otp",
+          "/verify-otp-challenge",
           false
         )
       );
-      expectBadRequestError(result, EXPECTED_INVALID_OTP);
+      expectBadRequestError(result, EXPECTED_INVALID_OTP, 400);
     });
 
     test("returns status code 204 when OTP check has passed", async () => {
@@ -324,9 +378,93 @@ describe("handler", () => {
           {
             email: "test@test.com",
             otp: "123456",
-            otpType: "VERIFY_EMAIL",
+            mfaMethodType: "EMAIL",
           },
-          "/verify-otp",
+          "/verify-otp-challenge",
+          false
+        )
+      );
+      expect(result.statusCode).toEqual(204);
+    });
+  });
+
+  describe("/send-otp-challenge", () => {
+    test("returns status code 400 if body is empty", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent({}, "/send-otp-challenge", false)
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
+    });
+
+    test("returns status code 400 if body is null", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(undefined, "/send-otp-challenge", false)
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
+    });
+
+    test("returns status code 400 if body does not contain 'mfaMethodType'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test@test.com",
+          },
+          "/send-otp-challenge",
+          false
+        )
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
+    });
+
+    test("returns status code 400 if body does not contain 'email'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            mfaMethodType: "EMAIL",
+          },
+          "/send-otp-challenge",
+          false
+        )
+      );
+      expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
+    });
+
+    test("returns status code 400 if body does not contain a valid 'email'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test&test.com",
+            mfaMethodType: "EMAIL",
+          },
+          "/send-otp-challenge",
+          false
+        )
+      );
+      expectBadRequestError(result, BAD_REQUEST, 400);
+    });
+
+    test("returns status code 400 if body does not contain a valid 'mfaMethodType'", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test@test.com",
+            mfaMethodType: "XYZ",
+          },
+          "/send-otp-challenge",
+          false
+        )
+      );
+      expectBadRequestError(result, BAD_REQUEST, 400);
+    });
+
+    test("returns status code 204", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            email: "test@test.com",
+            mfaMethodType: "EMAIL",
+          },
+          "/send-otp-challenge",
           false
         )
       );
