@@ -46,7 +46,7 @@
     "@types/aws-lambda": "^8.10.159",
     "dotenv": "^17.2.3",
     "jose": "^6.1.2",
-    "valibot": "^1.1.0"
+    "valibot": "^1.2.0"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,json,css,scss,md,yaml}": [
