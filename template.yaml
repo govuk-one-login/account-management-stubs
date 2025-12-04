@@ -73,7 +73,6 @@ Conditions:
       - Fn::Equals:
           - !Ref PermissionsBoundary
           - "none"
-  IsDev: !Equals [!Ref Environment, dev]
 
 Globals:
   Function:
