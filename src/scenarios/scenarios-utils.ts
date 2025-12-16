@@ -47,11 +47,9 @@ export const getUserIdFromEvent = async (
     Limit: 1,
   });
   const results = await dynamoDocClient.send(command);
-  if (results.Items?.length !== 1) {
-    throw new Error("nonce not found in DB");
-  }
+
   return (
-    (results.Items[0] as OicdPersistedData).userId ||
+    (results.Items?.[0] as OicdPersistedData).userId ||
     "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA"
   );
 };
