@@ -3,7 +3,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import assert from "node:assert/strict";
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
 import { userScenarios } from "./scenarios";
-import { OicdPersistedData, UserScenarios } from "./scenarios.interfaces";
+import { UserScenarios } from "./scenarios.interfaces";
 import { randomUUID } from "node:crypto";
 
 const marshallOptions = {
