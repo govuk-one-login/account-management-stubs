@@ -3,7 +3,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import assert from "node:assert/strict";
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda";
 import { userScenarios } from "./scenarios";
-import { OicdPersistedData, UserScenarios } from "./scenarios.interfaces";
+import { UserScenarios } from "./scenarios.interfaces";
 import { randomUUID } from "node:crypto";
 
 const marshallOptions = {
@@ -48,10 +48,7 @@ export const getUserIdFromEvent = async (
   });
   const results = await dynamoDocClient.send(command);
 
-  return (
-    (results.Items?.[0] as OicdPersistedData).userId ||
-    "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA"
-  );
+  return results.Items?.[0]?.userId || "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA";
 };
 
 export const getUserScenario = <
