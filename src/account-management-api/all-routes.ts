@@ -66,9 +66,13 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
       });
     }
   } else if (event.rawPath.startsWith("/verify-otp-challenge")) {
+    const publicSubjectId = event.rawPath.substring(
+      "/verify-otp-challenge/".length
+    );
+
     if (
       !body ||
-      !Object.prototype.hasOwnProperty.call(body, "email") ||
+      !publicSubjectId ||
       !Object.prototype.hasOwnProperty.call(body, "otp") ||
       !Object.prototype.hasOwnProperty.call(body, "mfaMethodType")
     )
@@ -77,11 +81,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         message: "Request is missing parameters",
       });
 
-    if (
-      body.mfaMethodType !== "EMAIL" ||
-      !OTP_REGEX.test(body.otp) ||
-      !EMAIL_REGEX.test(body.email)
-    )
+    if (body.mfaMethodType !== "EMAIL" || !OTP_REGEX.test(body.otp))
       return formatResponse(400, {
         message: "bad request",
       });
@@ -92,9 +92,13 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         message: "Invalid OTP code",
       });
   } else if (event.rawPath.startsWith("/send-otp-challenge")) {
+    const publicSubjectId = event.rawPath.substring(
+      "/send-otp-challenge/".length
+    );
+
     if (
       !body ||
-      !Object.prototype.hasOwnProperty.call(body, "email") ||
+      !publicSubjectId ||
       !Object.prototype.hasOwnProperty.call(body, "mfaMethodType")
     )
       return formatResponse(400, {
@@ -102,7 +106,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
         message: "Request is missing parameters",
       });
 
-    if (body.mfaMethodType !== "EMAIL" || !EMAIL_REGEX.test(body.email))
+    if (body.mfaMethodType !== "EMAIL")
       return formatResponse(400, {
         message: "bad request",
       });
