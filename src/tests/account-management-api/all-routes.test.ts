@@ -254,7 +254,11 @@ describe("handler", () => {
   describe("/verify-otp-challenge", () => {
     test("returns status code 400 if body is empty", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
-        createFakeAPIGatewayProxyEvent({}, "/verify-otp-challenge", false)
+        createFakeAPIGatewayProxyEvent(
+          {},
+          "/verify-otp-challenge/user123",
+          false
+        )
       );
       expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
@@ -263,7 +267,7 @@ describe("handler", () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           undefined,
-          "/verify-otp-challenge",
+          "/verify-otp-challenge/user123",
           false
         )
       );
@@ -274,10 +278,9 @@ describe("handler", () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
-            email: "test@test.com",
             otp: "123456",
           },
-          "/verify-otp-challenge",
+          "/verify-otp-challenge/user123",
           false
         )
       );
@@ -288,17 +291,16 @@ describe("handler", () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
-            email: "test@test.com",
             mfaMethodType: "EMAIL",
           },
-          "/verify-otp-challenge",
+          "/verify-otp-challenge/user123",
           false
         )
       );
       expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
-    test("returns status code 400 if body does not contain 'email'", async () => {
+    test("returns status code 400 if path does not contain 'publicSubjectId'", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
@@ -310,32 +312,16 @@ describe("handler", () => {
         )
       );
       expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
-    });
-
-    test("returns status code 400 if body does not contain a valid 'email'", async () => {
-      const result: Response | ResponseWithOptionalBody = await handler(
-        createFakeAPIGatewayProxyEvent(
-          {
-            email: "test&test.com",
-            otp: "123456",
-            mfaMethodType: "EMAIL",
-          },
-          "/verify-otp-challenge",
-          false
-        )
-      );
-      expectBadRequestError(result, BAD_REQUEST, 400);
     });
 
     test("returns status code 400 if body does not contain a valid 'mfaMethodType'", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
-            email: "test@test.com",
             otp: "123456",
             mfaMethodType: "XYZ",
           },
-          "/verify-otp-challenge",
+          "/verify-otp-challenge/user123",
           false
         )
       );
@@ -346,11 +332,10 @@ describe("handler", () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
-            email: "test@test.com",
             otp: "abcdef",
             mfaMethodType: "EMAIL",
           },
-          "/verify-otp-challenge",
+          "/verify-otp-challenge/user123",
           false
         )
       );
@@ -361,11 +346,10 @@ describe("handler", () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
-            email: "test@test.com",
             otp: "000000",
             mfaMethodType: "EMAIL",
           },
-          "/verify-otp-challenge",
+          "/verify-otp-challenge/user123",
           false
         )
       );
@@ -376,11 +360,10 @@ describe("handler", () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
-            email: "test@test.com",
             otp: "123456",
             mfaMethodType: "EMAIL",
           },
-          "/verify-otp-challenge",
+          "/verify-otp-challenge/user123",
           false
         )
       );
@@ -391,32 +374,30 @@ describe("handler", () => {
   describe("/send-otp-challenge", () => {
     test("returns status code 400 if body is empty", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
-        createFakeAPIGatewayProxyEvent({}, "/send-otp-challenge", false)
+        createFakeAPIGatewayProxyEvent({}, "/send-otp-challenge/user123", false)
       );
       expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
     test("returns status code 400 if body is null", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
-        createFakeAPIGatewayProxyEvent(undefined, "/send-otp-challenge", false)
+        createFakeAPIGatewayProxyEvent(
+          undefined,
+          "/send-otp-challenge/user123",
+          false
+        )
       );
       expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
     test("returns status code 400 if body does not contain 'mfaMethodType'", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
-        createFakeAPIGatewayProxyEvent(
-          {
-            email: "test@test.com",
-          },
-          "/send-otp-challenge",
-          false
-        )
+        createFakeAPIGatewayProxyEvent({}, "/send-otp-challenge/user123", false)
       );
       expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
-    test("returns status code 400 if body does not contain 'email'", async () => {
+    test("returns status code 400 if path does not contain 'publicSubjectId'", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
@@ -427,30 +408,15 @@ describe("handler", () => {
         )
       );
       expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
-    });
-
-    test("returns status code 400 if body does not contain a valid 'email'", async () => {
-      const result: Response | ResponseWithOptionalBody = await handler(
-        createFakeAPIGatewayProxyEvent(
-          {
-            email: "test&test.com",
-            mfaMethodType: "EMAIL",
-          },
-          "/send-otp-challenge",
-          false
-        )
-      );
-      expectBadRequestError(result, BAD_REQUEST, 400);
     });
 
     test("returns status code 400 if body does not contain a valid 'mfaMethodType'", async () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
-            email: "test@test.com",
             mfaMethodType: "XYZ",
           },
-          "/send-otp-challenge",
+          "/send-otp-challenge/user123",
           false
         )
       );
@@ -461,10 +427,9 @@ describe("handler", () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
-            email: "test@test.com",
             mfaMethodType: "EMAIL",
           },
-          "/send-otp-challenge",
+          "/send-otp-challenge/user123",
           false
         )
       );
