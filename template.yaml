@@ -680,6 +680,9 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref OidcStubDataTableName
+          JWK_KEY_SECRET: "{{resolve:secretsmanager:/account-mgmt-stubs/oidc/signing/key}}"
+          OIDC_CLIENT_ID: "{{resolve:ssm:/account-mgmt-frontend/Config/OIDC/Client/Id}}"
+          ENVIRONMENT: !Ref Environment
     Metadata:
       BuildMethod: esbuild
       BuildProperties:

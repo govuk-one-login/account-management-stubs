@@ -1,12 +1,5 @@
 import { randomUUID } from "node:crypto";
-import {
-  importJWK,
-  JWK,
-  JWTHeaderParameters,
-  JWTPayload,
-  CryptoKey,
-  SignJWT,
-} from "jose";
+import { JWTPayload, SignJWT } from "jose";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { APIGatewayProxyEvent } from "aws-lambda";
@@ -17,6 +10,7 @@ import {
   validateSupportedGrantType,
   verifyParametersExistAndOnlyOnce,
 } from "./validate-token";
+import { getPrivateKey, jwtHeader } from "./util/sign";
 
 export interface Response {
   statusCode: number;
@@ -34,28 +28,11 @@ const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient, {
     convertClassInstanceToMap: true,
   },
 });
-const { OIDC_CLIENT_ID, ENVIRONMENT, TABLE_NAME, JWK_KEY_SECRET } = process.env;
-const algorithm = "ES256";
-const jwtHeader: JWTHeaderParameters = {
-  kid: "B-QMUxdJOJ8ubkmArc4i1SGmfZnNNlM-va9h0HJ0jCo",
-  alg: algorithm,
-};
+const { OIDC_CLIENT_ID, ENVIRONMENT, TABLE_NAME } = process.env;
 const tokenResponseTemplate: Omit<Token, "access_token" | "id_token"> = {
   refresh_token: "456DEF",
   token_type: "Bearer",
   expires_in: 3600,
-};
-let cachedPrivateKey: Uint8Array | CryptoKey;
-const getPrivateKey = async () => {
-  if (!cachedPrivateKey) {
-    if (typeof JWK_KEY_SECRET === "undefined") {
-      throw new Error("JWK_KEY_SECRET environment variable is undefined");
-    }
-    const jwkSecret = JSON.parse(JWK_KEY_SECRET);
-    const jwk: JWK = JSON.parse(jwkSecret);
-    cachedPrivateKey = await importJWK(jwk, algorithm);
-  }
-  return cachedPrivateKey;
 };
 getPrivateKey(); //populate cache on runtime
 
