@@ -24,7 +24,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   }
 
   if (event?.rawPath.includes("send-otp-notification")) {
-    const { phoneNumber } = JSON.parse(event.body || "{}").mfaMethod ?? {};
+    const { phoneNumber } = JSON.parse(event.body || "{}") ?? {};
 
     if (phoneNumber?.startsWith("+47")) {
       return formatResponse(400, {

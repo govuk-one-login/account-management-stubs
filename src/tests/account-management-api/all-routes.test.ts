@@ -442,9 +442,7 @@ describe("handler", () => {
       const result: Response | ResponseWithOptionalBody = await handler(
         createFakeAPIGatewayProxyEvent(
           {
-            mfaMethod: {
-              phoneNumber: "+4712345678",
-            },
+            phoneNumber: "+4712345678",
           },
           "/send-otp-notification",
           false
