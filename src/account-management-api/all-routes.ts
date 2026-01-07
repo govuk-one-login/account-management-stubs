@@ -24,6 +24,14 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   }
 
   if (event?.rawPath.includes("send-otp-notification")) {
+    const { phoneNumber } = JSON.parse(event.body || "{}").mfaMethod ?? {};
+
+    if (phoneNumber?.startsWith("+47")) {
+      return formatResponse(400, {
+        success: false,
+      });
+    }
+
     const userId = await getUserIdFromEvent(event);
     const scenario = getUserScenario(userId, "otpNotification");
 

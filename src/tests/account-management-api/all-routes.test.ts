@@ -436,4 +436,23 @@ describe("handler", () => {
       expect(result.statusCode).toEqual(204);
     });
   });
+
+  describe("/send-otp-notification", () => {
+    test("returns status code 400 when phone number starts with +47", async () => {
+      const result: Response | ResponseWithOptionalBody = await handler(
+        createFakeAPIGatewayProxyEvent(
+          {
+            mfaMethod: {
+              phoneNumber: "+4712345678",
+            },
+          },
+          "/send-otp-notification",
+          false
+        )
+      );
+      expect(result.statusCode).toEqual(400);
+      const responseBody = JSON.parse(result.body as string);
+      expect(responseBody).toStrictEqual({ success: false });
+    });
+  });
 });

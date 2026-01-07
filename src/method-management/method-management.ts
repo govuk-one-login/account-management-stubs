@@ -90,6 +90,12 @@ export const createMfaMethodHandler = async (
     } = {},
   } = JSON.parse(event.body || "{}").mfaMethod ?? {};
 
+  if (phoneNumber?.startsWith("+47")) {
+    return formatResponse(400, {
+      error: "International phone numbers are not allowed",
+    });
+  }
+
   const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
   const userScenario = getUserScenario(publicSubjectId, "httpResponse");
 
@@ -143,8 +149,14 @@ export const updateMfaMethodHandler = async (
 ): Promise<APIGatewayProxyResult> => {
   const {
     priorityIdentifier = undefined,
-    method: { mfaMethodType = undefined } = {},
+    method: { mfaMethodType = undefined, phoneNumber = undefined } = {},
   } = JSON.parse(event.body || "{}").mfaMethod ?? {};
+
+  if (phoneNumber?.startsWith("+47")) {
+    return formatResponse(400, {
+      error: "International phone numbers are not allowed",
+    });
+  }
 
   const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
   const mfaIdentifier = event.pathParameters?.mfaIdentifier;

@@ -338,6 +338,25 @@ describe("createMfaMethodHandler", () => {
     const response = await createMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(403);
   });
+
+  test("should return 400 when phone number starts with +47", async () => {
+    const requestBody = {
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "+4712345678",
+          otp: "987654",
+        },
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent("default", requestBody);
+    const response = await createMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toStrictEqual({
+      error: "International phone numbers are not allowed",
+    });
+  });
 });
 
 describe("updateMfaMethodHandler", () => {
@@ -517,6 +536,28 @@ describe("updateMfaMethodHandler", () => {
     );
     const response = await updateMfaMethodHandler(fakeEvent);
     expect(response.statusCode).toBe(403);
+  });
+
+  test("should return 400 when phone number starts with +47", async () => {
+    const requestBody = {
+      mfaMethod: {
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "+4712345678",
+        },
+      },
+    };
+    const fakeEvent = createFakeAPIGatewayProxyEvent(
+      requestBody,
+      "1",
+      "default"
+    );
+    const response = await updateMfaMethodHandler(fakeEvent);
+    expect(response.statusCode).toBe(400);
+    expect(JSON.parse(response.body)).toStrictEqual({
+      error: "International phone numbers are not allowed",
+    });
   });
 });
 
