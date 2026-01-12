@@ -23,6 +23,7 @@ export interface UserScenarios {
     mfaMethods: mfaMethodComponents["schemas"]["MfaMethod"][];
     otpNotification: { success: true } | { success: false; code: number };
     interventions?: { suspended: boolean; blocked: boolean };
+    userInfoSigned: { isSigned: boolean };
   };
   [key: string]: Partial<UserScenarios["default"]>;
 }

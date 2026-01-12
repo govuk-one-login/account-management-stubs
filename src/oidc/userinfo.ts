@@ -36,6 +36,17 @@ export const handler = async (
 
   const userId = await getUserIdFromEvent(event);
   const userinfo = getUserScenario(userId, "userinfo");
+  const userInfoSigned = getUserScenario(userId, "userInfoSigned");
+
+  if (!userInfoSigned.isSigned) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify(userinfo),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+  }
 
   const privateKey = await getPrivateKey();
   const jwt = await new SignJWT(userinfo)
