@@ -12,6 +12,9 @@ export const userScenarios: UserScenarios = {
       code: 200,
       message: "OK",
     },
+    userInfoSigned: {
+      isSigned: true,
+    },
     userinfo: {
       sub: "urn:fdc:gov.uk:default",
       email: "your.name@example.com",
@@ -553,6 +556,11 @@ export const userScenarios: UserScenarios = {
     interventions: {
       suspended: true,
       blocked: true,
+    },
+  },
+  unsignedUserInfo: {
+    userInfoSigned: {
+      isSigned: false,
     },
   },
 };
