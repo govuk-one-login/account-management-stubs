@@ -85,18 +85,13 @@ export const writeNonce = async (
 export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
-  let mockState, mockNonce, mockRedirectUri;
-  const { state, nonce, redirect_uri, request } = queryStringParameters;
-  if (request) {
-    const decoded = decodeJwt(request);
-    mockNonce = decoded.nonce;
-    mockState = decoded.state;
-    mockRedirectUri = decoded.redirect_uri;
-  } else {
-    mockNonce = nonce;
-    mockRedirectUri = redirect_uri;
-    mockState = state
-  }
+  const { request } = queryStringParameters;
+  assert(request, "no request object");
+  const decoded = decodeJwt(request);
+  const mockNonce = decoded.nonce;
+  const mockState = decoded.state;
+  const mockRedirectUri = decoded.redirect_uri;
+ 
   const scenarios = Object.keys(userScenarios)
     .map((scenario) => {
       return `<button name="scenario" value="${scenario}">${scenario}</button>`;
