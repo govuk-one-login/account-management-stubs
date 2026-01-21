@@ -13,7 +13,7 @@ export const userScenarios: UserScenarios = {
       message: "OK",
     },
     userInfoSigned: {
-      isSigned: true,
+      isSigned: false,
     },
     userinfo: {
       sub: "urn:fdc:gov.uk:default",
