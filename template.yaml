@@ -1278,7 +1278,7 @@ Resources:
       AlwaysDeploy: true
       PropagateTags: true
       Name: amc-api-stub
-      Description: HTTP API stub for Account Management Client
+      Description: HTTP API stub for Account Management Components
       StageName: !Ref Environment
       CacheClusterEnabled: true
       CacheClusterSize: "0.5"
