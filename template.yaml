@@ -1268,3 +1268,138 @@ Resources:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-method-management-delete-v1"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  ######################################
+  # AMC Stub API
+  ######################################
+  AmcStubsRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      AlwaysDeploy: true
+      PropagateTags: true
+      Name: amc-api-stub
+      Description: HTTP API stub for Account Management Client
+      StageName: !Ref Environment
+      CacheClusterEnabled: true
+      CacheClusterSize: "0.5"
+      MethodSettings:
+        - HttpMethod: "*"
+          CachingEnabled: false
+          ResourcePath: /*
+      TracingEnabled: true
+      AccessLogSetting:
+        DestinationArn: !GetAtt AmcApiGatewayApiLogGroup.Arn
+      Tags:
+        FMSRegionalPolicy: false
+        CustomPolicy: true
+
+  AmcApiGatewayApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/apigateway/${AmcStubsRestApi}"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  AmcCustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Sub amc-stub.home.${Environment}.account.gov.uk
+      DomainNameConfigurations:
+        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/HostedZone/Certificate/Home/ARN}}"
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
+
+  AmcApiRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref AmcCustomDomain
+      Type: A
+      HostedZoneId: !Sub "{{resolve:ssm:/${Environment}/Platform/Route53/HostedZone/Home}}"
+      AliasTarget:
+        DNSName: !GetAtt AmcCustomDomain.RegionalDomainName
+        HostedZoneId: !GetAtt AmcCustomDomain.RegionalHostedZoneId
+        EvaluateTargetHealth: true
+
+  AmcApiMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref AmcCustomDomain
+      Stage: !Ref Environment
+      RestApiId: !Ref AmcStubsRestApi
+    DependsOn:
+      - AmcStubsRestApiStage
+
+  AmcStubEndpoint:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: The API Gateway endpoint for the AMC stub
+      Name: !Sub "/${AWS::StackName}/Stub/AMC"
+      Type: String
+      Value: !Sub amc-stub.home.${Environment}.account.gov.uk
+
+  AmcLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+
+  AmcApiStubFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - AmcApiStubFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-amc
+      Architectures: ["arm64"]
+      CodeUri: src
+      Handler: amc-routes.handler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 128
+      ReservedConcurrentExecutions: 30
+      Role: !GetAtt AmcLambdaRole.Arn
+      Timeout: 5
+      Events:
+        status:
+          Type: Api
+          Properties:
+            Path: /status
+            Method: GET
+            RestApiId:
+              Ref: AmcStubsRestApi
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - amc/amc-routes.ts
+
+  AmcApiStubFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-amc"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
