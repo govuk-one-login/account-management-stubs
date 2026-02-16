@@ -56,11 +56,14 @@ export const sendSqsMessage = async (
   messageBody: string,
   queueUrl: string | undefined
 ): Promise<string | undefined> => {
+  console.log('sendSqsMessage - queueUrl:', queueUrl);
   const message: SendMessageRequest = {
     QueueUrl: queueUrl,
     MessageBody: messageBody,
   };
+  console.log('sendSqsMessage - sending message to SQS');
   const result = await sqsClient.send(new SendMessageCommand(message));
+  console.log('sendSqsMessage - MessageId:', result.MessageId);
   return result.MessageId;
 };
 
@@ -70,6 +73,8 @@ export const writeNonce = async (
   userId = "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
   remove_at: number
 ): Promise<PutCommandOutput> => {
+  console.log('writeNonce - TABLE_NAME:', TABLE_NAME);
+  console.log('writeNonce - code:', code, 'nonce:', nonce, 'userId:', userId);
   const command = new PutCommand({
     TableName: TABLE_NAME,
     Item: {
@@ -79,12 +84,17 @@ export const writeNonce = async (
       remove_at,
     },
   });
-  return dynamoDocClient.send(command);
+  console.log('writeNonce - writing to DynamoDB');
+  const result = await dynamoDocClient.send(command);
+  console.log('writeNonce - write successful');
+  return result;
 };
 
 export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
+  console.log('selectScenarioHandler - event:', JSON.stringify(event));
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
+  console.log('selectScenarioHandler - queryStringParameters:', queryStringParameters);
   let mockState, mockNonce, mockRedirectUri;
   const { state, nonce, redirect_uri, request } = queryStringParameters;
   if (request) {
@@ -124,6 +134,8 @@ export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
+  console.log('handler - event:', JSON.stringify(event));
+  console.log('handler - event.body:', event.body);
   assert(event.body, "no body");
 
   const properties = new URLSearchParams(event.body);
@@ -131,19 +143,24 @@ export const handler = async (
   const state = properties.get("state");
   const redirectUri = properties.get("redirectUri");
   const scenario = properties.get("scenario") || "default";
+  console.log('handler - parsed properties:', { nonce, state, redirectUri, scenario });
 
   assert(nonce, "no nonce");
   assert(state, "no state");
   assert(redirectUri, "no redirect url");
 
   const { DUMMY_TXMA_QUEUE_URL } = process.env;
+  console.log('handler - DUMMY_TXMA_QUEUE_URL:', DUMMY_TXMA_QUEUE_URL);
+  console.log('handler - TABLE_NAME:', TABLE_NAME);
 
   const code = randomUUID();
+  console.log('handler - generated code:', code);
 
   if (
     typeof DUMMY_TXMA_QUEUE_URL === "undefined" ||
     typeof nonce === "undefined"
   ) {
+    console.error('handler - Missing environment variables');
     throw new Error(
       "TXMA Queue URL or Frontend URL environemnt variables is null"
     );
@@ -152,21 +169,28 @@ export const handler = async (
   const remove_at = Math.floor(
     (new Date().getTime() + 24 * 60 * 60 * 1000) / 1000
   );
+  console.log('handler - remove_at:', remove_at);
 
   try {
+    console.log('handler - starting Promise.all for writeNonce and sendSqsMessage');
     await Promise.all([
       writeNonce(code, nonce, scenario, remove_at),
       sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL),
     ]);
+    console.log('handler - Promise.all completed successfully');
 
+    const redirectUrl = `${redirectUri}?state=${state}&code=${code}`;
+    console.log('handler - redirecting to:', redirectUrl);
     return {
       statusCode: 302,
       headers: {
-        Location: `${redirectUri}?state=${state}&code=${code}`,
+        Location: redirectUrl,
       },
     };
   } catch (err) {
-    console.error(`Error :: ${err}`);
+    console.error('handler - Error caught:', err);
+    console.error('handler - Error stack:', err instanceof Error ? err.stack : 'No stack trace');
+    console.error('handler - Error message:', err instanceof Error ? err.message : String(err));
     return {
       statusCode: 500,
       headers: {
