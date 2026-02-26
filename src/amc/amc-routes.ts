@@ -1,5 +1,6 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { generateJwks } from "./utils/generate-jwks";
+import { validateTokenRequest } from "./utils/validate-token-request";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   if (event.path === "/status") {
@@ -134,6 +135,19 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       headers: { "Content-Type": "text/html" },
       body: html,
     };
+  }
+
+  if (event.path === "/token" && event.httpMethod === "POST") {
+    try {
+      const body = event.body || "";
+      const bodyObj = Object.fromEntries(new URLSearchParams(body));
+      return validateTokenRequest(bodyObj);
+    } catch (err) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Invalid request" }),
+      };
+    }
   }
 
   return {
