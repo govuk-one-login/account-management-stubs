@@ -1373,20 +1373,12 @@ Resources:
       Role: !GetAtt AmcLambdaRole.Arn
       Timeout: 5
       Events:
-        status:
+        CatchAll:
           Type: Api
           Properties:
-            Path: /status
-            Method: GET
-            RestApiId:
-              Ref: AmcStubsRestApi
-        jwks:
-          Type: Api
-          Properties:
-            Path: /.well-known/jwks.json
-            Method: GET
-            RestApiId:
-              Ref: AmcStubsRestApi
+            Method: ANY
+            Path: /{proxy+}
+            RestApiId: !Ref AmcStubsRestApi      
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
