@@ -33,6 +33,7 @@ export default {
   },
   // Allow transforming ESM-only dependency `jose`
   transformIgnorePatterns: ["/node_modules/(?!(jose)/)"],
+  testPathIgnorePatterns: ["authorize.test.ts"], // Ths test is run separately with `npm run test:esm` to use ESM support in Node.js
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "mjs"],
   testEnvironment: "node",
   clearMocks: true,
