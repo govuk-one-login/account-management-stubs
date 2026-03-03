@@ -17,7 +17,7 @@ export const handleJourneyOutcomeRequest = (headers: Record<string, string | und
     };
   }
 
-  const jsonString = token.substring(26); 
+  const jsonString = token.split("journeyoutcome_response__")[1]; 
 
   try {
     const parsed = JSON.parse(jsonString);
