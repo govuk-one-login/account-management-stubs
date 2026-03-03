@@ -82,6 +82,27 @@ export const writeNonce = async (
   return dynamoDocClient.send(command);
 };
 
+export const hasNoCodeChallenge = (
+  codeChallengeMethod: string,
+  codeChallenge: string
+): boolean => {
+  return (
+    !codeChallenge ||
+    codeChallenge.length === 0 ||
+    !codeChallengeMethod ||
+    codeChallengeMethod !== "S256"
+  );
+};
+
+export const failedCodeChallenge = (redirectUri: string): Response => {
+  return {
+    statusCode: 302,
+    headers: {
+      Location: `${redirectUri}?error=invalid_request`,
+    },
+  };
+};
+
 export const saveCodeChallenge = async (
   code: string,
   code_challenge: string,
@@ -113,6 +134,14 @@ export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
   const mockNonce = decoded.nonce;
   const mockState = decoded.state;
   const mockRedirectUri = decoded.redirect_uri;
+  const codeChallengeMethod = decoded.code_challenge_method;
+  const codeChallenge = decoded.code_challenge;
+
+  if (
+    hasNoCodeChallenge(codeChallengeMethod as string, codeChallenge as string)
+  ) {
+    return failedCodeChallenge((mockRedirectUri as string) || "");
+  }
 
   const scenarios = Object.keys(userScenarios)
     .map((scenario) => {
@@ -151,17 +180,8 @@ export const handler = async (
   const codeChallengeMethod = properties.get("code_challenge_method");
   const codeChallenge = properties.get("code_challenge");
 
-  if (
-    !codeChallenge ||
-    codeChallenge.length === 0 ||
-    (codeChallengeMethod && codeChallengeMethod !== "S256")
-  ) {
-    return {
-      statusCode: 302,
-      headers: {
-        Location: `${redirectUri}?error=invalid_request`,
-      },
-    };
+  if (hasNoCodeChallenge(codeChallengeMethod || "", codeChallenge || "")) {
+    return failedCodeChallenge(redirectUri || "");
   }
 
   try {
