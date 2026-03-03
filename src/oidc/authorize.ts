@@ -31,7 +31,7 @@ const dynamoDocClient = DynamoDBDocumentClient.from(
   translateConfig
 );
 
-const { AWS_REGION, TABLE_NAME } = process.env;
+const { AWS_REGION, TABLE_NAME, CODE_CHALLENGE_TABLE } = process.env;
 const sqsClient = new SQSClient({ region: AWS_REGION });
 
 export interface Response {
@@ -82,6 +82,28 @@ export const writeNonce = async (
   return dynamoDocClient.send(command);
 };
 
+export const saveCodeChallenge = async (
+  code: string,
+  code_challenge: string,
+  code_challenge_method: string,
+  nonce: string,
+  userId = "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+  remove_at: number
+): Promise<PutCommandOutput> => {
+  const command = new PutCommand({
+    TableName: CODE_CHALLENGE_TABLE,
+    Item: {
+      code,
+      code_challenge,
+      code_challenge_method,
+      nonce,
+      userId,
+      remove_at,
+    },
+  });
+  return dynamoDocClient.send(command);
+};
+
 export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
@@ -91,7 +113,7 @@ export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
   const mockNonce = decoded.nonce;
   const mockState = decoded.state;
   const mockRedirectUri = decoded.redirect_uri;
- 
+
   const scenarios = Object.keys(userScenarios)
     .map((scenario) => {
       return `<button name="scenario" value="${scenario}">${scenario}</button>`;
@@ -126,6 +148,34 @@ export const handler = async (
   const state = properties.get("state");
   const redirectUri = properties.get("redirectUri");
   const scenario = properties.get("scenario") || "default";
+  const codeChallengeMethod = properties.get("code_challenge_method");
+  const codeChallenge = properties.get("code_challenge");
+
+  if (
+    !codeChallenge ||
+    codeChallenge.length === 0 ||
+    (codeChallengeMethod && codeChallengeMethod !== "S256")
+  ) {
+    return {
+      statusCode: 302,
+      headers: {
+        Location: `${redirectUri}?error=invalid_request`,
+      },
+    };
+  }
+
+  try {
+    await saveCodeChallenge(
+      randomUUID(),
+      codeChallenge || "",
+      codeChallengeMethod || "",
+      nonce || "",
+      "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      Math.floor(Date.now() / 1000 + 3600)
+    );
+  } catch (err) {
+    console.error(`Error saving code challenge: ${err}`);
+  }
 
   assert(nonce, "no nonce");
   assert(state, "no state");
@@ -149,10 +199,15 @@ export const handler = async (
   );
 
   try {
-    await Promise.all([
-      writeNonce(code, nonce, scenario, remove_at),
-      sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL),
-    ]);
+    // writeNonce is resilient — log errors but don't block the auth flow
+    try {
+      await writeNonce(code, nonce, scenario, remove_at);
+    } catch (err) {
+      console.error(`Error saving code challenge: ${err}`);
+    }
+
+    // sendSqsMessage is critical — let failures bubble up
+    await sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
 
     return {
       statusCode: 302,

@@ -5,7 +5,11 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 import { jest } from "@jest/globals";
 import { describe, expect, test } from "@jest/globals";
-import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { mockClient } from "aws-sdk-client-mock";
 import {
   APIGatewayProxyEvent,
@@ -29,6 +33,7 @@ describe("handler", () => {
     process.env.OIDC_CLIENT_ID = "12345";
     process.env.ENVIRONMENT = "dev";
     process.env.TABLE_NAME = "TableName";
+    process.env.CODE_CHALLENGE_TABLE = "CodeChallengeTable";
     process.env.DUMMY_TXMA_QUEUE_URL =
       "https://sqs.eu-west-2.amazonaws.com/123456789012/dummy-txma-queue";
 
@@ -40,6 +45,7 @@ describe("handler", () => {
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
   });
 
@@ -78,7 +84,7 @@ describe("handler", () => {
   test("throws an error if TXMA queue URL is undefined", async () => {
     delete process.env.DUMMY_TXMA_QUEUE_URL;
     const mockApiEvent: APIGatewayProxyEvent = {
-      body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback",
+      body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=S256&code_challenge=abc123",
       queryStringParameters: {
         clientId: "12345",
         responseType: "code",
@@ -99,7 +105,7 @@ describe("handler", () => {
 
   test("throws an error if nonce is undefined", async () => {
     const mockApiEvent: APIGatewayProxyEvent = {
-      body: "state=Authenticate&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback",
+      body: "state=Authenticate&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=S256&code_challenge=abc123",
       queryStringParameters: {
         clientId: "12345",
         responseType: "code",
@@ -122,7 +128,7 @@ describe("handler", () => {
     sqsMock.on(SendMessageCommand).rejects(new Error("SQS error"));
 
     const mockApiEvent: APIGatewayProxyEvent = {
-      body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback",
+      body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=S256&code_challenge=abc123",
       queryStringParameters: {
         clientId: "12345",
         responseType: "code",
@@ -148,6 +154,123 @@ describe("handler", () => {
     expect(result.headers.Location).toContain("Internal Server Error");
 
     consoleErrorSpy.mockRestore();
+  });
+
+  test("redirects with error: invalid_request if code_challenge_method is not S256", async () => {
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=plain",
+      queryStringParameters: {
+        clientId: "12345",
+        responseType: "code",
+        scope: "openid",
+        redirectUri: "https://home.dev.account.gov.uk/auth/callback",
+        state: "AUTHENTICATE",
+        nonce: "67890",
+      } as APIGatewayProxyEventQueryStringParameters,
+    } as never;
+    const result = await handler(mockApiEvent);
+    expect(result.statusCode).toEqual(302);
+    expect(result.headers.Location).toContain(
+      `${mockApiEvent.queryStringParameters?.redirectUri}?error=invalid_request`
+    );
+  });
+
+  test("redirects with error: invalid_request if code_challenge not present", async () => {
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=S256",
+      queryStringParameters: {
+        clientId: "12345",
+        responseType: "code",
+        scope: "openid",
+        redirectUri: "https://home.dev.account.gov.uk/auth/callback",
+        state: "AUTHENTICATE",
+        nonce: "67890",
+      } as APIGatewayProxyEventQueryStringParameters,
+    } as never;
+    const result = await handler(mockApiEvent);
+    expect(result.statusCode).toEqual(302);
+    expect(result.headers.Location).toContain(
+      `${mockApiEvent.queryStringParameters?.redirectUri}?error=invalid_request`
+    );
+  });
+
+  test("redirects with error: invalid_request if code_challenge is empty", async () => {
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=S256&code_challenge=",
+      queryStringParameters: {
+        clientId: "12345",
+        responseType: "code",
+        scope: "openid",
+        redirectUri: "https://home.dev.account.gov.uk/auth/callback",
+        state: "AUTHENTICATE",
+        nonce: "67890",
+      } as APIGatewayProxyEventQueryStringParameters,
+    } as never;
+    const result = await handler(mockApiEvent);
+    expect(result.statusCode).toEqual(302);
+    expect(result.headers.Location).toContain(
+      `${mockApiEvent.queryStringParameters?.redirectUri}?error=invalid_request`
+    );
+  });
+
+  test("stores the code challenge with a ttl of one hour", async () => {
+    const dynamoMock = mockClient(DynamoDBDocumentClient);
+    const dynamoPutSpy = jest.spyOn(DynamoDBDocumentClient.prototype, "send");
+
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=S256&code_challenge=abc123",
+      queryStringParameters: {
+        clientId: "12345",
+        responseType: "code",
+        scope: "openid",
+        redirectUri: "https://home.dev.account.gov.uk/auth/callback",
+        state: "AUTHENTICATE",
+        nonce: "67890",
+      } as APIGatewayProxyEventQueryStringParameters,
+    } as never;
+    await handler(mockApiEvent);
+
+    expect(dynamoPutSpy).toHaveBeenCalled();
+    const ttl =
+      dynamoMock.commandCalls(PutCommand)[0].args[0].input.Item?.remove_at;
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    expect(ttl).toBeGreaterThanOrEqual(nowInSeconds + 3590); // allow a few seconds of leeway
+    expect(ttl).toBeLessThanOrEqual(nowInSeconds + 3600);
+  });
+
+  test("logs an error if saving the code challenge fails but still returns a 302 response", async () => {
+    const dynamoMock = mockClient(DynamoDBDocumentClient);
+    dynamoMock.on(PutCommand).rejects(new Error("DynamoDB error"));
+
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {
+        // Mock implementation to suppress error logging during test
+      });
+
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=S256&code_challenge=abc123",
+      queryStringParameters: {
+        clientId: "12345",
+        responseType: "code",
+        scope: "openid",
+        redirectUri: "https://home.dev.account.gov.uk/auth/callback",
+        state: "AUTHENTICATE",
+        nonce: "67890",
+      } as APIGatewayProxyEventQueryStringParameters,
+    } as never;
+
+    const result = await handler(mockApiEvent);
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Error saving code challenge: Error: DynamoDB error"
+      )
+    );
+    expect(result.statusCode).toEqual(302);
+    expect(result.headers.Location).toContain(
+      mockApiEvent.queryStringParameters?.redirectUri
+    );
   });
 });
 
