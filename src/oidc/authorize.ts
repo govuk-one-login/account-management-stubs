@@ -199,15 +199,10 @@ export const handler = async (
   );
 
   try {
-    // writeNonce is resilient — log errors but don't block the auth flow
-    try {
-      await writeNonce(code, nonce, scenario, remove_at);
-    } catch (err) {
-      console.error(`Error saving code challenge: ${err}`);
-    }
-
-    // sendSqsMessage is critical — let failures bubble up
-    await sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL);
+    await Promise.all([
+      writeNonce(code, nonce, scenario, remove_at),
+      sendSqsMessage(JSON.stringify(newTxmaEvent()), DUMMY_TXMA_QUEUE_URL),
+    ]);
 
     return {
       statusCode: 302,

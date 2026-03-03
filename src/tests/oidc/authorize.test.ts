@@ -240,7 +240,7 @@ describe("handler", () => {
 
   test("logs an error if saving the code challenge fails but still returns a 302 response", async () => {
     const dynamoMock = mockClient(DynamoDBDocumentClient);
-    dynamoMock.on(PutCommand).rejects(new Error("DynamoDB error"));
+    dynamoMock.on(PutCommand).rejectsOnce(new Error("DynamoDB error"));
 
     const consoleErrorSpy = jest
       .spyOn(console, "error")
@@ -262,6 +262,7 @@ describe("handler", () => {
 
     const result = await handler(mockApiEvent);
 
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       expect.stringContaining(
         "Error saving code challenge: Error: DynamoDB error"
