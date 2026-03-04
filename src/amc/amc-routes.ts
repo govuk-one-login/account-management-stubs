@@ -1,6 +1,7 @@
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { generateJwks } from "./utils/generate-jwks";
 import { validateTokenRequest } from "./utils/validate-token-request";
+import { handleJourneyOutcomeRequest } from "./utils/validate-journeyoutcome-request";
 
 export const handler = async (event: APIGatewayProxyEvent) => {
   if (event.path === "/status") {
@@ -135,6 +136,10 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       headers: { "Content-Type": "text/html" },
       body: html,
     };
+  }
+
+  if (event.path === "/journeyoutcome" && event.httpMethod === "GET") {
+    return handleJourneyOutcomeRequest(event.headers || {});
   }
 
   if (event.path === "/token" && event.httpMethod === "POST") {
