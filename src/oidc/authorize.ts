@@ -143,6 +143,19 @@ export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
     return failedCodeChallenge((mockRedirectUri as string) || "");
   }
 
+  try {
+    await saveCodeChallenge(
+      randomUUID(),
+      (codeChallenge as string) || "",
+      (codeChallengeMethod as string) || "",
+      (mockNonce as string) || "",
+      "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
+      Math.floor(Date.now() / 1000 + 3600)
+    );
+  } catch (err) {
+    console.error(`Error saving code challenge: ${err}`);
+  }
+
   const scenarios = Object.keys(userScenarios)
     .map((scenario) => {
       return `<button name="scenario" value="${scenario}">${scenario}</button>`;
