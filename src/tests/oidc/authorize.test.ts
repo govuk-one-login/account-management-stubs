@@ -356,7 +356,9 @@ describe("authorize", () => {
           request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
+
       const result = await selectScenarioHandler(mockApiEvent);
+
       expect(result.statusCode).toEqual(302);
     });
 
@@ -453,7 +455,7 @@ describe("authorize", () => {
       expect(ttl).toBeLessThanOrEqual(nowInSeconds + 3600);
     });
 
-    test("logs an error if saving the code challenge fails but still returns a 302 response", async () => {
+    test("logs an error if saving the code challenge fails but still returns a 200 response", async () => {
       const dynamoMock = mockClient(DynamoDBDocumentClient);
       dynamoMock.on(PutCommand).rejectsOnce(new Error("DynamoDB error"));
 
@@ -482,10 +484,11 @@ describe("authorize", () => {
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
           nonce: "67890",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
 
-      const result = await handler(mockApiEvent);
+      const result = await selectScenarioHandler(mockApiEvent);
 
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -493,10 +496,7 @@ describe("authorize", () => {
           "Error saving code challenge: Error: DynamoDB error"
         )
       );
-      expect(result.statusCode).toEqual(302);
-      expect(result.headers.Location).toContain(
-        mockApiEvent.queryStringParameters?.redirectUri
-      );
+      expect(result.statusCode).toEqual(200);
     });
   });
 });

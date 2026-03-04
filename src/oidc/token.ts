@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import { JWTPayload, SignJWT } from "jose";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
@@ -22,13 +22,19 @@ interface OicdPersistedData {
   nonce: string;
 }
 
+interface CodeChallengeData {
+  code: string;
+  code_challenge: string;
+  code_challenge_method: string;
+  nonce: string;
+}
+
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient, {
   marshallOptions: {
     convertClassInstanceToMap: true,
   },
 });
-const { OIDC_CLIENT_ID, ENVIRONMENT, TABLE_NAME } = process.env;
 const tokenResponseTemplate: Omit<Token, "access_token" | "id_token"> = {
   refresh_token: "456DEF",
   token_type: "Bearer",
@@ -55,11 +61,12 @@ const newClaims = (
 });
 
 const persistedNonce = async (code: string): Promise<string> => {
-  if (typeof TABLE_NAME === "undefined") {
+  const { TABLE_NAME: tableName } = process.env;
+  if (typeof tableName === "undefined") {
     throw new Error("TABLE_NAME environment variable is undefined");
   }
   const command = new GetCommand({
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Key: {
       code,
     },
@@ -71,22 +78,89 @@ const persistedNonce = async (code: string): Promise<string> => {
   return (results.Item as OicdPersistedData).nonce;
 };
 
+const persistedCodeChallenge = async (
+  code: string
+): Promise<{ code_challenge: string; code_challenge_method: string }> => {
+  const { CODE_CHALLENGE_TABLE } = process.env;
+  if (typeof CODE_CHALLENGE_TABLE === "undefined") {
+    throw new Error("CODE_CHALLENGE_TABLE environment variable is undefined");
+  }
+
+  const command = new GetCommand({
+    TableName: CODE_CHALLENGE_TABLE,
+    Key: {
+      code,
+    },
+  });
+  const results = await dynamoDocClient.send(command);
+
+  if (results.Item === undefined) {
+    console.error("code challenge not found in DB");
+    return {
+      code_challenge: "not_found",
+      code_challenge_method: "none",
+    };
+  }
+
+  const item = results.Item as CodeChallengeData;
+
+  return {
+    code_challenge: item.code_challenge,
+    code_challenge_method: item.code_challenge_method,
+  };
+};
+
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
   if (!event.body) {
     throw new Error(`no request body is provided`);
   }
+  const { OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
 
   verifyParametersExistAndOnlyOnce(event.body);
   validateRedirectURLSupported(event.body);
   validateSupportedGrantType(event.body);
 
-  const codeStartIndex = event.body.indexOf("&code=") + 6;
-  const codeEndIndex = event.body.indexOf("&redirect_uri=");
-  const code = event.body.substring(codeStartIndex, codeEndIndex);
+  const params = new URLSearchParams(event.body);
 
-  const nonce = await persistedNonce(code);
+  const code = params.get("code");
+
+  const nonce = await persistedNonce(code || "");
+
+  const codeVerifier = params.get("code_verifier");
+  if (!codeVerifier) {
+    console.error("code_verifier missing");
+    return {
+      statusCode: 400,
+      body: '{"error": "invalid_request"}',
+    };
+  }
+
+  // verify PKCE code_verifier against stored code_challenge if present
+  const codeChallengeEntry = await persistedCodeChallenge(code || "");
+  const codeChallenge = codeChallengeEntry.code_challenge;
+
+  if (codeChallenge === "not_found") {
+    return {
+      statusCode: 400,
+      body: '{"error": "invalid_grant"}',
+    };
+  }
+
+  const hashed = createHash("sha256")
+    .update(codeVerifier)
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  if (hashed !== codeChallenge) {
+    console.error("invalid code_verifier");
+    return {
+      statusCode: 400,
+      body: '"error": "invalid_grant"',
+    };
+  }
 
   if (
     typeof OIDC_CLIENT_ID === "undefined" ||
