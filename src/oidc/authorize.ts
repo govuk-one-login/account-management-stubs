@@ -31,7 +31,7 @@ const dynamoDocClient = DynamoDBDocumentClient.from(
   translateConfig
 );
 
-const { AWS_REGION, TABLE_NAME } = process.env;
+const { AWS_REGION, TABLE_NAME, CODE_CHALLENGE_TABLE } = process.env;
 const sqsClient = new SQSClient({ region: AWS_REGION });
 
 export interface Response {
@@ -82,6 +82,41 @@ export const writeNonce = async (
   return dynamoDocClient.send(command);
 };
 
+export const hasNoCodeChallenge = (
+  codeChallengeMethod: string | undefined,
+  codeChallenge: string | undefined
+): boolean => {
+  return (
+    !codeChallengeMethod ||
+    codeChallengeMethod !== "S256" ||
+    !codeChallenge ||
+    codeChallenge.length === 0
+  );
+};
+
+export const failedCodeChallenge = (redirectUri: string): Response => {
+  return {
+    statusCode: 302,
+    headers: {
+      Location: `${redirectUri}?error=invalid_request`,
+    },
+  };
+};
+
+export const saveCodeChallenge = async (
+  code_challenge: string,
+  remove_at: number
+): Promise<PutCommandOutput> => {
+  const command = new PutCommand({
+    TableName: CODE_CHALLENGE_TABLE,
+    Item: {
+      code_challenge,
+      remove_at,
+    },
+  });
+  return dynamoDocClient.send(command);
+};
+
 export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
   const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
     event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
@@ -91,7 +126,24 @@ export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
   const mockNonce = decoded.nonce;
   const mockState = decoded.state;
   const mockRedirectUri = decoded.redirect_uri;
- 
+  const codeChallengeMethod = decoded.code_challenge_method;
+  const codeChallenge = decoded.code_challenge;
+
+  if (
+    hasNoCodeChallenge(codeChallengeMethod as string, codeChallenge as string)
+  ) {
+    return failedCodeChallenge((mockRedirectUri as string) || "");
+  }
+
+  try {
+    await saveCodeChallenge(
+      (codeChallenge as string) || "",
+      Math.floor(Date.now() / 1000 + 3600)
+    );
+  } catch (err) {
+    console.error(`Error saving code challenge: ${err}`);
+  }
+
   const scenarios = Object.keys(userScenarios)
     .map((scenario) => {
       return `<button name="scenario" value="${scenario}">${scenario}</button>`;
@@ -126,6 +178,21 @@ export const handler = async (
   const state = properties.get("state");
   const redirectUri = properties.get("redirectUri");
   const scenario = properties.get("scenario") || "default";
+  const codeChallengeMethod = properties.get("code_challenge_method");
+  const codeChallenge = properties.get("code_challenge");
+
+  if (hasNoCodeChallenge(codeChallengeMethod || "", codeChallenge || "")) {
+    return failedCodeChallenge(redirectUri || "");
+  }
+
+  try {
+    await saveCodeChallenge(
+      codeChallenge || "",
+      Math.floor(Date.now() / 1000 + 3600)
+    );
+  } catch (err) {
+    console.error(`Error saving code challenge: ${err}`);
+  }
 
   assert(nonce, "no nonce");
   assert(state, "no state");

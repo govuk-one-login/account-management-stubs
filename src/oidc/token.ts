@@ -1,8 +1,11 @@
-import { randomUUID } from "node:crypto";
-import { JWTPayload, SignJWT } from "jose";
+import { randomUUID, createHash } from "node:crypto";
+import { decodeJwt, JWTPayload, SignJWT } from "jose";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { APIGatewayProxyEvent } from "aws-lambda";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyEventQueryStringParameters,
+} from "aws-lambda";
 import { Token } from "../common/models";
 import {
   validateClientIdMatches,
@@ -22,13 +25,18 @@ interface OicdPersistedData {
   nonce: string;
 }
 
+interface CodeChallengeData {
+  code_challenge: string;
+  code_challenge_method: string;
+  code: string;
+}
+
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(dynamoClient, {
   marshallOptions: {
     convertClassInstanceToMap: true,
   },
 });
-const { OIDC_CLIENT_ID, ENVIRONMENT, TABLE_NAME } = process.env;
 const tokenResponseTemplate: Omit<Token, "access_token" | "id_token"> = {
   refresh_token: "456DEF",
   token_type: "Bearer",
@@ -55,11 +63,12 @@ const newClaims = (
 });
 
 const persistedNonce = async (code: string): Promise<string> => {
-  if (typeof TABLE_NAME === "undefined") {
+  const { TABLE_NAME: tableName } = process.env;
+  if (typeof tableName === "undefined") {
     throw new Error("TABLE_NAME environment variable is undefined");
   }
   const command = new GetCommand({
-    TableName: TABLE_NAME,
+    TableName: tableName,
     Key: {
       code,
     },
@@ -71,22 +80,77 @@ const persistedNonce = async (code: string): Promise<string> => {
   return (results.Item as OicdPersistedData).nonce;
 };
 
+const isValidCodeChallenge = async (codeVerifier: string): Promise<boolean> => {
+  const { CODE_CHALLENGE_TABLE } = process.env;
+  if (typeof CODE_CHALLENGE_TABLE === "undefined") {
+    throw new Error("CODE_CHALLENGE_TABLE environment variable is undefined");
+  }
+
+  const codeChallenge = createHash("sha256")
+    .update(codeVerifier)
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  const command = new GetCommand({
+    TableName: CODE_CHALLENGE_TABLE,
+    Key: {
+      codeChallenge,
+    },
+  });
+
+  const results = await dynamoDocClient.send(command);
+
+  if (
+    results.Item === undefined ||
+    (results.Item as CodeChallengeData).code_challenge !== codeChallenge
+  ) {
+    return false;
+  }
+  return true;
+};
+
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
   if (!event.body) {
     throw new Error(`no request body is provided`);
   }
+  const { OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
 
   verifyParametersExistAndOnlyOnce(event.body);
   validateRedirectURLSupported(event.body);
   validateSupportedGrantType(event.body);
 
-  const codeStartIndex = event.body.indexOf("&code=") + 6;
-  const codeEndIndex = event.body.indexOf("&redirect_uri=");
-  const code = event.body.substring(codeStartIndex, codeEndIndex);
+  const params = new URLSearchParams(event.body);
 
-  const nonce = await persistedNonce(code);
+  const code = params.get("code");
+
+  const nonce = await persistedNonce(code || "");
+
+  const { request } =
+    event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
+  const tokenPayload = decodeJwt(request || "");
+
+  const codeVerifier: string = tokenPayload.code_verifier as string;
+  console.log(`Code Verifier: ${codeVerifier}`);
+
+  if (codeVerifier !== undefined) {
+    if (codeVerifier.length < 1) {
+      return {
+        statusCode: 400,
+        body: '{"error": "invalid_request"}',
+      };
+    }
+
+    if (!(await isValidCodeChallenge(codeVerifier || ""))) {
+      return {
+        statusCode: 400,
+        body: '{"error": "invalid_grant"}',
+      };
+    }
+  }
 
   if (
     typeof OIDC_CLIENT_ID === "undefined" ||
