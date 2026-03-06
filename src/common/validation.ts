@@ -1,3 +1,4 @@
+import { APIGatewayProxyEventHeaders } from "aws-lambda";
 import assert from "node:assert/strict";
 
 export const validateFields = (
@@ -20,5 +21,14 @@ export const validateBearerToken = (authHeader: string | undefined): void => {
   assert(
     authHeader && /^Bearer \S+$/.test(authHeader),
     "Authorization header must be in format 'Bearer token'"
+  );
+};
+
+export const validateADAPIAccessToken = (
+  headers: APIGatewayProxyEventHeaders
+): void => {
+  assert(
+    headers["x-adapi-accesstoken"],
+    "Account data API token must be provided"
   );
 };
