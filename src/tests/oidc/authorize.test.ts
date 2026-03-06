@@ -19,6 +19,32 @@ import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
 import { selectScenarioHandler, handler } from "../../oidc/authorize";
 
 describe("authorize", () => {
+  let requestJwt: string;
+
+  const buildJwt = (payload: object): string => {
+    // build a minimal unsigned JWT (header.payload.) so decodeJwt can read payload
+    const base64url = (obj: unknown) =>
+      Buffer.from(JSON.stringify(obj))
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+
+    return `${base64url({ alg: "none", typ: "JWT" })}.${base64url(payload)}.`;
+  };
+
+  beforeEach(() => {
+    const payload = {
+      nonce: "67890",
+      state: "AUTHENTICATE",
+      redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+      code_challenge_method: "S256",
+      code_challenge: "abc123",
+    };
+
+    requestJwt = buildJwt(payload);
+  });
+
   describe("handler", () => {
     beforeEach(() => {
       jest.resetModules();
@@ -277,32 +303,6 @@ describe("authorize", () => {
   });
 
   describe("selectScenarioHandler", () => {
-    let requestJwt: string;
-
-    const buildJwt = (payload: object): string => {
-      // build a minimal unsigned JWT (header.payload.) so decodeJwt can read payload
-      const base64url = (obj: unknown) =>
-        Buffer.from(JSON.stringify(obj))
-          .toString("base64")
-          .replace(/\+/g, "-")
-          .replace(/\//g, "_")
-          .replace(/=+$/, "");
-
-      return `${base64url({ alg: "none", typ: "JWT" })}.${base64url(payload)}.`;
-    };
-
-    beforeEach(() => {
-      const payload = {
-        nonce: "67890",
-        state: "AUTHENTICATE",
-        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
-        code_challenge_method: "S256",
-        code_challenge: "abc123",
-      };
-
-      requestJwt = buildJwt(payload);
-    });
-
     test("returns 200 response", async () => {
       const mockApiEvent: APIGatewayProxyEvent = {
         body: "scenario=AUTH_AUTH_CODE_ISSUED",

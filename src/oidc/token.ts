@@ -1,8 +1,11 @@
 import { randomUUID, createHash } from "node:crypto";
-import { JWTPayload, SignJWT } from "jose";
+import { decodeJwt, JWTPayload, SignJWT } from "jose";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { APIGatewayProxyEvent } from "aws-lambda";
+import {
+  APIGatewayProxyEvent,
+  APIGatewayProxyEventQueryStringParameters,
+} from "aws-lambda";
 import { Token } from "../common/models";
 import {
   validateClientIdMatches,
@@ -23,10 +26,9 @@ interface OicdPersistedData {
 }
 
 interface CodeChallengeData {
-  code: string;
   code_challenge: string;
   code_challenge_method: string;
-  nonce: string;
+  code: string;
 }
 
 const dynamoClient = new DynamoDBClient({});
@@ -78,36 +80,35 @@ const persistedNonce = async (code: string): Promise<string> => {
   return (results.Item as OicdPersistedData).nonce;
 };
 
-const persistedCodeChallenge = async (
-  code: string
-): Promise<{ code_challenge: string; code_challenge_method: string }> => {
+const isValidCodeChallenge = async (codeVerifier: string): Promise<boolean> => {
   const { CODE_CHALLENGE_TABLE } = process.env;
   if (typeof CODE_CHALLENGE_TABLE === "undefined") {
     throw new Error("CODE_CHALLENGE_TABLE environment variable is undefined");
   }
 
+  const codeChallenge = createHash("sha256")
+    .update(codeVerifier)
+    .digest("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
   const command = new GetCommand({
     TableName: CODE_CHALLENGE_TABLE,
     Key: {
-      code,
+      codeChallenge,
     },
   });
+
   const results = await dynamoDocClient.send(command);
 
-  if (results.Item === undefined) {
-    console.error("code challenge not found in DB");
-    return {
-      code_challenge: "not_found",
-      code_challenge_method: "none",
-    };
+  if (
+    results.Item === undefined ||
+    (results.Item as CodeChallengeData).code_challenge !== codeChallenge
+  ) {
+    return false;
   }
-
-  const item = results.Item as CodeChallengeData;
-
-  return {
-    code_challenge: item.code_challenge,
-    code_challenge_method: item.code_challenge_method,
-  };
+  return true;
 };
 
 export const handler = async (
@@ -128,38 +129,27 @@ export const handler = async (
 
   const nonce = await persistedNonce(code || "");
 
-  const codeVerifier = params.get("code_verifier");
-  if (!codeVerifier) {
-    console.error("code_verifier missing");
-    return {
-      statusCode: 400,
-      body: '{"error": "invalid_request"}',
-    };
-  }
+  const { request } =
+    event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
+  const tokenPayload = decodeJwt(request || "");
 
-  // verify PKCE code_verifier against stored code_challenge if present
-  const codeChallengeEntry = await persistedCodeChallenge(code || "");
-  const codeChallenge = codeChallengeEntry.code_challenge;
+  const codeVerifier: string = tokenPayload.code_verifier as string;
+  console.log(`Code Verifier: ${codeVerifier}`);
 
-  if (codeChallenge === "not_found") {
-    return {
-      statusCode: 400,
-      body: '{"error": "invalid_grant"}',
-    };
-  }
+  if (codeVerifier !== undefined) {
+    if (codeVerifier.length < 1) {
+      return {
+        statusCode: 400,
+        body: '{"error": "invalid_request"}',
+      };
+    }
 
-  const hashed = createHash("sha256")
-    .update(codeVerifier)
-    .digest("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
-  if (hashed !== codeChallenge) {
-    console.error("invalid code_verifier");
-    return {
-      statusCode: 400,
-      body: '"error": "invalid_grant"',
-    };
+    if (!(await isValidCodeChallenge(codeVerifier || ""))) {
+      return {
+        statusCode: 400,
+        body: '{"error": "invalid_grant"}',
+      };
+    }
   }
 
   if (

@@ -83,14 +83,14 @@ export const writeNonce = async (
 };
 
 export const hasNoCodeChallenge = (
-  codeChallengeMethod: string,
-  codeChallenge: string
+  codeChallengeMethod: string | undefined,
+  codeChallenge: string | undefined
 ): boolean => {
   return (
-    !codeChallenge ||
-    codeChallenge.length === 0 ||
     !codeChallengeMethod ||
-    codeChallengeMethod !== "S256"
+    codeChallengeMethod !== "S256" ||
+    !codeChallenge ||
+    codeChallenge.length === 0
   );
 };
 
@@ -104,21 +104,13 @@ export const failedCodeChallenge = (redirectUri: string): Response => {
 };
 
 export const saveCodeChallenge = async (
-  code: string,
   code_challenge: string,
-  code_challenge_method: string,
-  nonce: string,
-  userId = "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
   remove_at: number
 ): Promise<PutCommandOutput> => {
   const command = new PutCommand({
     TableName: CODE_CHALLENGE_TABLE,
     Item: {
-      code,
       code_challenge,
-      code_challenge_method,
-      nonce,
-      userId,
       remove_at,
     },
   });
@@ -145,11 +137,7 @@ export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
 
   try {
     await saveCodeChallenge(
-      randomUUID(),
       (codeChallenge as string) || "",
-      (codeChallengeMethod as string) || "",
-      (mockNonce as string) || "",
-      "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
       Math.floor(Date.now() / 1000 + 3600)
     );
   } catch (err) {
@@ -199,11 +187,7 @@ export const handler = async (
 
   try {
     await saveCodeChallenge(
-      randomUUID(),
       codeChallenge || "",
-      codeChallengeMethod || "",
-      nonce || "",
-      "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
       Math.floor(Date.now() / 1000 + 3600)
     );
   } catch (err) {
