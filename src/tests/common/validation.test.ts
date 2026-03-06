@@ -1,4 +1,8 @@
-import { validateFields, validateBearerToken } from "../../common/validation";
+import {
+  validateFields,
+  validateBearerToken,
+  validateADAPIAccessToken,
+} from "../../common/validation";
 
 describe("validateFields Function", () => {
   it("should validate required fields successfully", () => {
@@ -98,5 +102,25 @@ describe("validateBearerToken Function", () => {
     expect(() => validateBearerToken("")).toThrow(
       /Authorization header must be in format 'Bearer token'/
     );
+  });
+});
+
+describe("validateADAPIAccessToken Function", () => {
+  it("should validate when x-adapi-accesstoken header is present", () => {
+    expect(() =>
+      validateADAPIAccessToken({ "x-adapi-accesstoken": "token" })
+    ).not.toThrow();
+  });
+
+  it("should throw an error when x-adapi-accesstoken header is missing", () => {
+    expect(() => validateADAPIAccessToken({})).toThrow(
+      /Account data API token must be provided/
+    );
+  });
+
+  it("should throw an error when x-adapi-accesstoken header is undefined", () => {
+    expect(() =>
+      validateADAPIAccessToken({ "x-adapi-accesstoken": undefined })
+    ).toThrow(/Account data API token must be provided/);
   });
 });
