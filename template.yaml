@@ -1326,7 +1326,7 @@ Resources:
       FunctionName: !Sub ${Environment}-${AWS::StackName}-method-management-delete-passkeys-v1
       Architectures: ["arm64"]
       CodeUri: src
-      Handler: method-management.deletePasskeysHandler
+      Handler: method-management.deletePasskeyHandler
       KmsKeyArn: !GetAtt LambdaKMSKey.Arn
       PackageType: Zip
       MemorySize: 128
