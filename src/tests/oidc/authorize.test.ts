@@ -86,6 +86,35 @@ describe("authorize", () => {
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
           nonce: "67890",
+          request: requestJwt,
+        } as APIGatewayProxyEventQueryStringParameters,
+      } as never;
+      const result = await handler(mockApiEvent);
+      expect(result.statusCode).toEqual(302);
+      expect(result.headers.Location).toContain(
+        mockApiEvent.queryStringParameters?.redirectUri
+      );
+    });
+
+    test("returns 302 response with Location header if code_challenge_method not present", async () => {
+      const payload = {
+        nonce: "67890",
+        state: "AUTHENTICATE",
+        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+      };
+
+      requestJwt = buildJwt(payload);
+
+      const mockApiEvent: APIGatewayProxyEvent = {
+        body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback",
+        queryStringParameters: {
+          clientId: "12345",
+          responseType: "code",
+          scope: "openid",
+          redirectUri: "https://home.dev.account.gov.uk/auth/callback",
+          state: "AUTHENTICATE",
+          nonce: "67890",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
       const result = await handler(mockApiEvent);
@@ -119,6 +148,7 @@ describe("authorize", () => {
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
           nonce: "67890",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
       let errorThrown = false;
@@ -139,6 +169,7 @@ describe("authorize", () => {
           scope: "openid",
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
       let errorThrown = false;
@@ -163,6 +194,7 @@ describe("authorize", () => {
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
           nonce: "67890",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
 
@@ -184,6 +216,16 @@ describe("authorize", () => {
     });
 
     test("redirects with error: invalid_request if code_challenge_method is not S256", async () => {
+      const payload = {
+        nonce: "67890",
+        state: "AUTHENTICATE",
+        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+        code_challenge_method: "someMethod",
+        code_challenge: "abc123",
+      };
+
+      requestJwt = buildJwt(payload);
+
       const mockApiEvent: APIGatewayProxyEvent = {
         body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=plain",
         queryStringParameters: {
@@ -193,6 +235,7 @@ describe("authorize", () => {
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
           nonce: "67890",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
       const result = await handler(mockApiEvent);
@@ -203,6 +246,15 @@ describe("authorize", () => {
     });
 
     test("redirects with error: invalid_request if code_challenge not present", async () => {
+      const payload = {
+        nonce: "67890",
+        state: "AUTHENTICATE",
+        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+        code_challenge_method: "someMethod",
+      };
+
+      requestJwt = buildJwt(payload);
+
       const mockApiEvent: APIGatewayProxyEvent = {
         body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=S256",
         queryStringParameters: {
@@ -212,6 +264,7 @@ describe("authorize", () => {
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
           nonce: "67890",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
       const result = await handler(mockApiEvent);
@@ -222,6 +275,16 @@ describe("authorize", () => {
     });
 
     test("redirects with error: invalid_request if code_challenge is empty", async () => {
+      const payload = {
+        nonce: "67890",
+        state: "AUTHENTICATE",
+        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+        code_challenge_method: "someMethod",
+        code_challenge: "",
+      };
+
+      requestJwt = buildJwt(payload);
+
       const mockApiEvent: APIGatewayProxyEvent = {
         body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_challenge_method=S256&code_challenge=",
         queryStringParameters: {
@@ -231,6 +294,7 @@ describe("authorize", () => {
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
           nonce: "67890",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
       const result = await handler(mockApiEvent);
@@ -253,6 +317,7 @@ describe("authorize", () => {
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
           nonce: "67890",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
       await handler(mockApiEvent);
@@ -284,6 +349,7 @@ describe("authorize", () => {
           redirectUri: "https://home.dev.account.gov.uk/auth/callback",
           state: "AUTHENTICATE",
           nonce: "67890",
+          request: requestJwt,
         } as APIGatewayProxyEventQueryStringParameters,
       } as never;
 
@@ -304,6 +370,31 @@ describe("authorize", () => {
 
   describe("selectScenarioHandler", () => {
     test("returns 200 response", async () => {
+      const mockApiEvent: APIGatewayProxyEvent = {
+        body: "scenario=AUTH_AUTH_CODE_ISSUED",
+        queryStringParameters: {
+          clientId: "12345",
+          responseType: "code",
+          scope: "openid",
+          redirectUri: "https://home.dev.account.gov.uk/auth/callback",
+          state: "AUTHENTICATE",
+          nonce: "67890",
+          request: requestJwt,
+        } as APIGatewayProxyEventQueryStringParameters,
+      } as never;
+      const result = await selectScenarioHandler(mockApiEvent);
+      expect(result.statusCode).toEqual(200);
+    });
+
+    test("returns 200 response if code_challenge_method not present", async () => {
+      const payload = {
+        nonce: "67890",
+        state: "AUTHENTICATE",
+        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+      };
+
+      requestJwt = buildJwt(payload);
+
       const mockApiEvent: APIGatewayProxyEvent = {
         body: "scenario=AUTH_AUTH_CODE_ISSUED",
         queryStringParameters: {

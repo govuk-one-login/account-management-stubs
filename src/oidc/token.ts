@@ -134,7 +134,6 @@ export const handler = async (
   const tokenPayload = decodeJwt(request || "");
 
   const codeVerifier: string = tokenPayload.code_verifier as string;
-  console.log(`Code Verifier: ${codeVerifier}`);
 
   if (codeVerifier !== undefined) {
     if (codeVerifier.length < 1) {

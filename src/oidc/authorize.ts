@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { decodeJwt } from "jose";
+import { decodeJwt, JWTPayload } from "jose";
 import {
   DynamoDBDocumentClient,
   PutCommand,
@@ -82,12 +82,25 @@ export const writeNonce = async (
   return dynamoDocClient.send(command);
 };
 
-export const hasNoCodeChallenge = (
+export const getQueryParams = (
+  event: APIGatewayProxyEvent
+): APIGatewayProxyEventQueryStringParameters => {
+  return event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
+};
+
+export const getJwtToken = (
+  params: APIGatewayProxyEventQueryStringParameters
+): JWTPayload => {
+  const { request } = params;
+  assert(request, "no request object");
+  return decodeJwt(request);
+};
+
+export const hasValidCodeChallenge = (
   codeChallengeMethod: string | undefined,
   codeChallenge: string | undefined
 ): boolean => {
   return (
-    !codeChallengeMethod ||
     codeChallengeMethod !== "S256" ||
     !codeChallenge ||
     codeChallenge.length === 0
@@ -118,30 +131,32 @@ export const saveCodeChallenge = async (
 };
 
 export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
-  const queryStringParameters: APIGatewayProxyEventQueryStringParameters =
-    event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
-  const { request } = queryStringParameters;
-  assert(request, "no request object");
-  const decoded = decodeJwt(request);
+  const decoded = getJwtToken(getQueryParams(event));
+
   const mockNonce = decoded.nonce;
   const mockState = decoded.state;
   const mockRedirectUri = decoded.redirect_uri;
   const codeChallengeMethod = decoded.code_challenge_method;
   const codeChallenge = decoded.code_challenge;
 
-  if (
-    hasNoCodeChallenge(codeChallengeMethod as string, codeChallenge as string)
-  ) {
-    return failedCodeChallenge((mockRedirectUri as string) || "");
-  }
+  if (codeChallengeMethod !== undefined) {
+    if (
+      hasValidCodeChallenge(
+        codeChallengeMethod as string,
+        codeChallenge as string
+      )
+    ) {
+      return failedCodeChallenge((mockRedirectUri as string) || "");
+    }
 
-  try {
-    await saveCodeChallenge(
-      (codeChallenge as string) || "",
-      Math.floor(Date.now() / 1000 + 3600)
-    );
-  } catch (err) {
-    console.error(`Error saving code challenge: ${err}`);
+    try {
+      await saveCodeChallenge(
+        (codeChallenge as string) || "",
+        Math.floor(Date.now() / 1000 + 3600)
+      );
+    } catch (err) {
+      console.error(`Error saving code challenge: ${err}`);
+    }
   }
 
   const scenarios = Object.keys(userScenarios)
@@ -178,20 +193,33 @@ export const handler = async (
   const state = properties.get("state");
   const redirectUri = properties.get("redirectUri");
   const scenario = properties.get("scenario") || "default";
-  const codeChallengeMethod = properties.get("code_challenge_method");
-  const codeChallenge = properties.get("code_challenge");
 
-  if (hasNoCodeChallenge(codeChallengeMethod || "", codeChallenge || "")) {
-    return failedCodeChallenge(redirectUri || "");
-  }
+  const codeChallengeMethod = getJwtToken(
+    getQueryParams(event)
+  ).code_challenge_method;
+  console.log(codeChallengeMethod);
 
-  try {
-    await saveCodeChallenge(
-      codeChallenge || "",
-      Math.floor(Date.now() / 1000 + 3600)
-    );
-  } catch (err) {
-    console.error(`Error saving code challenge: ${err}`);
+  const codeChallenge = getJwtToken(getQueryParams(event)).code_challenge;
+  console.log(codeChallenge);
+
+  if (codeChallengeMethod !== undefined) {
+    if (
+      hasValidCodeChallenge(
+        (codeChallengeMethod as string) || "",
+        (codeChallenge as string) || ""
+      )
+    ) {
+      return failedCodeChallenge(redirectUri || "");
+    }
+
+    try {
+      await saveCodeChallenge(
+        (codeChallenge as string) || "",
+        Math.floor(Date.now() / 1000 + 3600)
+      );
+    } catch (err) {
+      console.error(`Error saving code challenge: ${err}`);
+    }
   }
 
   assert(nonce, "no nonce");
