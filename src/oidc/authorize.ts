@@ -96,7 +96,7 @@ export const getJwtToken = (
   return decodeJwt(request);
 };
 
-export const hasValidCodeChallenge = (
+export const hasInvalidCodeChallenge = (
   codeChallengeMethod: string | undefined,
   codeChallenge: string | undefined
 ): boolean => {
@@ -141,7 +141,7 @@ export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
 
   if (codeChallengeMethod !== undefined) {
     if (
-      hasValidCodeChallenge(
+      hasInvalidCodeChallenge(
         codeChallengeMethod as string,
         codeChallenge as string
       )
@@ -204,7 +204,7 @@ export const handler = async (
 
   if (codeChallengeMethod !== undefined) {
     if (
-      hasValidCodeChallenge(
+      hasInvalidCodeChallenge(
         (codeChallengeMethod as string) || "",
         (codeChallenge as string) || ""
       )
