@@ -197,10 +197,8 @@ export const handler = async (
   const codeChallengeMethod = getJwtToken(
     getQueryParams(event)
   ).code_challenge_method;
-  console.log(codeChallengeMethod);
 
   const codeChallenge = getJwtToken(getQueryParams(event)).code_challenge;
-  console.log(codeChallenge);
 
   if (codeChallengeMethod !== undefined) {
     if (

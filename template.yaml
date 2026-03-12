@@ -361,6 +361,38 @@ Resources:
         - Key: Source
           Value: "https://github.com/govuk-one-login/account-management-stubs/blob/main/infrastructure/template.yaml"
 
+  OidcStubCodeChallengeStore:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: code_challenge
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TableName: !Ref OidcStubCodeChallengeTableName
+      KeySchema:
+        - AttributeName: code_challenge
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt DatabaseKmsKey.Arn
+      TimeToLiveSpecification:
+        AttributeName: remove_at
+        Enabled: true
+      Tags:
+        - Key: Product
+          Value: GOV.UK Sign In
+        - Key: System
+          Value: Account Management Backend
+        - Key: Owner
+          Value: govuk-accounts-tech@digital.cabinet-office.gov.uk
+        - Key: Environment
+          Value: !Ref "Environment"
+        - Key: Source
+          Value: "https://github.com/govuk-one-login/account-management-stubs/blob/main/infrastructure/template.yaml"
+
   DatabaseKmsKey:
     Type: AWS::KMS::Key
     Properties:
@@ -397,6 +429,30 @@ Resources:
               - !Sub
                 - "${Arn}/*"
                 - Arn: !GetAtt OidcStubDataStore.Arn
+          - Effect: Allow
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey*
+              - kms:ReEncrypt*
+            Resource:
+              - !GetAtt DatabaseKmsKey.Arn
+
+  QueryOidcCodeChallengeTablePolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:Query
+              - dynamodb:GetItem
+              - dynamodb:PutItem
+            Resource:
+              - !GetAtt OidcStubCodeChallengeStore.Arn
+              - !Sub
+                - "${Arn}/*"
+                - Arn: !GetAtt OidcStubCodeChallengeStore.Arn
           - Effect: Allow
             Action:
               - kms:Decrypt
@@ -633,6 +689,14 @@ Resources:
               - !Sub
                 - "${Arn}/*"
                 - Arn: !GetAtt OidcStubDataStore.Arn
+          - Effect: Allow
+            Action:
+              - dynamodb:PutItem
+            Resource:
+              - !GetAtt OidcStubCodeChallengeStore.Arn
+              - !Sub
+                - "${Arn}/*"
+                - Arn: !GetAtt OidcStubCodeChallengeStore.Arn
           - Effect: Allow
             Action:
               - kms:Decrypt
@@ -1378,7 +1442,7 @@ Resources:
           Properties:
             Method: ANY
             Path: /{proxy+}
-            RestApiId: !Ref AmcStubsRestApi      
+            RestApiId: !Ref AmcStubsRestApi
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
