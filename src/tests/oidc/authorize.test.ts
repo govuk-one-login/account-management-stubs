@@ -1,6 +1,3 @@
-// This suite fails using plain jest due to a dynamic import error.
-// Run using `npm run test:esm` to use the experimental ESM support in Node.js
-
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 import { jest } from "@jest/globals";
