@@ -202,7 +202,7 @@ describe("handler", () => {
     expect(errorThrown).toBeTruthy();
   });
 
-  test("returns 400 invalid_grant when code is not included in token request", async () => {
+  test("returns 400 invalid_request when code is not included in token request", async () => {
     const codeVerifier = "test-verifier-123";
     const codeChallenge = createHash("sha256")
       .update(codeVerifier)
@@ -221,7 +221,7 @@ describe("handler", () => {
 
     const result: Response = await handler(mockApiEvent);
     expect(result.statusCode).toEqual(400);
-    expect(result.body).toContain('"error":"invalid_grant"');
+    expect(result.body).toContain('"error":"invalid_request"');
     expect(result.body).toContain('"error_description"');
   });
 
