@@ -36,18 +36,6 @@ describe("handler", () => {
     jest.clearAllMocks();
   });
 
-  test("returns 200 OK response including body with access token", async () => {
-    const mockApiEvent: APIGatewayProxyEvent = {
-      body: "client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback",
-    } as never;
-    const result: Response = await handler(mockApiEvent);
-    const body: Token = JSON.parse(result.body);
-    expect(result.statusCode).toEqual(200);
-    expect(body.id_token).toContain(
-      "eyJraWQiOiJCLVFNVXhkSk9KOHVia21BcmM0aTFTR21mWm5OTmxNLXZhOWgwSEowakNvIiwiYWxnIjoiRVMyNTYifQ."
-    );
-  });
-
   test("returns 500 error response if event body is undefined", async () => {
     const mockApiEvent: APIGatewayProxyEvent = {
       body: "",
@@ -116,5 +104,153 @@ describe("handler", () => {
     expect(result.statusCode).toEqual(400);
     expect(result.body).toContain('"error":"invalid_request"');
     expect(result.body).toContain('"error_description"');
+  });
+
+  test("returns 200 with access_token when valid code_verifier is supplied", async () => {
+    const codeVerifier = "valid-verifier-abc";
+    const codeChallenge = createHash("sha256")
+      .update(codeVerifier)
+      .digest("base64");
+
+    dynamoMock
+      .on(GetCommand, {
+        TableName: "CodeChallengeTable",
+        Key: { code_challenge: codeChallenge },
+      })
+      .resolves({ Item: { code_challenge: codeChallenge } });
+
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: `client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_verifier=${codeVerifier}`,
+    } as never;
+
+    const result: Response = await handler(mockApiEvent);
+    const body: Token = JSON.parse(result.body);
+
+    expect(result.statusCode).toEqual(200);
+    expect(body.access_token).toBeDefined();
+    expect(body.id_token).toBeDefined();
+  });
+
+  test("throws an error if TABLE_NAME is undefined", async () => {
+    delete process.env.TABLE_NAME;
+
+    const codeVerifier = "valid-verifier-abc";
+    const codeChallenge = createHash("sha256")
+      .update(codeVerifier)
+      .digest("base64");
+
+    dynamoMock
+      .on(GetCommand, {
+        TableName: "CodeChallengeTable",
+        Key: { code_challenge: codeChallenge },
+      })
+      .resolves({ Item: { code_challenge: codeChallenge } });
+
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: `client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_verifier=${codeVerifier}`,
+    } as never;
+
+    let errorThrown = false;
+    try {
+      await handler(mockApiEvent);
+    } catch (error) {
+      errorThrown = true;
+    }
+    expect(errorThrown).toBeTruthy();
+  });
+
+  test("returns 400 invalid_grant when nonce is not found", async () => {
+    const codeVerifier = "test-verifier-123";
+
+    dynamoMock.on(GetCommand).resolves({ Item: undefined });
+
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: `client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_verifier=${codeVerifier}`,
+    } as never;
+
+    const result: Response = await handler(mockApiEvent);
+    expect(result.statusCode).toEqual(400);
+    expect(result.body).toContain('"error":"invalid_grant"');
+    expect(result.body).toContain('"error_description"');
+  });
+
+  test("throws an error if Code Challenge Table is undefined", async () => {
+    delete process.env.CODE_CHALLENGE_TABLE;
+
+    const codeVerifier = "valid-verifier-abc";
+    const codeChallenge = createHash("sha256")
+      .update(codeVerifier)
+      .digest("base64");
+
+    dynamoMock
+      .on(GetCommand, {
+        TableName: "CodeChallengeTable",
+        Key: { code_challenge: codeChallenge },
+      })
+      .resolves({ Item: { code_challenge: codeChallenge } });
+
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: `client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_verifier=${codeVerifier}`,
+    } as never;
+
+    let errorThrown = false;
+    try {
+      await handler(mockApiEvent);
+    } catch (error) {
+      errorThrown = true;
+    }
+    expect(errorThrown).toBeTruthy();
+  });
+
+  test("returns 400 invalid_grant when code is not included in token request", async () => {
+    const codeVerifier = "test-verifier-123";
+    const codeChallenge = createHash("sha256")
+      .update(codeVerifier)
+      .digest("base64");
+
+    dynamoMock
+      .on(GetCommand, {
+        TableName: "CodeChallengeTable",
+        Key: { code_challenge: codeChallenge },
+      })
+      .resolves({ Item: { code_challenge: codeChallenge } });
+
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: `client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_verifier=${codeVerifier}`,
+    } as never;
+
+    const result: Response = await handler(mockApiEvent);
+    expect(result.statusCode).toEqual(400);
+    expect(result.body).toContain('"error":"invalid_grant"');
+    expect(result.body).toContain('"error_description"');
+  });
+
+  test("throws an error if required environment variables are not defined", async () => {
+    delete process.env.OIDC_CLIENT_ID;
+    delete process.env.ENVIRONMENT;
+
+    const codeVerifier = "valid-verifier-abc";
+    const codeChallenge = createHash("sha256")
+      .update(codeVerifier)
+      .digest("base64");
+
+    dynamoMock
+      .on(GetCommand, {
+        TableName: "CodeChallengeTable",
+        Key: { code_challenge: codeChallenge },
+      })
+      .resolves({ Item: { code_challenge: codeChallenge } });
+
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: `client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_verifier=${codeVerifier}`,
+    } as never;
+
+    let errorThrown = false;
+    try {
+      await handler(mockApiEvent);
+    } catch (error) {
+      errorThrown = true;
+    }
+    expect(errorThrown).toBeTruthy();
   });
 });

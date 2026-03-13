@@ -137,7 +137,7 @@ describe("authorize", () => {
     test("throws an error if TXMA queue URL is undefined", async () => {
       delete process.env.DUMMY_TXMA_QUEUE_URL;
       const mockApiEvent: APIGatewayProxyEvent = {
-        body: "state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback",
+        body: `state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&request=${requestJwt}`,
         queryStringParameters: {
           clientId: "12345",
           responseType: "code",
@@ -210,6 +210,35 @@ describe("authorize", () => {
       expect(result.headers.Location).toContain("Internal Server Error");
 
       consoleErrorSpy.mockRestore();
+    });
+
+    test("returns a 302 response if Code Challenge Method is not a string", async () => {
+      const payload = {
+        nonce: "67890",
+        state: "AUTHENTICATE",
+        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+        code_challenge_method: 123,
+        code_challenge: "abc123",
+      };
+
+      requestJwt = buildJwt(payload);
+
+      const mockApiEvent: APIGatewayProxyEvent = {
+        body: `state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&request=${requestJwt}`,
+        queryStringParameters: {
+          clientId: "12345",
+          responseType: "code",
+          scope: "openid",
+          redirectUri: "https://home.dev.account.gov.uk/auth/callback",
+          state: "AUTHENTICATE",
+          nonce: "67890",
+          request: requestJwt,
+        } as APIGatewayProxyEventQueryStringParameters,
+      } as never;
+
+      const result = await handler(mockApiEvent);
+      expect(result.statusCode).toEqual(302);
+      expect(result.headers.Location).toContain("error=invalid_request");
     });
 
     test("redirects with error: invalid_request when code_challenge_method is not 'S256'", async () => {
