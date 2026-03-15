@@ -1,3 +1,5 @@
+import { UnsecuredJWT } from "jose";
+
 export function validateTokenRequest(body: Record<string, string>): {
   statusCode: number;
   body: string;
@@ -38,12 +40,19 @@ export function validateTokenRequest(body: Record<string, string>): {
   }
 
   if (!body.code.startsWith("token_response__")) {
+    const expiresIn = 300;
+
+    const token = new UnsecuredJWT({
+      journeyoutcome_response: body.code,
+      exp: new Date().getTime() / 1000 + expiresIn,
+    }).encode();
+
     return {
       statusCode: 200,
       body: JSON.stringify({
-        access_token: body.code,
+        access_token: token,
         token_type: "Bearer",
-        expires_in: 300,
+        expires_in: expiresIn,
       }),
     };
   } else {

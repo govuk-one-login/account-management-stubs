@@ -1289,7 +1289,7 @@ Resources:
         userinfo:
           Type: Api
           Properties:
-            Path: /v1/accounts/{publicSubjectId}/authenticators/passkeys
+            Path: /v1/passkeys/{publicSubjectId}
             Method: GET
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
@@ -1337,7 +1337,7 @@ Resources:
         userinfo:
           Type: Api
           Properties:
-            Path: /v1/accounts/{publicSubjectId}/authenticators/passkeys/{passkeyId}
+            Path: /v1/passkeys/{publicSubjectId}/{passkeyId}
             Method: DELETE
             RestApiId:
               Ref: MethodManagementv1StubsRestApi
