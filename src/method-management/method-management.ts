@@ -1,10 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import assert from "node:assert/strict";
-import {
-  validateFields,
-  validateBearerToken,
-  validateADAPIAccessToken,
-} from "../common/validation";
+import { validateFields, validateBearerToken } from "../common/validation";
 import { formatResponse, Response } from "../common/response-utils";
 import { getUserScenario } from "../scenarios/scenarios-utils";
 import { components } from "./models/schema";
@@ -219,46 +215,6 @@ export const deleteMethodHandler = async (
 
   if (methodToRemove.priorityIdentifier === "DEFAULT") {
     return formatResponse(409, {});
-  }
-
-  return formatResponse(204, {});
-};
-
-export const getPasskeysHandler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  try {
-    validateBearerToken(event.headers?.Authorization);
-  } catch (e) {
-    return formatResponse(403, { error: (e as Error).message });
-  }
-
-  try {
-    validateADAPIAccessToken(event.headers);
-  } catch (e) {
-    return formatResponse(403, { error: (e as Error).message });
-  }
-
-  const publicSubjectId = event.pathParameters?.publicSubjectId || "default";
-
-  const passkeys = getUserScenario(publicSubjectId, "passkeys");
-
-  return formatResponse(200, passkeys);
-};
-
-export const deletePasskeyHandler = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
-  try {
-    validateBearerToken(event.headers?.Authorization);
-  } catch (e) {
-    return formatResponse(403, { error: (e as Error).message });
-  }
-
-  try {
-    validateADAPIAccessToken(event.headers);
-  } catch (e) {
-    return formatResponse(403, { error: (e as Error).message });
   }
 
   return formatResponse(204, {});

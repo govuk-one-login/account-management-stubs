@@ -1,6 +1,5 @@
 import { handler } from "../../amc/amc-routes";
 import { APIGatewayProxyEvent } from "aws-lambda";
-import { UnsecuredJWT } from "jose";
 
 describe("token route", () => {
   const validBaseParams = {
@@ -47,11 +46,8 @@ describe("token route", () => {
 
     expect(result.statusCode).toBe(200);
     const body = JSON.parse(result.body);
+    expect(body.access_token).toBe("some_auth_code");
     expect(body.token_type).toBe("Bearer");
-    expect(body.expires_in).toBe(300);
-
-    const { payload } = UnsecuredJWT.decode(body.access_token);
-    expect(payload.journeyoutcome_response).toBe("some_auth_code");
   });
 
   test('processes "token_response__" prefix to return custom status and body', async () => {

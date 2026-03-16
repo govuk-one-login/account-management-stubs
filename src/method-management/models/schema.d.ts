@@ -40,18 +40,6 @@ export interface components {
       methodVerified?: boolean;
       smsPhoneNumber?: string;
     };
-    Passkey: {
-      credential: string;
-      id: string;
-      aaguid: string;
-      isAttested: boolean;
-      signCount: number;
-      transports: string[];
-      isBackUpEligible: boolean;
-      isBackedUp: boolean;
-      createdAt: string;
-      lastUsedAt: string;
-    };
     SmsMethod: {
       /** @enum {string} */
       mfaMethodType?: "SMS";

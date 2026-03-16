@@ -9,8 +9,6 @@ import {
   createMfaMethodHandler,
   deleteMethodHandler,
   retrieveMfaMethodHandler,
-  getPasskeysHandler,
-  deletePasskeyHandler,
 } from "../../method-management/method-management";
 import { Response } from "../../common/response-utils";
 
@@ -24,8 +22,7 @@ interface HttpResponse {
 interface Scenario {
   httpResponse: HttpResponse;
   mfaMethods?: MfaMethod[];
-  passkeys?: unknown[];
-  [key: string]: HttpResponse | MfaMethod[] | unknown[] | undefined;
+  [key: string]: HttpResponse | MfaMethod[] | undefined;
 }
 
 jest.mock("../../scenarios/scenarios-utils.ts", () => {
@@ -114,18 +111,6 @@ jest.mock("../../scenarios/scenarios-utils.ts", () => {
             code: 500,
             message: "METHOD COULD NOT BE UPDATED",
           },
-        },
-        withPasskeys: {
-          httpResponse: {
-            code: 200,
-            message: "OK",
-          },
-          passkeys: [
-            {
-              credentialId: "cred123",
-              friendlyName: "My Passkey",
-            },
-          ],
         },
       };
 
@@ -651,124 +636,6 @@ describe("deleteMethodHandler", () => {
       "Bearer "
     );
     const response = await deleteMethodHandler(fakeEvent);
-    expect(response.statusCode).toBe(403);
-  });
-});
-
-describe("getPasskeysHandler", () => {
-  const createFakeAPIGatewayProxyEvent = (
-    publicSubjectId: string,
-    authHeader?: string,
-    adapiToken?: string
-  ): APIGatewayProxyEvent => {
-    return {
-      body: null,
-      httpMethod: "GET",
-      path: `/passkeys/${publicSubjectId}`,
-      pathParameters: { publicSubjectId },
-      isBase64Encoded: false,
-      headers: {
-        Authorization: authHeader || "Bearer token",
-        "x-adapi-accesstoken": adapiToken || "adapi-token",
-      },
-      multiValueHeaders: {},
-      queryStringParameters: null,
-      multiValueQueryStringParameters: null,
-      stageVariables: null,
-      requestContext:
-        {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
-      resource: "",
-    };
-  };
-
-  test("should return 200 with passkeys", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent("withPasskeys");
-    const response = await getPasskeysHandler(fakeEvent);
-    expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toStrictEqual([
-      {
-        credentialId: "cred123",
-        friendlyName: "My Passkey",
-      },
-    ]);
-  });
-
-  test("should return 403 when Authorization header is missing", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent("withPasskeys", undefined);
-    fakeEvent.headers = { "x-adapi-accesstoken": "adapi-token" };
-    const response = await getPasskeysHandler(fakeEvent);
-    expect(response.statusCode).toBe(403);
-  });
-
-  test("should return 403 when Authorization header does not start with Bearer", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent(
-      "withPasskeys",
-      "Basic token"
-    );
-    const response = await getPasskeysHandler(fakeEvent);
-    expect(response.statusCode).toBe(403);
-  });
-
-  test("should return 403 when x-adapi-accesstoken header is missing", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent(
-      "withPasskeys",
-      "Bearer token",
-      undefined
-    );
-    delete fakeEvent.headers["x-adapi-accesstoken"];
-    const response = await getPasskeysHandler(fakeEvent);
-    expect(response.statusCode).toBe(403);
-  });
-});
-
-describe("deletePasskeyHandler", () => {
-  const createFakeAPIGatewayProxyEvent = (
-    authHeader?: string,
-    adapiToken?: string
-  ): APIGatewayProxyEvent => {
-    return {
-      body: null,
-      httpMethod: "DELETE",
-      path: "/passkeys/cred123",
-      pathParameters: { credentialId: "cred123" },
-      isBase64Encoded: false,
-      headers: {
-        Authorization: authHeader || "Bearer token",
-        "x-adapi-accesstoken": adapiToken || "adapi-token",
-      },
-      multiValueHeaders: {},
-      queryStringParameters: null,
-      multiValueQueryStringParameters: null,
-      stageVariables: null,
-      requestContext:
-        {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
-      resource: "",
-    };
-  };
-
-  test("should return 204 on successful deletion", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent();
-    const response = await deletePasskeyHandler(fakeEvent);
-    expect(response.statusCode).toBe(204);
-  });
-
-  test("should return 403 when Authorization header is missing", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent(undefined);
-    fakeEvent.headers = { "x-adapi-accesstoken": "adapi-token" };
-    const response = await deletePasskeyHandler(fakeEvent);
-    expect(response.statusCode).toBe(403);
-  });
-
-  test("should return 403 when Authorization header does not start with Bearer", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent("Basic token");
-    const response = await deletePasskeyHandler(fakeEvent);
-    expect(response.statusCode).toBe(403);
-  });
-
-  test("should return 403 when x-adapi-accesstoken header is missing", async () => {
-    const fakeEvent = createFakeAPIGatewayProxyEvent("Bearer token", undefined);
-    delete fakeEvent.headers["x-adapi-accesstoken"];
-    const response = await deletePasskeyHandler(fakeEvent);
     expect(response.statusCode).toBe(403);
   });
 });
