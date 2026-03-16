@@ -31,9 +31,6 @@ Parameters:
   OidcStubDataTableName:
     Type: String
     Default: oidc_stub_data
-  OidcStubCodeChallengeTableName:
-    Type: String
-    Default: code_challenge_table
 
 Mappings:
   AccountManagementUI:
@@ -364,38 +361,6 @@ Resources:
         - Key: Source
           Value: "https://github.com/govuk-one-login/account-management-stubs/blob/main/infrastructure/template.yaml"
 
-  OidcStubCodeChallengeStore:
-    Type: AWS::DynamoDB::Table
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
-    Properties:
-      AttributeDefinitions:
-        - AttributeName: code_challenge
-          AttributeType: S
-      BillingMode: PAY_PER_REQUEST
-      TableName: !Ref OidcStubCodeChallengeTableName
-      KeySchema:
-        - AttributeName: code_challenge
-          KeyType: HASH
-      SSESpecification:
-        SSEEnabled: true
-        SSEType: KMS
-        KMSMasterKeyId: !GetAtt DatabaseKmsKey.Arn
-      TimeToLiveSpecification:
-        AttributeName: remove_at
-        Enabled: true
-      Tags:
-        - Key: Product
-          Value: GOV.UK Sign In
-        - Key: System
-          Value: Account Management Backend
-        - Key: Owner
-          Value: govuk-accounts-tech@digital.cabinet-office.gov.uk
-        - Key: Environment
-          Value: !Ref "Environment"
-        - Key: Source
-          Value: "https://github.com/govuk-one-login/account-management-stubs/blob/main/infrastructure/template.yaml"
-
   DatabaseKmsKey:
     Type: AWS::KMS::Key
     Properties:
@@ -432,29 +397,6 @@ Resources:
               - !Sub
                 - "${Arn}/*"
                 - Arn: !GetAtt OidcStubDataStore.Arn
-          - Effect: Allow
-            Action:
-              - kms:Decrypt
-              - kms:GenerateDataKey*
-              - kms:ReEncrypt*
-            Resource:
-              - !GetAtt DatabaseKmsKey.Arn
-
-  OidcCodeChallengeTablePolicy:
-    Type: AWS::IAM::ManagedPolicy
-    Properties:
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - dynamodb:GetItem
-              - dynamodb:PutItem
-            Resource:
-              - !GetAtt OidcStubCodeChallengeStore.Arn
-              - !Sub
-                - "${Arn}/*"
-                - Arn: !GetAtt OidcStubCodeChallengeStore.Arn
           - Effect: Allow
             Action:
               - kms:Decrypt
@@ -611,7 +553,6 @@ Resources:
           ACCOUNT_MANAGEMENT_URL:
             !FindInMap [AccountManagementUI, !Ref Environment, url]
           TABLE_NAME: !Ref OidcStubDataTableName
-          CODE_CHALLENGE_TABLE: !Ref OidcStubCodeChallengeTableName
       Events:
         userinfo:
           Type: Api
@@ -648,7 +589,6 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - !Ref OidcAuthorizeApiStubPolicy
-        - !Ref OidcCodeChallengeTablePolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -925,7 +865,6 @@ Resources:
           JWK_KEY_SECRET: "{{resolve:secretsmanager:/account-mgmt-stubs/oidc/signing/key}}"
           ENVIRONMENT: !Ref Environment
           TABLE_NAME: !Ref OidcStubDataTableName
-          CODE_CHALLENGE_TABLE: !Ref OidcStubCodeChallengeTableName
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -946,7 +885,6 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         - !Ref QueryOidcDynamoTablePolicy
-        - !Ref OidcCodeChallengeTablePolicy
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -1536,7 +1474,7 @@ Resources:
           Properties:
             Method: ANY
             Path: /{proxy+}
-            RestApiId: !Ref AmcStubsRestApi
+            RestApiId: !Ref AmcStubsRestApi      
       VpcConfig:
         SubnetIds:
           - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
