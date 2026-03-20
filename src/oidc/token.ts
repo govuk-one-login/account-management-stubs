@@ -18,7 +18,7 @@ const HASH_ENCODING = "base64" as const;
 
 interface TokenRequestParams {
   code: string;
-  code_verifier?: string;
+  code_verifier: string;
 }
 
 interface OAuthErrorResponse {
@@ -152,23 +152,21 @@ const parseTokenRequestParams = (body: string): TokenRequestParams => {
     );
   }
 
-  return {
-    code,
-    code_verifier: codeVerifier !== null ? codeVerifier : undefined,
-  };
-};
-
-const validateCodeVerifier = async (
-  codeVerifier: string | null
-): Promise<void> => {
-  if (!codeVerifier || codeVerifier.length === 0) {
+  if (!codeVerifier) {
     throw new TokenValidationError(
-      "Empty code verifier",
+      "Missing authorization code_verifier",
       "invalid_request",
-      "The code_verifier parameter cannot be empty"
+      "The code verifier parameter is required"
     );
   }
 
+  return {
+    code,
+    code_verifier: codeVerifier,
+  };
+};
+
+const validateCodeVerifier = async (codeVerifier: string): Promise<void> => {
   const isValid = await verifyCodeChallenge(codeVerifier);
 
   if (!isValid) {
@@ -258,10 +256,8 @@ export const handler = async (
     // Retrieve persisted nonce
     const nonce = await getPersistedNonce(code);
 
-    // Validate PKCE if code_verifier is provided
-    if (codeVerifier !== undefined) {
-      await validateCodeVerifier(codeVerifier);
-    }
+    // Validate PKCE
+    await validateCodeVerifier(codeVerifier);
 
     // Validate client ID
     const { oidcClientId, environment } = getRequiredEnvVars();
