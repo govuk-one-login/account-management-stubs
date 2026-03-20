@@ -109,7 +109,11 @@ const getPersistedNonce = async (code: string): Promise<string> => {
 const computeCodeChallenge = (codeVerifier: string): string => {
   const codeChallenge = createHash(HASH_ALGORITHM)
     .update(codeVerifier)
-    .digest(HASH_ENCODING);
+    .digest(HASH_ENCODING)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+
   console.log(`Computed code challenge (${codeVerifier}): ${codeChallenge}`);
   return codeChallenge;
 };
