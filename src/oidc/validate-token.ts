@@ -30,8 +30,10 @@ export const verifyParametersExistAndOnlyOnce = (eventBody: string) => {
     !existsOnce(eventBody, "client_assertion=") ||
     !existsOnce(eventBody, "grant_type=") ||
     !existsOnce(eventBody, "code=") ||
-    !existsOnce(eventBody, "redirect_uri=")
+    !existsOnce(eventBody, "redirect_uri=") ||
+    !existsOnce(eventBody, "code_verifier=")
   ) {
+    console.log(`Request Params`, { eventBody });
     throw new Error(`Missing parameters or duplicate parameter`);
   }
 };

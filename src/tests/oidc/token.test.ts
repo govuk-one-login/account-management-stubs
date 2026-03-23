@@ -17,6 +17,9 @@ const oicdPersistedData = {
   nonce,
 };
 
+const computeBase64urlChallenge = (verifier: string): string =>
+  createHash("sha256").update(verifier).digest("base64url");
+
 jest.mock("../../oidc/validate-token");
 
 describe("handler", () => {
@@ -51,9 +54,7 @@ describe("handler", () => {
 
   test("returns 200 OK when code_verifier matches stored code_challenge", async () => {
     const codeVerifier = "test-verifier-123";
-    const codeChallenge = createHash("sha256")
-      .update(codeVerifier)
-      .digest("base64");
+    const codeChallenge = computeBase64urlChallenge(codeVerifier);
 
     dynamoMock
       .on(GetCommand, {
@@ -95,6 +96,17 @@ describe("handler", () => {
     expect(result.body).toContain('"error_description"');
   });
 
+  test("returns 400 invalid_request when code_verifier is not supplied", async () => {
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: `client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback`,
+    } as never;
+
+    const result: Response = await handler(mockApiEvent);
+    expect(result.statusCode).toEqual(400);
+    expect(result.body).toContain('"error":"invalid_request"');
+    expect(result.body).toContain('"error_description"');
+  });
+
   test("returns 400 invalid_request when code_verifier is empty string", async () => {
     const mockApiEvent: APIGatewayProxyEvent = {
       body: `client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_verifier=`,
@@ -108,9 +120,7 @@ describe("handler", () => {
 
   test("returns 200 with access_token when valid code_verifier is supplied", async () => {
     const codeVerifier = "valid-verifier-abc";
-    const codeChallenge = createHash("sha256")
-      .update(codeVerifier)
-      .digest("base64");
+    const codeChallenge = computeBase64urlChallenge(codeVerifier);
 
     dynamoMock
       .on(GetCommand, {
@@ -135,9 +145,7 @@ describe("handler", () => {
     delete process.env.TABLE_NAME;
 
     const codeVerifier = "valid-verifier-abc";
-    const codeChallenge = createHash("sha256")
-      .update(codeVerifier)
-      .digest("base64");
+    const codeChallenge = computeBase64urlChallenge(codeVerifier);
 
     dynamoMock
       .on(GetCommand, {
@@ -178,9 +186,7 @@ describe("handler", () => {
     delete process.env.CODE_CHALLENGE_TABLE;
 
     const codeVerifier = "valid-verifier-abc";
-    const codeChallenge = createHash("sha256")
-      .update(codeVerifier)
-      .digest("base64");
+    const codeChallenge = computeBase64urlChallenge(codeVerifier);
 
     dynamoMock
       .on(GetCommand, {
@@ -204,9 +210,7 @@ describe("handler", () => {
 
   test("returns 400 invalid_request when code is not included in token request", async () => {
     const codeVerifier = "test-verifier-123";
-    const codeChallenge = createHash("sha256")
-      .update(codeVerifier)
-      .digest("base64");
+    const codeChallenge = computeBase64urlChallenge(codeVerifier);
 
     dynamoMock
       .on(GetCommand, {
@@ -225,14 +229,32 @@ describe("handler", () => {
     expect(result.body).toContain('"error_description"');
   });
 
+  test("computes correct code_challenge for a given code_verifier", async () => {
+    const codeVerifier =
+      "bT4B5jHX764bSA7ObBntSLLeBQ4YDD3jmwin_if~waYr9yGKMrogPIg32PJ7BYKxkoi2FHzsZ-16YsDZN15qoNky2h2mveSsvBijyYhMBJtxXRy4XvFlSYXa3PACBeoK";
+    const expectedChallenge = "uGE3zRS3jX1EZ97a8nrIuNQ1wM257OfzFsW6-MLp0do";
+
+    dynamoMock
+      .on(GetCommand, {
+        TableName: "CodeChallengeTable",
+        Key: { code_challenge: expectedChallenge },
+      })
+      .resolves({ Item: { code_challenge: expectedChallenge } });
+
+    const mockApiEvent: APIGatewayProxyEvent = {
+      body: `client_assertion_type=urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer&client_assertion=eyJhbGkpXVCJ9.ey5BPMzRJIn0.RmHvYkaw&grant_type=authorization_code&code=ccca4dec-6799-413c-ab45-896d050006b5&redirect_uri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&code_verifier=${codeVerifier}`,
+    } as never;
+
+    const result: Response = await handler(mockApiEvent);
+    expect(result.statusCode).toEqual(200);
+  });
+
   test("throws an error if required environment variables are not defined", async () => {
     delete process.env.OIDC_CLIENT_ID;
     delete process.env.ENVIRONMENT;
 
     const codeVerifier = "valid-verifier-abc";
-    const codeChallenge = createHash("sha256")
-      .update(codeVerifier)
-      .digest("base64");
+    const codeChallenge = computeBase64urlChallenge(codeVerifier);
 
     dynamoMock
       .on(GetCommand, {

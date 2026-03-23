@@ -25,8 +25,8 @@ const CODE_CHALLENGE_TTL_SECONDS = 3600;
 const NONCE_TTL_SECONDS = 24 * 60 * 60;
 
 interface PkceParams {
-  code_challenge_method?: unknown;
-  code_challenge?: unknown;
+  code_challenge_method: string;
+  code_challenge: string;
 }
 
 interface AuthorizeRequestBody {
@@ -146,23 +146,14 @@ const saveCodeChallenge = async (
 };
 
 const validateAndSavePkce = async (jwtPayload: JWTPayload): Promise<void> => {
-  const pkceParams = jwtPayload as PkceParams;
+  const pkceParams = jwtPayload as unknown as PkceParams;
   const {
     code_challenge_method: codeChallengeMethod,
     code_challenge: codeChallenge,
   } = pkceParams;
 
   if (codeChallengeMethod == null) {
-    console.log("No PKCE parameters provided");
-    return;
-  }
-
-  if (typeof codeChallengeMethod !== "string") {
-    throw new PkceValidationError("code_challenge_method must be a string");
-  }
-
-  if (typeof codeChallenge !== "string") {
-    throw new PkceValidationError("code_challenge must be a string");
+    throw new PkceValidationError("code_challenge_method is missing");
   }
 
   if (!isValidCodeChallenge(codeChallengeMethod, codeChallenge)) {
@@ -171,7 +162,7 @@ const validateAndSavePkce = async (jwtPayload: JWTPayload): Promise<void> => {
     );
   }
 
-  console.log(`Valid PKCE parameters provided: ${codeChallengeMethod}`);
+  console.log("Valid PKCE parameters provided", pkceParams);
   await saveCodeChallenge(codeChallenge);
 };
 

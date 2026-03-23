@@ -14,7 +14,7 @@ jest.mock("jose", () => ({
 
 describe("validation for token", () => {
   const eventBody =
-    "client_assertion_type=type&client_assertion=xxxx&grant_type=authorization_code&code=xxxx&redirect_uri=xxxxxx";
+    "client_assertion_type=type&client_assertion=xxxx&grant_type=authorization_code&code=xxxx&redirect_uri=xxxxxx&code_verifier=xxxx";
 
   beforeEach(() => {
     process.env.OIDC_CLIENT_ID = "12345";
