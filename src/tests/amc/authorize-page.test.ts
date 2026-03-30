@@ -52,7 +52,12 @@ describe("buildAuthorizePage", () => {
         .length;
       expect(apiSpecOccurrences).toBe(3);
 
-      expect(html).toContain(`<a href="${frontendSpecUrl}">`);
+      expect(html).toContain(
+        `<a href="${apiSpecUrl}">account-components/solutions/api/spec.yaml</a>`
+      );
+      expect(html).toContain(
+        `<a href="${frontendSpecUrl}">account-components/solutions/frontend/spec.yaml</a>`
+      );
     });
   });
 

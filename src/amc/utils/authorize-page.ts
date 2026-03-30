@@ -1,7 +1,10 @@
 const SPEC_BASE_URL =
   "https://github.com/govuk-one-login/account-components/blob/main/solutions";
 const API_SPEC_URL = `${SPEC_BASE_URL}/api/spec.yaml`;
+const API_SPEC_LINK_TEXT = "account-components/solutions/api/spec.yaml";
 const FRONTEND_SPEC_URL = `${SPEC_BASE_URL}/frontend/spec.yaml`;
+const FRONTEND_SPEC_LINK_TEXT =
+  "account-components/solutions/frontend/spec.yaml";
 
 const DEFAULT_EMAIL = "testuser@test.null.local";
 const DEFAULT_SUB = "urn:fdc:gov.uk:default";
@@ -281,8 +284,8 @@ const authorizeErrorLinksHtml = (
     )
     .join("\n");
 
-const specLink = (url: string, text: string): string =>
-  `<p>These links are for simulating ${text} as detailed in the spec at <a href="${url}">${url.split("/").pop()}</a></p>`;
+const specLink = (url: string, linkText: string, text: string): string =>
+  `<p>These links are for simulating ${text} as detailed in the spec at <a href="${url}">${linkText}</a></p>`;
 
 export const buildAuthorizePage = (
   redirectUri: string,
@@ -294,19 +297,19 @@ export const buildAuthorizePage = (
 <h1>Account Management Component Stub</h1>
 
 <h2>Journey outcome endpoint success responses</h2>
-${specLink(API_SPEC_URL, "/journeyoutcome success responses")}
+${specLink(API_SPEC_URL, API_SPEC_LINK_TEXT, "/journeyoutcome success responses")}
 ${journeyOutcomeLinksHtml(successLinks, redirectUri, state)}
 
 <h2>Journey outcome endpoint error responses</h2>
-${specLink(API_SPEC_URL, "/journeyoutcome error responses")}
+${specLink(API_SPEC_URL, API_SPEC_LINK_TEXT, "/journeyoutcome error responses")}
 ${journeyOutcomeLinksHtml(journeyOutcomeErrorLinks, redirectUri, state)}
 
 <h2>Token endpoint error responses</h2>
-${specLink(API_SPEC_URL, "/token error responses")}
+${specLink(API_SPEC_URL, API_SPEC_LINK_TEXT, "/token error responses")}
 ${journeyOutcomeLinksHtml(tokenErrorLinks, redirectUri, state, "token_response__")}
 
 <h2>Authorize error responses</h2>
-${specLink(FRONTEND_SPEC_URL, "/authorize error responses")}
+${specLink(FRONTEND_SPEC_URL, FRONTEND_SPEC_LINK_TEXT, "/authorize error responses")}
 ${authorizeErrorLinksHtml(authorizeErrorLinks, redirectUri, state)}
 
 </body>
