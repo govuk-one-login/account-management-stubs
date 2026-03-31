@@ -28,7 +28,7 @@ export const validateADAPIAccessToken = (
   headers: APIGatewayProxyEventHeaders
 ): void => {
   assert(
-    headers["x-adapi-accesstoken"],
+    headers["X-ADAPI-AccessToken"],
     "Account data API token must be provided"
   );
 };
