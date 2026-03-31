@@ -731,8 +731,8 @@ export const userScenarios: UserScenarios = {
         mfaIdentifier: "0",
         priorityIdentifier: "DEFAULT",
         method: {
-          mfaMethodType: "SMS",
-          phoneNumber: "07123456789",
+          mfaMethodType: "AUTH_APP",
+          credential: "ABC",
         },
         methodVerified: true,
       },
@@ -768,6 +768,15 @@ export const userScenarios: UserScenarios = {
         },
         methodVerified: true,
       },
+      {
+        mfaIdentifier: "1",
+        priorityIdentifier: "BACKUP",
+        method: {
+          mfaMethodType: "AUTH_APP",
+          credential: "ABC",
+        },
+        methodVerified: true,
+      },
     ],
     otpNotification: {
       success: true,
@@ -794,6 +803,15 @@ export const userScenarios: UserScenarios = {
       {
         mfaIdentifier: "0",
         priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "AUTH_APP",
+          credential: "ABC",
+        },
+        methodVerified: true,
+      },
+      {
+        mfaIdentifier: "1",
+        priorityIdentifier: "BACKUP",
         method: {
           mfaMethodType: "SMS",
           phoneNumber: "07123456789",
