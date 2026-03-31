@@ -50,7 +50,7 @@ export interface components {
       isBackUpEligible: boolean;
       isBackedUp: boolean;
       createdAt: string;
-      lastUsedAt?: string;
+      lastUsedAt: string;
     };
     SmsMethod: {
       /** @enum {string} */
