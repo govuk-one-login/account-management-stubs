@@ -29,7 +29,6 @@ const passkeys = [
     isBackUpEligible: true,
     isBackedUp: true,
     createdAt: "2025-11-05T05:09:01.341Z",
-    lastUsedAt: "2025-11-11T23:56:58.341Z",
   },
   {
     credential: "fake-credential-3",
@@ -53,7 +52,6 @@ const passkeys = [
     isBackUpEligible: true,
     isBackedUp: false,
     createdAt: "2025-12-19T12:32:19.341Z",
-    lastUsedAt: "2025-12-25T08:14:00.341Z",
   },
   {
     credential: "fake-credential-5",
