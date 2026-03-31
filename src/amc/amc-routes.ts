@@ -27,6 +27,16 @@ export const handler = async (event: APIGatewayProxyEvent) => {
     const params = event.queryStringParameters || {};
     const errors: string[] = [];
 
+    const cookies = event.headers?.Cookie || event.headers?.cookie || "";
+    const amcCookie = cookies
+      .split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith("amc="));
+    const amcValue = amcCookie?.split("=").slice(1).join("=") || "";
+    if (amcValue.length === 0) {
+      errors.push("amc cookie is required and must not be empty");
+    }
+
     if (!params.client_id || params.client_id.length === 0) {
       errors.push("client_id is required and must not be empty");
     }
