@@ -77,6 +77,12 @@ const successLinks: JourneyOutcomeLink[] = [
     }),
   },
   {
+    label: "passkey-create success (passkey has no display name)",
+    code: journeyOutcome("passkey-create", true, {
+      aaguid: "00000000-0000-0000-0000-000000000000",
+    }),
+  },
+  {
     label: "testing-journey user signed out",
     code: journeyOutcome("testing-journey", false, userSignedOut),
   },
