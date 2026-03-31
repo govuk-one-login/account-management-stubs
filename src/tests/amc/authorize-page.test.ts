@@ -374,7 +374,7 @@ describe("buildAuthorizePage", () => {
   });
 
   describe("link counts", () => {
-    test("has 7 journey outcome success links", () => {
+    test("has 8 journey outcome success links", () => {
       const successSection = html.split(
         "Journey outcome endpoint error responses"
       )[0];
@@ -383,7 +383,7 @@ describe("buildAuthorizePage", () => {
           new RegExp(`<a href="${REDIRECT_URI}\\?code=`, "g")
         ) || []
       ).length;
-      expect(linkCount).toBe(7);
+      expect(linkCount).toBe(8);
     });
 
     test("has 8 journey outcome error links", () => {
