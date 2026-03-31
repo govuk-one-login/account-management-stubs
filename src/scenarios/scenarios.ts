@@ -6,12 +6,12 @@ export const ERROR_CODES = {
   NEW_PHONE_NUMBER_SAME_AS_EXISTING: 1044,
 };
 
-const somePasskeys = [
+const passkeys = [
   {
     credential: "fake-credential-1",
     id: "f5cf86e0-6eb5-4965-8c5e-2516b8f1c625",
-    aaguid: "1ac71f64-468d-4fe0-bef1-0e5f2f551f18",
-    isAttested: true,
+    aaguid: "1ac71f64-468d-4fe0-bef1-0e5f2f551f18", // YubiKey 5 Series with NFC (Enterprise Profile)
+    isAttested: false,
     signCount: 1,
     transports: ["usb"],
     isBackUpEligible: false,
@@ -21,8 +21,20 @@ const somePasskeys = [
   },
   {
     credential: "fake-credential-2",
+    id: "2250f2de-2add-4d2d-bb0c-4e67f2a7d4bf",
+    aaguid: "00000000-0000-0000-0000-000000000000",
+    isAttested: false,
+    signCount: 0,
+    transports: ["internal"],
+    isBackUpEligible: true,
+    isBackedUp: true,
+    createdAt: "2025-11-05T05:09:01.341Z",
+    lastUsedAt: "2025-11-11T23:56:58.341Z",
+  },
+  {
+    credential: "fake-credential-3",
     id: "8518d6e1-a126-463f-b682-103b7f8b1852",
-    aaguid: "dd4ec289-e01d-41c9-bb89-70fa845d4bf2",
+    aaguid: "dd4ec289-e01d-41c9-bb89-70fa845d4bf2", // iCloud Keychain (Managed)
     isAttested: false,
     signCount: 0,
     transports: ["internal"],
@@ -30,6 +42,30 @@ const somePasskeys = [
     isBackedUp: true,
     createdAt: "2026-01-19T19:04:16.341Z",
     lastUsedAt: "2026-02-25T20:06:19.341Z",
+  },
+  {
+    credential: "fake-credential-4",
+    id: "7b83b06f-f5a7-495b-9f1c-5485c66b19ee",
+    aaguid: "ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4", // Google Password Manager
+    isAttested: false,
+    signCount: 0,
+    transports: ["internal"],
+    isBackUpEligible: true,
+    isBackedUp: false,
+    createdAt: "2025-12-19T12:32:19.341Z",
+    lastUsedAt: "2025-12-25T08:14:00.341Z",
+  },
+  {
+    credential: "fake-credential-5",
+    id: "f4df1704-f6a5-4802-8607-d6a64f4ba2ee",
+    aaguid: "c80dbd9a-533f-4a17-b941-1a2f1c7cedff", // HID Crescendo C3000
+    isAttested: false,
+    signCount: 3,
+    transports: ["usb"],
+    isBackUpEligible: false,
+    isBackedUp: false,
+    createdAt: "2025-03-19T12:32:19.341Z",
+    lastUsedAt: "2025-03-25T08:14:00.341Z",
   },
 ];
 
@@ -64,7 +100,7 @@ export const userScenarios: UserScenarios = {
     otpNotification: {
       success: true,
     },
-    passkeys: somePasskeys,
+    passkeys,
   },
   methodManagementDev: {
     userinfo: {
@@ -75,7 +111,7 @@ export const userScenarios: UserScenarios = {
       phone_number_verified: true,
       public_subject_id: "ooVD4Sm9oPoZTHdY6ekyoexHDb_AoN4uDd7uHH-eQqk",
     },
-    passkeys: somePasskeys,
+    passkeys,
   },
   userDEFAULTAuthApp: {
     userinfo: {
@@ -97,7 +133,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   userDEFAULTSms: {
     userinfo: {
@@ -119,7 +155,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   userDEFAULTSmsBackupAuthApp: {
     userinfo: {
@@ -150,7 +186,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   userDEFAULTAuthAppBackupSms: {
     userinfo: {
@@ -181,7 +217,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   userDEFAULTSmsBackupSms: {
     userinfo: {
@@ -212,7 +248,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   userNewPhoneNumberSameAsExisting: {
     userinfo: {
@@ -238,7 +274,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   userOtpCodeWrong: {
     userinfo: {
@@ -253,7 +289,7 @@ export const userScenarios: UserScenarios = {
       code: 400,
       message: "OTP incorrect",
     },
-    passkeys: somePasskeys,
+    passkeys,
   },
   errorNoMfaMethods: {
     userinfo: {
@@ -265,7 +301,7 @@ export const userScenarios: UserScenarios = {
       public_subject_id: "errorNoMfaMethods",
     },
     mfaMethods: [],
-    passkeys: somePasskeys,
+    passkeys,
   },
   errorMoreThanTwoMethods: {
     userinfo: {
@@ -305,7 +341,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   errorNoDEFAULTMethod: {
     userinfo: {
@@ -336,7 +372,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   errorMultipleDEFAULTMethods: {
     userinfo: {
@@ -367,7 +403,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   errorMultipleAuthAppMethods: {
     userinfo: {
@@ -398,7 +434,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   errorMfa400: {
     userinfo: {
@@ -424,7 +460,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   errorMfa404: {
     userinfo: {
@@ -450,7 +486,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   errorMfa500: {
     userinfo: {
@@ -476,7 +512,7 @@ export const userScenarios: UserScenarios = {
         methodVerified: true,
       },
     ],
-    passkeys: somePasskeys,
+    passkeys,
   },
   userPerformanceTest: {
     httpResponse: {
@@ -505,7 +541,7 @@ export const userScenarios: UserScenarios = {
     otpNotification: {
       success: true,
     },
-    passkeys: somePasskeys,
+    passkeys,
   },
   permanentlySuspended: {
     httpResponse: {
@@ -538,7 +574,7 @@ export const userScenarios: UserScenarios = {
       suspended: false,
       blocked: true,
     },
-    passkeys: somePasskeys,
+    passkeys,
   },
   temporarilySuspended: {
     httpResponse: {
@@ -571,7 +607,7 @@ export const userScenarios: UserScenarios = {
       suspended: true,
       blocked: false,
     },
-    passkeys: somePasskeys,
+    passkeys,
   },
   suspendedAndBlocked: {
     httpResponse: {
@@ -604,13 +640,13 @@ export const userScenarios: UserScenarios = {
       suspended: true,
       blocked: true,
     },
-    passkeys: somePasskeys,
+    passkeys,
   },
   unsignedUserInfo: {
     userInfoSigned: {
       isSigned: false,
     },
-    passkeys: somePasskeys,
+    passkeys,
   },
   noPasskeys: {
     httpResponse: {
@@ -644,6 +680,70 @@ export const userScenarios: UserScenarios = {
     },
     passkeys: [],
   },
+  onePasskey: {
+    httpResponse: {
+      code: 200,
+      message: "OK",
+    },
+    userInfoSigned: {
+      isSigned: false,
+    },
+    userinfo: {
+      sub: "urn:fdc:gov.uk:default",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "default",
+    },
+    mfaMethods: [
+      {
+        mfaIdentifier: "0",
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
+        methodVerified: true,
+      },
+    ],
+    otpNotification: {
+      success: true,
+    },
+    passkeys: [passkeys[0]],
+  },
+  onePasskeyNoDisplayName: {
+    httpResponse: {
+      code: 200,
+      message: "OK",
+    },
+    userInfoSigned: {
+      isSigned: false,
+    },
+    userinfo: {
+      sub: "urn:fdc:gov.uk:default",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "default",
+    },
+    mfaMethods: [
+      {
+        mfaIdentifier: "0",
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
+        methodVerified: true,
+      },
+    ],
+    otpNotification: {
+      success: true,
+    },
+    passkeys: [passkeys[1]],
+  },
   fourPasskeys: {
     httpResponse: {
       code: 200,
@@ -674,32 +774,38 @@ export const userScenarios: UserScenarios = {
     otpNotification: {
       success: true,
     },
-    passkeys: [
-      ...somePasskeys,
+    passkeys: passkeys.slice(0, 4),
+  },
+  fivePasskeys: {
+    httpResponse: {
+      code: 200,
+      message: "OK",
+    },
+    userInfoSigned: {
+      isSigned: false,
+    },
+    userinfo: {
+      sub: "urn:fdc:gov.uk:default",
+      email: "your.name@example.com",
+      email_verified: true,
+      phone_number: "1234567890",
+      phone_number_verified: true,
+      public_subject_id: "default",
+    },
+    mfaMethods: [
       {
-        credential: "fake-credential-3",
-        id: "7b83b06f-f5a7-495b-9f1c-5485c66b19ee",
-        aaguid: "ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4",
-        isAttested: false,
-        signCount: 0,
-        transports: ["internal"],
-        isBackUpEligible: true,
-        isBackedUp: true,
-        createdAt: "2025-12-19T12:32:19.341Z",
-        lastUsedAt: "2025-12-25T08:14:00.341Z",
-      },
-      {
-        credential: "fake-credential-4",
-        id: "2250f2de-2add-4d2d-bb0c-4e67f2a7d4bf",
-        aaguid: "00000000-0000-0000-0000-000000000000",
-        isAttested: false,
-        signCount: 0,
-        transports: ["internal"],
-        isBackUpEligible: true,
-        isBackedUp: true,
-        createdAt: "2025-11-05T05:09:01.341Z",
-        lastUsedAt: "2025-11-11T23:56:58.341Z",
+        mfaIdentifier: "0",
+        priorityIdentifier: "DEFAULT",
+        method: {
+          mfaMethodType: "SMS",
+          phoneNumber: "07123456789",
+        },
+        methodVerified: true,
       },
     ],
+    otpNotification: {
+      success: true,
+    },
+    passkeys,
   },
 };
