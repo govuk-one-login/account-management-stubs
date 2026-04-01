@@ -660,7 +660,7 @@ export const userScenarios: UserScenarios = {
       email_verified: true,
       phone_number: "1234567890",
       phone_number_verified: true,
-      public_subject_id: "default",
+      public_subject_id: "noPasskeys",
     },
     mfaMethods: [
       {
@@ -692,7 +692,7 @@ export const userScenarios: UserScenarios = {
       email_verified: true,
       phone_number: "1234567890",
       phone_number_verified: true,
-      public_subject_id: "default",
+      public_subject_id: "onePasskey",
     },
     mfaMethods: [
       {
@@ -724,7 +724,7 @@ export const userScenarios: UserScenarios = {
       email_verified: true,
       phone_number: "1234567890",
       phone_number_verified: true,
-      public_subject_id: "default",
+      public_subject_id: "onePasskeyNoDisplayName",
     },
     mfaMethods: [
       {
@@ -756,7 +756,7 @@ export const userScenarios: UserScenarios = {
       email_verified: true,
       phone_number: "1234567890",
       phone_number_verified: true,
-      public_subject_id: "default",
+      public_subject_id: "fourPasskeys",
     },
     mfaMethods: [
       {
@@ -797,7 +797,7 @@ export const userScenarios: UserScenarios = {
       email_verified: true,
       phone_number: "1234567890",
       phone_number_verified: true,
-      public_subject_id: "default",
+      public_subject_id: "fivePasskeys",
     },
     mfaMethods: [
       {
