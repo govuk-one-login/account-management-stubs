@@ -106,21 +106,21 @@ describe("validateBearerToken Function", () => {
 });
 
 describe("validateADAPIAccessToken Function", () => {
-  it("should validate when x-adapi-accesstoken header is present", () => {
+  it("should validate when X-ADAPI-AccessToken header is present", () => {
     expect(() =>
-      validateADAPIAccessToken({ "x-adapi-accesstoken": "token" })
+      validateADAPIAccessToken({ "X-ADAPI-AccessToken": "token" })
     ).not.toThrow();
   });
 
-  it("should throw an error when x-adapi-accesstoken header is missing", () => {
+  it("should throw an error when X-ADAPI-AccessToken header is missing", () => {
     expect(() => validateADAPIAccessToken({})).toThrow(
       /Account data API token must be provided/
     );
   });
 
-  it("should throw an error when x-adapi-accesstoken header is undefined", () => {
+  it("should throw an error when X-ADAPI-AccessToken header is undefined", () => {
     expect(() =>
-      validateADAPIAccessToken({ "x-adapi-accesstoken": undefined })
+      validateADAPIAccessToken({ "X-ADAPI-AccessToken": undefined })
     ).toThrow(/Account data API token must be provided/);
   });
 });

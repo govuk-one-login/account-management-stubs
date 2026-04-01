@@ -669,7 +669,7 @@ describe("getPasskeysHandler", () => {
       isBase64Encoded: false,
       headers: {
         Authorization: authHeader || "Bearer token",
-        "x-adapi-accesstoken": adapiToken || "adapi-token",
+        "X-ADAPI-AccessToken": adapiToken || "adapi-token",
       },
       multiValueHeaders: {},
       queryStringParameters: null,
@@ -695,7 +695,7 @@ describe("getPasskeysHandler", () => {
 
   test("should return 403 when Authorization header is missing", async () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent("withPasskeys", undefined);
-    fakeEvent.headers = { "x-adapi-accesstoken": "adapi-token" };
+    fakeEvent.headers = { "X-ADAPI-AccessToken": "adapi-token" };
     const response = await getPasskeysHandler(fakeEvent);
     expect(response.statusCode).toBe(403);
   });
@@ -709,13 +709,13 @@ describe("getPasskeysHandler", () => {
     expect(response.statusCode).toBe(403);
   });
 
-  test("should return 403 when x-adapi-accesstoken header is missing", async () => {
+  test("should return 403 when X-ADAPI-AccessToken header is missing", async () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent(
       "withPasskeys",
       "Bearer token",
       undefined
     );
-    delete fakeEvent.headers["x-adapi-accesstoken"];
+    delete fakeEvent.headers["X-ADAPI-AccessToken"];
     const response = await getPasskeysHandler(fakeEvent);
     expect(response.statusCode).toBe(403);
   });
@@ -734,7 +734,7 @@ describe("deletePasskeyHandler", () => {
       isBase64Encoded: false,
       headers: {
         Authorization: authHeader || "Bearer token",
-        "x-adapi-accesstoken": adapiToken || "adapi-token",
+        "X-ADAPI-AccessToken": adapiToken || "adapi-token",
       },
       multiValueHeaders: {},
       queryStringParameters: null,
@@ -754,7 +754,7 @@ describe("deletePasskeyHandler", () => {
 
   test("should return 403 when Authorization header is missing", async () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent(undefined);
-    fakeEvent.headers = { "x-adapi-accesstoken": "adapi-token" };
+    fakeEvent.headers = { "X-ADAPI-AccessToken": "adapi-token" };
     const response = await deletePasskeyHandler(fakeEvent);
     expect(response.statusCode).toBe(403);
   });
@@ -765,9 +765,9 @@ describe("deletePasskeyHandler", () => {
     expect(response.statusCode).toBe(403);
   });
 
-  test("should return 403 when x-adapi-accesstoken header is missing", async () => {
+  test("should return 403 when X-ADAPI-AccessToken header is missing", async () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent("Bearer token", undefined);
-    delete fakeEvent.headers["x-adapi-accesstoken"];
+    delete fakeEvent.headers["X-ADAPI-AccessToken"];
     const response = await deletePasskeyHandler(fakeEvent);
     expect(response.statusCode).toBe(403);
   });
