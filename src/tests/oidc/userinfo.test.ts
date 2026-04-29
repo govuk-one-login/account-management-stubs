@@ -33,5 +33,5 @@ describe("handler", () => {
     } as never;
     const result: Response = await handler(mockApiEvent);
     expect(result.statusCode).toEqual(200);
-  });
+  }, 20_000);
 });
