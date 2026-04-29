@@ -96,33 +96,49 @@ describe("handler", () => {
   });
 
   describe("/authenticate", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const runWithTimers = async (promise: Promise<Response | ResponseWithOptionalBody>) => {
+      jest.advanceTimersByTime(20000);
+      return promise;
+    };
+
     test("returns status code 204", async () => {
-      const result: Response | ResponseWithOptionalBody = await handler(
+      const resultPromise = handler(
         createFakeAPIGatewayProxyEvent(
           { email: "test@test.com", password: "password" },
           "/authenticate"
         )
       );
+      const result = await runWithTimers(resultPromise);
       expect(result.statusCode).toEqual(204);
     });
 
     test("returns status code 400 when 'email' is missing", async () => {
-      const result: Response | ResponseWithOptionalBody = await handler(
+      const resultPromise = handler(
         createFakeAPIGatewayProxyEvent(
           { password: "password" },
           "/authenticate"
         )
       );
+      const result = await runWithTimers(resultPromise);
       expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
     test("returns status code 400 when 'password' is missing", async () => {
-      const result: Response | ResponseWithOptionalBody = await handler(
+      const resultPromise = handler(
         createFakeAPIGatewayProxyEvent(
           { email: "test@test.com" },
           "/authenticate"
         )
       );
+      const result = await runWithTimers(resultPromise);
       expectBadRequestError(result, EXPECTED_MISSING_PARAMS_ERROR, 400);
     });
 
@@ -132,13 +148,13 @@ describe("handler", () => {
         suspended: true,
         blocked: false,
       } as never);
-      // Call the function
-      const result: Response | ResponseWithOptionalBody = await handler(
+      const resultPromise = handler(
         createFakeAPIGatewayProxyEvent(
           { email: "test@test.com", password: "password" },
           "/authenticate"
         )
       );
+      const result = await runWithTimers(resultPromise);
       expectBadRequestError(
         result,
         { code: 1083, message: "User's account is suspended" },
@@ -153,13 +169,13 @@ describe("handler", () => {
         blocked: true,
       } as never);
 
-      const result: Response | ResponseWithOptionalBody = await handler(
+      const resultPromise = handler(
         createFakeAPIGatewayProxyEvent(
           { email: "test@test.com", password: "password" },
           "/authenticate"
         )
       );
-
+      const result = await runWithTimers(resultPromise);
       expectBadRequestError(
         result,
         { code: 1084, message: "User's account is blocked" },
@@ -174,13 +190,13 @@ describe("handler", () => {
         blocked: true,
       } as never);
 
-      const result: Response | ResponseWithOptionalBody = await handler(
+      const resultPromise = handler(
         createFakeAPIGatewayProxyEvent(
           { email: "test@test.com", password: "password" },
           "/authenticate"
         )
       );
-
+      const result = await runWithTimers(resultPromise);
       expectBadRequestError(
         result,
         { code: 1084, message: "User's account is blocked" },
