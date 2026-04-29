@@ -140,3 +140,7 @@ build.toml
 .vscode/
 node_modules/
 coverage/
+
+
+*.js
+*.js.map
