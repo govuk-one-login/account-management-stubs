@@ -46,7 +46,6 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
       });
     }
   } else if (event?.rawPath.includes("/authenticate")) {
-    await new Promise((resolve) => setTimeout(resolve, 20000));
     const userId = await getUserIdFromEvent(event);
     const scenario = await getUserScenario(userId, "interventions");
     if (
