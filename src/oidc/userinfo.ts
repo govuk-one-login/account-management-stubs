@@ -20,9 +20,11 @@ const { OIDC_CLIENT_ID, ENVIRONMENT } = process.env;
 const delay = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
+
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<Response> => {
+  // This delay is to test the timeout handling of the client application
   console.log("Delaying response by 15 seconds to test timeout");
   await delay(15_000);
 
