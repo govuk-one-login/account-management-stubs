@@ -26,4 +26,5 @@ export interface UserInfo {
   phone_number: string;
   phone_number_verified: boolean;
   updated_at: string;
+  account_data_api_access_token?: string;
 }

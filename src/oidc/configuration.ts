@@ -41,6 +41,7 @@ export const handler = async () => {
       "email_verified",
       "phone_number",
       "phone_number_verified",
+      "account_data_api_access_token",
       "https://vocab.account.gov.uk/v1/passport",
       "https://vocab.account.gov.uk/v1/drivingPermit",
       "https://vocab.account.gov.uk/v1/coreIdentityJWT",

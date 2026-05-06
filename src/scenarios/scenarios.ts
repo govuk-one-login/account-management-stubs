@@ -1,4 +1,5 @@
 import { UserScenarios } from "./scenarios.interfaces";
+import { UnsecuredJWT } from "jose";
 
 export const ERROR_CODES = {
   NEW_PASSWORD_SAME_AS_EXISTING: 1024,
@@ -67,6 +68,10 @@ const passkeys = [
   },
 ];
 
+const accountDataApiAccessToken = new UnsecuredJWT({
+  exp: new Date().getTime() / 1000 + 3600,
+}).encode();
+
 export const userScenarios: UserScenarios = {
   default: {
     httpResponse: {
@@ -83,6 +88,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "default",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -108,6 +114,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "ooVD4Sm9oPoZTHdY6ekyoexHDb_AoN4uDd7uHH-eQqk",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     passkeys,
   },
@@ -119,6 +126,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "userDEFAULTAuthApp",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -141,6 +149,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "userDEFAULTSms",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -163,6 +172,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "userDEFAULTSmsBackupAuthApp",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -194,6 +204,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "userDEFAULTAuthAppBackupSms",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -225,6 +236,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "userDEFAULTSmsBackupSms",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -256,6 +268,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "userNewPhoneNumberSameAsExisting",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     otpNotification: {
       success: false,
@@ -282,6 +295,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "userOtpCodeWrong",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     httpResponse: {
       code: 400,
@@ -297,6 +311,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "errorNoMfaMethods",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [],
     passkeys,
@@ -309,6 +324,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "errorMoreThanTwoMethods",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -349,6 +365,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "errorNoDEFAULTMethod",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -380,6 +397,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "errorMultipleDEFAULTMethods",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -411,6 +429,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "errorMultipleAuthAppMethods",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -442,6 +461,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "errorMfa400",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     httpResponse: {
       code: 400,
@@ -468,6 +488,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "errorMfa404",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     httpResponse: {
       code: 404,
@@ -494,6 +515,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "errorMfa500",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     httpResponse: {
       code: 500,
@@ -524,6 +546,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "userPerformanceTest-eQqk",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -553,6 +576,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "default",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -586,6 +610,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "default",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -619,6 +644,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "default",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -661,6 +687,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "noPasskeys",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -693,6 +720,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "onePasskey",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -725,6 +753,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "onePasskeyNoDisplayName",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -757,6 +786,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "fourPasskeys",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {
@@ -798,6 +828,7 @@ export const userScenarios: UserScenarios = {
       phone_number: "1234567890",
       phone_number_verified: true,
       public_subject_id: "fivePasskeys",
+      account_data_api_access_token: accountDataApiAccessToken,
     },
     mfaMethods: [
       {

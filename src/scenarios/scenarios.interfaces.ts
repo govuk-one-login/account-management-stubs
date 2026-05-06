@@ -19,6 +19,7 @@ export interface UserScenarios {
       phone_number: string;
       phone_number_verified: boolean;
       public_subject_id: string;
+      account_data_api_access_token?: string;
     };
     mfaMethods: components["schemas"]["MfaMethod"][];
     otpNotification: { success: true } | { success: false; code: number };
