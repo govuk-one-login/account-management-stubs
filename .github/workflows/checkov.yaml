@@ -17,6 +17,6 @@ jobs:
           framework: cloudformation
           # CKV_AWS_116 - Lambda functions should have a Dead Letter Queue configured not required for stub functions
           # CKV_AWS_28 - Lambda functions should have reserved concurrency configured not required for stub functions
-          skip_check: CKV_AWS_28, CKV_AWS_116 
+          skip_check: CKV_AWS_28,CKV_AWS_116 
           output_format: cli
           output_file_path: console
