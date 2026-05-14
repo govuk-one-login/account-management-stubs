@@ -25,22 +25,22 @@ interface ErrorLink {
 }
 
 const journeyOutcome = (
-  journey: string,
+  action: string,
   success: boolean,
   details: object = {}
 ): object => ({
   body: {
     email: DEFAULT_EMAIL,
-    journeys: [
+    actions: [
       {
         details,
-        journey,
+        action,
         success,
         timestamp: success ? SUCCESS_TIMESTAMP : FAILURE_TIMESTAMP,
       },
     ],
     outcome_id: success ? SUCCESS_OUTCOME_ID : FAILURE_OUTCOME_ID,
-    scope: journey,
+    scope: action,
     sub: DEFAULT_SUB,
     success,
   },

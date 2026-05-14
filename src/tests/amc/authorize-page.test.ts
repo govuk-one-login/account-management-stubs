@@ -89,10 +89,10 @@ describe("buildAuthorizePage", () => {
       expect(code.body.sub).toBe("urn:fdc:gov.uk:default");
       expect(code.body.scope).toBe("testing-journey");
       expect(code.body.success).toBe(true);
-      expect(code.body.journeys).toHaveLength(1);
-      expect(code.body.journeys[0].journey).toBe("testing-journey");
-      expect(code.body.journeys[0].success).toBe(true);
-      expect(code.body.journeys[0].details).toEqual({});
+      expect(code.body.actions).toHaveLength(1);
+      expect(code.body.actions[0].action).toBe("testing-journey");
+      expect(code.body.actions[0].success).toBe(true);
+      expect(code.body.actions[0].details).toEqual({});
     });
 
     test("passkey-create success includes aaguid in details", () => {
@@ -103,7 +103,7 @@ describe("buildAuthorizePage", () => {
       expect(match).not.toBeNull();
 
       const code = JSON.parse(decodeURIComponent(match![1]));
-      expect(code.body.journeys[0].details.aaguid).toBe(
+      expect(code.body.actions[0].details.aaguid).toBe(
         "9ddd1817-af5a-4672-a2b9-3e3dd95000a9"
       );
     });
@@ -117,9 +117,9 @@ describe("buildAuthorizePage", () => {
 
       const code = JSON.parse(decodeURIComponent(match![1]));
       expect(code.body.success).toBe(false);
-      expect(code.body.journeys[0].success).toBe(false);
-      expect(code.body.journeys[0].details.error.code).toBe(1001);
-      expect(code.body.journeys[0].details.error.description).toBe(
+      expect(code.body.actions[0].success).toBe(false);
+      expect(code.body.actions[0].details.error.code).toBe(1001);
+      expect(code.body.actions[0].details.error.description).toBe(
         "UserSignedOut"
       );
     });
@@ -132,8 +132,8 @@ describe("buildAuthorizePage", () => {
       expect(match).not.toBeNull();
 
       const code = JSON.parse(decodeURIComponent(match![1]));
-      expect(code.body.journeys[0].details.error.code).toBe(1002);
-      expect(code.body.journeys[0].details.error.description).toBe(
+      expect(code.body.actions[0].details.error.code).toBe(1002);
+      expect(code.body.actions[0].details.error.description).toBe(
         "UserAbortedJourney"
       );
     });
@@ -154,8 +154,8 @@ describe("buildAuthorizePage", () => {
       );
 
       expect(successCode.body.outcome_id).not.toBe(failureCode.body.outcome_id);
-      expect(successCode.body.journeys[0].timestamp).not.toBe(
-        failureCode.body.journeys[0].timestamp
+      expect(successCode.body.actions[0].timestamp).not.toBe(
+        failureCode.body.actions[0].timestamp
       );
     });
   });
