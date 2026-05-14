@@ -1,0 +1,26 @@
+name: Checkov
+
+permissions: {}
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  checkov:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 
+
+      - name: Checkov GitHub Action
+        uses: bridgecrewio/checkov-action@eec884fd62682f5f2b33e303e160d5e2fe8d89ec 
+        with:
+          file: template.yaml
+          framework: cloudformation
+          # CKV_AWS_116 - Lambda functions should have a Dead Letter Queue configured not required for stub functions
+          # CKV_AWS_28 - Lambda functions should have reserved concurrency configured not required for stub functions
+          skip_check: CKV_AWS_28,CKV_AWS_116 
+          output_format: cli
+          output_file_path: console
