@@ -243,7 +243,7 @@ export const getPasskeysHandler = async (
 
   const passkeys = getUserScenario(publicSubjectId, "passkeys");
 
-  return formatResponse(200, passkeys);
+  return formatResponse(200, { passkeys });
 };
 
 export const deletePasskeyHandler = async (

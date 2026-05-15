@@ -685,12 +685,14 @@ describe("getPasskeysHandler", () => {
     const fakeEvent = createFakeAPIGatewayProxyEvent("withPasskeys");
     const response = await getPasskeysHandler(fakeEvent);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toStrictEqual([
-      {
-        credentialId: "cred123",
-        friendlyName: "My Passkey",
-      },
-    ]);
+    expect(JSON.parse(response.body)).toStrictEqual({
+      passkeys: [
+        {
+          credentialId: "cred123",
+          friendlyName: "My Passkey",
+        },
+      ],
+    });
   });
 
   test("should return 403 when Authorization header is missing", async () => {
