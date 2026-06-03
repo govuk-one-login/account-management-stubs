@@ -68,7 +68,11 @@ export const handler = async (event: APIGatewayProxyEvent) => {
       };
     }
 
-    const html = buildAuthorizePage(params.redirect_uri!, params.state!);
+    const html = buildAuthorizePage(
+      params.redirect_uri!,
+      params.state!,
+      params.scope!
+    );
 
     return {
       statusCode: 200,
