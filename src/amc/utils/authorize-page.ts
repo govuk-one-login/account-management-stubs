@@ -262,9 +262,6 @@ const authorizeErrorLinks: ErrorLink[] = [
   },
 ];
 
-const encodeCode = (code: object): string =>
-  encodeURIComponent(JSON.stringify(code));
-
 const buildLink = (
   redirectUri: string,
   params: Record<string, string>
