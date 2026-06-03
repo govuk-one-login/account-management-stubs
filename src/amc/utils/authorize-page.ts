@@ -16,6 +16,7 @@ const FAILURE_TIMESTAMP = 1770631329893;
 interface JourneyOutcomeLink {
   label: string;
   code: object;
+  scope?: string;
 }
 
 interface ErrorLink {
@@ -65,38 +66,46 @@ const successLinks: JourneyOutcomeLink[] = [
   {
     label: "testing-journey success",
     code: journeyOutcome("testing-journey", true),
+    scope: "testing-journey",
   },
   {
     label: "account-delete success",
     code: journeyOutcome("account-delete", true),
+    scope: "account-delete",
   },
   {
     label: "passkey-create success",
     code: journeyOutcome("passkey-create", true, {
       aaguid: "9ddd1817-af5a-4672-a2b9-3e3dd95000a9",
     }),
+    scope: "passkey-create",
   },
   {
     label: "passkey-create success (passkey has no display name)",
     code: journeyOutcome("passkey-create", true, {
       aaguid: "00000000-0000-0000-0000-000000000000",
     }),
+    scope: "passkey-create",
   },
   {
     label: "testing-journey user signed out",
     code: journeyOutcome("testing-journey", false, userSignedOut),
+    scope: "testing-journey",
   },
   {
     label: "account-delete user signed out",
     code: journeyOutcome("account-delete", false, userSignedOut),
+    scope: "account-delete",
   },
   {
     label: "passkey-create user signed out",
     code: journeyOutcome("passkey-create", false, userSignedOut),
+    scope: "passkey-create",
   },
   {
     label: "passkey-create user aborted journey",
     code: journeyOutcome("passkey-create", false, userAborted),
+    scope: "passkey-create",
   },
 ];
 
@@ -262,19 +271,29 @@ const authorizeErrorLinks: ErrorLink[] = [
   },
 ];
 
-const encodeCode = (code: object): string =>
-  encodeURIComponent(JSON.stringify(code));
+const buildLink = (
+  redirectUri: string,
+  params: Record<string, string>
+): string => {
+  const url = new URL(redirectUri);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  return url.toString();
+};
 
 const journeyOutcomeLinksHtml = (
   links: JourneyOutcomeLink[],
   redirectUri: string,
   state: string,
+  scope: string,
   codePrefix = ""
 ): string =>
   links
+    .filter(
+      ({ scope: linkScope }) => linkScope === undefined || linkScope === scope
+    )
     .map(
       ({ label, code }) =>
-        `<a href="${redirectUri}?code=${encodeURIComponent(codePrefix)}${encodeCode(code)}&state=${encodeURIComponent(state)}">${label}</a><br>`
+        `<a href="${buildLink(redirectUri, { code: `${codePrefix}${JSON.stringify(code)}`, state })}">${label}</a><br>`
     )
     .join("\n");
 
@@ -286,7 +305,7 @@ const authorizeErrorLinksHtml = (
   links
     .map(
       ({ label, error, errorDescription }) =>
-        `<a href="${redirectUri}?error=${encodeURIComponent(error)}&error_description=${encodeURIComponent(errorDescription)}&state=${encodeURIComponent(state)}">${label}</a><br>`
+        `<a href="${buildLink(redirectUri, { error, error_description: errorDescription, state })}">${label}</a><br>`
     )
     .join("\n");
 
@@ -295,7 +314,8 @@ const specLink = (url: string, linkText: string, text: string): string =>
 
 export const buildAuthorizePage = (
   redirectUri: string,
-  state: string
+  state: string,
+  scope: string
 ): string => `<!DOCTYPE html>
 <html>
 <head><title>Account Management Component Stub</title></head>
@@ -304,15 +324,15 @@ export const buildAuthorizePage = (
 
 <h2>Journey outcome endpoint success responses</h2>
 ${specLink(API_SPEC_URL, API_SPEC_LINK_TEXT, "/journeyoutcome success responses")}
-${journeyOutcomeLinksHtml(successLinks, redirectUri, state)}
+${journeyOutcomeLinksHtml(successLinks, redirectUri, state, scope)}
 
 <h2>Journey outcome endpoint error responses</h2>
 ${specLink(API_SPEC_URL, API_SPEC_LINK_TEXT, "/journeyoutcome error responses")}
-${journeyOutcomeLinksHtml(journeyOutcomeErrorLinks, redirectUri, state)}
+${journeyOutcomeLinksHtml(journeyOutcomeErrorLinks, redirectUri, state, scope)}
 
 <h2>Token endpoint error responses</h2>
 ${specLink(API_SPEC_URL, API_SPEC_LINK_TEXT, "/token error responses")}
-${journeyOutcomeLinksHtml(tokenErrorLinks, redirectUri, state, "token_response__")}
+${journeyOutcomeLinksHtml(tokenErrorLinks, redirectUri, state, scope, "token_response__")}
 
 <h2>Authorize error responses</h2>
 ${specLink(FRONTEND_SPEC_URL, FRONTEND_SPEC_LINK_TEXT, "/authorize error responses")}

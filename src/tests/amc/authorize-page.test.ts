@@ -2,12 +2,13 @@ import { buildAuthorizePage } from "../../amc/utils/authorize-page";
 
 const REDIRECT_URI = "https://example.com/callback";
 const STATE = "test-state-123";
+const SCOPE = "testing-journey";
 
 describe("buildAuthorizePage", () => {
   let html: string;
 
   beforeAll(() => {
-    html = buildAuthorizePage(REDIRECT_URI, STATE);
+    html = buildAuthorizePage(REDIRECT_URI, STATE, SCOPE);
   });
 
   describe("page structure", () => {
@@ -62,21 +63,33 @@ describe("buildAuthorizePage", () => {
   });
 
   describe("journey outcome success links", () => {
-    const expectedLabels = [
-      "testing-journey success",
-      "account-delete success",
-      "passkey-create success",
-      "testing-journey user signed out",
-      "account-delete user signed out",
-      "passkey-create user signed out",
-      "passkey-create user aborted journey",
-    ];
+    test("only shows links matching the scope", () => {
+      expect(html).toContain(">testing-journey success</a>");
+      expect(html).toContain(">testing-journey user signed out</a>");
+      expect(html).not.toContain(">account-delete success</a>");
+      expect(html).not.toContain(">passkey-create success</a>");
+    });
 
-    test.each(expectedLabels)("contains link for '%s'", (label) => {
-      expect(html).toContain(`>${label}</a>`);
+    test("shows all links for passkey-create scope", () => {
+      const passkeyHtml = buildAuthorizePage(
+        REDIRECT_URI,
+        STATE,
+        "passkey-create"
+      );
+      expect(passkeyHtml).toContain(">passkey-create success</a>");
+      expect(passkeyHtml).toContain(
+        ">passkey-create success (passkey has no display name)</a>"
+      );
+      expect(passkeyHtml).toContain(">passkey-create user signed out</a>");
+      expect(passkeyHtml).toContain(">passkey-create user aborted journey</a>");
+      expect(passkeyHtml).not.toContain(">testing-journey success</a>");
     });
 
     test("success links contain correct journey data", () => {
+      const url = new URL(REDIRECT_URI);
+      url.searchParams.set("code", "placeholder");
+      url.searchParams.set("state", STATE);
+      // Extract code param from the generated link
       const hrefPattern = new RegExp(
         `href="${REDIRECT_URI}\\?code=([^"&]+)&[^"]*">[^<]*testing-journey success</a>`
       );
@@ -96,10 +109,15 @@ describe("buildAuthorizePage", () => {
     });
 
     test("passkey-create success includes aaguid in details", () => {
+      const passkeyHtml = buildAuthorizePage(
+        REDIRECT_URI,
+        STATE,
+        "passkey-create"
+      );
       const hrefPattern = new RegExp(
         `href="${REDIRECT_URI}\\?code=([^"&]+)&[^"]*">passkey-create success</a>`
       );
-      const match = html.match(hrefPattern);
+      const match = passkeyHtml.match(hrefPattern);
       expect(match).not.toBeNull();
 
       const code = JSON.parse(decodeURIComponent(match![1]));
@@ -125,10 +143,15 @@ describe("buildAuthorizePage", () => {
     });
 
     test("user aborted journey link contains UserAbortedJourney error details", () => {
+      const passkeyHtml = buildAuthorizePage(
+        REDIRECT_URI,
+        STATE,
+        "passkey-create"
+      );
       const hrefPattern = new RegExp(
         `href="${REDIRECT_URI}\\?code=([^"&]+)&[^"]*">passkey-create user aborted journey</a>`
       );
-      const match = html.match(hrefPattern);
+      const match = passkeyHtml.match(hrefPattern);
       expect(match).not.toBeNull();
 
       const code = JSON.parse(decodeURIComponent(match![1]));
@@ -349,7 +372,7 @@ describe("buildAuthorizePage", () => {
     });
 
     test("code parameters contain valid URL-encoded JSON", () => {
-      const codePattern = /\?code=([^&"]+)&/g;
+      const codePattern = /[?&]code=([^&"]+)&/g;
       let match;
       while ((match = codePattern.exec(html)) !== null) {
         const decoded = decodeURIComponent(match[1]);
@@ -362,19 +385,22 @@ describe("buildAuthorizePage", () => {
 
     test("handles special characters in state parameter", () => {
       const specialState = "state with spaces & special=chars";
-      const result = buildAuthorizePage(REDIRECT_URI, specialState);
-      expect(result).toContain(encodeURIComponent(specialState));
+      const result = buildAuthorizePage(REDIRECT_URI, specialState, SCOPE);
+      const expectedState = new URLSearchParams({
+        state: specialState,
+      }).toString();
+      expect(result).toContain(expectedState);
     });
 
     test("handles special characters in redirect URI", () => {
       const specialUri = "https://example.com/callback?existing=param";
-      const result = buildAuthorizePage(specialUri, STATE);
-      expect(result).toContain(`href="${specialUri}?code=`);
+      const result = buildAuthorizePage(specialUri, STATE, SCOPE);
+      expect(result).toContain(`href="${specialUri}&code=`);
     });
   });
 
   describe("link counts", () => {
-    test("has 8 journey outcome success links", () => {
+    test("has 2 journey outcome success links for testing-journey scope", () => {
       const successSection = html.split(
         "Journey outcome endpoint error responses"
       )[0];
@@ -383,7 +409,7 @@ describe("buildAuthorizePage", () => {
           new RegExp(`<a href="${REDIRECT_URI}\\?code=`, "g")
         ) || []
       ).length;
-      expect(linkCount).toBe(8);
+      expect(linkCount).toBe(2);
     });
 
     test("has 8 journey outcome error links", () => {
