@@ -265,6 +265,15 @@ const authorizeErrorLinks: ErrorLink[] = [
 const encodeCode = (code: object): string =>
   encodeURIComponent(JSON.stringify(code));
 
+const buildLink = (
+  redirectUri: string,
+  params: Record<string, string>
+): string => {
+  const url = new URL(redirectUri);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  return url.toString();
+};
+
 const journeyOutcomeLinksHtml = (
   links: JourneyOutcomeLink[],
   redirectUri: string,
@@ -274,7 +283,7 @@ const journeyOutcomeLinksHtml = (
   links
     .map(
       ({ label, code }) =>
-        `<a href="${redirectUri}?code=${encodeURIComponent(codePrefix)}${encodeCode(code)}&state=${encodeURIComponent(state)}">${label}</a><br>`
+        `<a href="${buildLink(redirectUri, { code: `${codePrefix}${JSON.stringify(code)}`, state })}">${label}</a><br>`
     )
     .join("\n");
 
@@ -286,7 +295,7 @@ const authorizeErrorLinksHtml = (
   links
     .map(
       ({ label, error, errorDescription }) =>
-        `<a href="${redirectUri}?error=${encodeURIComponent(error)}&error_description=${encodeURIComponent(errorDescription)}&state=${encodeURIComponent(state)}">${label}</a><br>`
+        `<a href="${buildLink(redirectUri, { error, error_description: errorDescription, state })}">${label}</a><br>`
     )
     .join("\n");
 

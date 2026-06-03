@@ -363,13 +363,16 @@ describe("buildAuthorizePage", () => {
     test("handles special characters in state parameter", () => {
       const specialState = "state with spaces & special=chars";
       const result = buildAuthorizePage(REDIRECT_URI, specialState);
-      expect(result).toContain(encodeURIComponent(specialState));
+      const expectedState = new URLSearchParams({
+        state: specialState,
+      }).toString();
+      expect(result).toContain(expectedState);
     });
 
     test("handles special characters in redirect URI", () => {
       const specialUri = "https://example.com/callback?existing=param";
       const result = buildAuthorizePage(specialUri, STATE);
-      expect(result).toContain(`href="${specialUri}?code=`);
+      expect(result).toContain(`href="${specialUri}&code=`);
     });
   });
 
