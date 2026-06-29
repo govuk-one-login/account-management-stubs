@@ -103,7 +103,7 @@ describe("buildAuthorizePage", () => {
       expect(code.body.scope).toBe("testing-journey");
       expect(code.body.success).toBe(true);
       expect(code.body.actions).toHaveLength(1);
-      expect(code.body.actions[0].action).toBe("testing-journey");
+      expect(code.body.actions[0].action).toBe("testing-journey-action");
       expect(code.body.actions[0].success).toBe(true);
       expect(code.body.actions[0].details).toEqual({});
     });
