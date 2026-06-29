@@ -26,22 +26,22 @@ interface ErrorLink {
 }
 
 const journeyOutcome = (
-  action: string,
+  scope: string,
   success: boolean,
-  details: object = {}
+  actions: {
+    action: string;
+    success: boolean;
+    details: object;
+  }[]
 ): object => ({
   body: {
     email: DEFAULT_EMAIL,
-    actions: [
-      {
-        details,
-        action,
-        success,
-        timestamp: success ? SUCCESS_TIMESTAMP : FAILURE_TIMESTAMP,
-      },
-    ],
+    actions: actions.map((action) => ({
+      ...action,
+      timestamp: action.success ? SUCCESS_TIMESTAMP : FAILURE_TIMESTAMP,
+    })),
     outcome_id: success ? SUCCESS_OUTCOME_ID : FAILURE_OUTCOME_ID,
-    scope: action,
+    scope,
     sub: DEFAULT_SUB,
     success,
   },
@@ -65,46 +65,73 @@ const userAborted = {
 const successLinks: JourneyOutcomeLink[] = [
   {
     label: "testing-journey success",
-    code: journeyOutcome("testing-journey", true),
+    code: journeyOutcome("testing-journey", true, [
+      {
+        action: "testing-journey-action",
+        success: true,
+        details: {},
+      },
+    ]),
     scope: "testing-journey",
   },
   {
-    label: "account-delete success",
-    code: journeyOutcome("account-delete", true),
-    scope: "account-delete",
-  },
-  {
     label: "passkey-create success",
-    code: journeyOutcome("passkey-create", true, {
-      aaguid: "9ddd1817-af5a-4672-a2b9-3e3dd95000a9",
-    }),
+    code: journeyOutcome("passkey-create", true, [
+      {
+        action: "passkey-create",
+        success: true,
+        details: {
+          aaguid: "9ddd1817-af5a-4672-a2b9-3e3dd95000a9",
+        },
+      },
+    ]),
     scope: "passkey-create",
   },
   {
     label: "passkey-create success (passkey has no display name)",
-    code: journeyOutcome("passkey-create", true, {
-      aaguid: "00000000-0000-0000-0000-000000000000",
-    }),
+    code: journeyOutcome("passkey-create", true, [
+      {
+        action: "passkey-create",
+        success: true,
+        details: {
+          aaguid: "00000000-0000-0000-0000-000000000000",
+        },
+      },
+    ]),
     scope: "passkey-create",
   },
   {
     label: "testing-journey user signed out",
-    code: journeyOutcome("testing-journey", false, userSignedOut),
+    code: journeyOutcome("testing-journey", false, [
+      {
+        action: "testing-journey-action",
+        success: false,
+        details: userSignedOut,
+      },
+    ]),
     scope: "testing-journey",
   },
-  {
-    label: "account-delete user signed out",
-    code: journeyOutcome("account-delete", false, userSignedOut),
-    scope: "account-delete",
-  },
+
   {
     label: "passkey-create user signed out",
-    code: journeyOutcome("passkey-create", false, userSignedOut),
+    code: journeyOutcome("passkey-create", false, [
+      {
+        action: "passkey-create",
+        success: false,
+        details: userSignedOut,
+      },
+    ]),
     scope: "passkey-create",
   },
   {
     label: "passkey-create user aborted journey",
-    code: journeyOutcome("passkey-create", false, userAborted),
+    code: journeyOutcome("passkey-create", false, [
+      {
+        action: "passkey-create",
+        success: false,
+        details: userAborted,
+      },
+    ]),
     scope: "passkey-create",
   },
 ];
