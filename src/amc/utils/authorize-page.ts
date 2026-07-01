@@ -10,9 +10,7 @@ const DEFAULT_EMAIL = "testuser@test.null.local";
 const DEFAULT_SUB = "urn:fdc:gov.uk:default";
 const SUCCESS_OUTCOME_ID = "e015cbfbfb80b1d0b48454c2e033e04910c27d58827b31d8";
 const FAILURE_OUTCOME_ID = "67ed54cfef70b3a5a7c88da6cabca2a128eb57a2aa92a81b";
-const SUCCESS_TIMESTAMP = 1770630621788;
-const FAILURE_TIMESTAMP = 1770631329893;
-
+const TIMESTAMP = 1770630621788;
 interface JourneyOutcomeLink {
   label: string;
   code: object;
@@ -32,14 +30,13 @@ const journeyOutcome = (
     action: string;
     success: boolean;
     details: object;
+    startedAt: number;
+    completedAt: number;
   }[]
 ): object => ({
   body: {
     email: DEFAULT_EMAIL,
-    actions: actions.map((action) => ({
-      ...action,
-      timestamp: action.success ? SUCCESS_TIMESTAMP : FAILURE_TIMESTAMP,
-    })),
+    actions,
     outcome_id: success ? SUCCESS_OUTCOME_ID : FAILURE_OUTCOME_ID,
     scope,
     sub: DEFAULT_SUB,
@@ -70,6 +67,8 @@ const successLinks: JourneyOutcomeLink[] = [
         action: "testing-journey-action",
         success: true,
         details: {},
+        startedAt: TIMESTAMP,
+        completedAt: TIMESTAMP + 300000,
       },
     ]),
     scope: "testing-journey",
@@ -83,6 +82,8 @@ const successLinks: JourneyOutcomeLink[] = [
         details: {
           aaguid: "9ddd1817-af5a-4672-a2b9-3e3dd95000a9",
         },
+        startedAt: TIMESTAMP,
+        completedAt: TIMESTAMP + 300000,
       },
     ]),
     scope: "passkey-create",
@@ -96,6 +97,8 @@ const successLinks: JourneyOutcomeLink[] = [
         details: {
           aaguid: "00000000-0000-0000-0000-000000000000",
         },
+        startedAt: TIMESTAMP,
+        completedAt: TIMESTAMP + 300000,
       },
     ]),
     scope: "passkey-create",
@@ -107,6 +110,8 @@ const successLinks: JourneyOutcomeLink[] = [
         action: "testing-journey-action",
         success: false,
         details: userSignedOut,
+        startedAt: TIMESTAMP,
+        completedAt: TIMESTAMP + 300000,
       },
     ]),
     scope: "testing-journey",
@@ -119,6 +124,8 @@ const successLinks: JourneyOutcomeLink[] = [
         action: "passkey-create",
         success: false,
         details: userSignedOut,
+        startedAt: TIMESTAMP,
+        completedAt: TIMESTAMP + 300000,
       },
     ]),
     scope: "passkey-create",
@@ -130,6 +137,8 @@ const successLinks: JourneyOutcomeLink[] = [
         action: "passkey-create",
         success: false,
         details: userAborted,
+        startedAt: TIMESTAMP,
+        completedAt: TIMESTAMP + 300000,
       },
     ]),
     scope: "passkey-create",
