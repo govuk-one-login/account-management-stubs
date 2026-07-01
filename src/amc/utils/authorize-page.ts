@@ -61,8 +61,12 @@ const userSignedOut = { error: { code: 1001, description: "UserSignedOut" } };
 const userAborted = {
   error: { code: 1002, description: "UserAbortedJourney" },
 };
+const accountHasInterventionsError = {
+  code: 1004,
+  description: "AccountHasInterventions",
+};
 const accountHasInterventions_blocked = {
-  error: { code: 1004, description: "AccountHasInterventions" },
+  error: accountHasInterventionsError,
   accountInterventionsStatus: {
     state: {
       blocked: true,
@@ -73,7 +77,7 @@ const accountHasInterventions_blocked = {
   },
 };
 const accountHasInterventions_blockedNoActionsSpecified = {
-  error: { code: 1004, description: "AccountHasInterventions" },
+  error: accountHasInterventionsError,
   accountInterventionsStatus: {
     state: {
       blocked: true,
@@ -82,7 +86,7 @@ const accountHasInterventions_blockedNoActionsSpecified = {
   },
 };
 const accountHasInterventions_suspendedNoActionsSpecified = {
-  error: { code: 1004, description: "AccountHasInterventions" },
+  error: accountHasInterventionsError,
   accountInterventionsStatus: {
     state: {
       blocked: false,
@@ -91,7 +95,7 @@ const accountHasInterventions_suspendedNoActionsSpecified = {
   },
 };
 const accountHasInterventions_suspendedNoActionsRequired = {
-  error: { code: 1004, description: "AccountHasInterventions" },
+  error: accountHasInterventionsError,
   accountInterventionsStatus: {
     state: {
       blocked: false,
@@ -102,7 +106,7 @@ const accountHasInterventions_suspendedNoActionsRequired = {
   },
 };
 const accountHasInterventions_suspendedResetPasswordRequired = {
-  error: { code: 1004, description: "AccountHasInterventions" },
+  error: accountHasInterventionsError,
   accountInterventionsStatus: {
     state: {
       blocked: false,
@@ -113,7 +117,7 @@ const accountHasInterventions_suspendedResetPasswordRequired = {
   },
 };
 const accountHasInterventions_suspendedReproveIdentityRequired = {
-  error: { code: 1004, description: "AccountHasInterventions" },
+  error: accountHasInterventionsError,
   accountInterventionsStatus: {
     state: {
       blocked: false,
@@ -125,7 +129,7 @@ const accountHasInterventions_suspendedReproveIdentityRequired = {
 };
 const accountHasInterventions_suspendedResetPasswordAndReproveIdentityRequired =
   {
-    error: { code: 1004, description: "AccountHasInterventions" },
+    error: accountHasInterventionsError,
     accountInterventionsStatus: {
       state: {
         blocked: false,
