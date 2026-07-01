@@ -127,6 +127,8 @@ describe("buildAuthorizePage", () => {
       expect(code.body.actions[0].action).toBe("testing-journey-action");
       expect(code.body.actions[0].success).toBe(true);
       expect(code.body.actions[0].details).toEqual({});
+      expect(code.body.actions[0].startedAt).toBe(1770630621788);
+      expect(code.body.actions[0].completedAt).toBe(1770630621788 + 300000);
     });
 
     test("passkey-create success includes aaguid in details", () => {
@@ -204,7 +206,7 @@ describe("buildAuthorizePage", () => {
       );
     });
 
-    test("success outcomes use different outcome_id and timestamp than failures", () => {
+    test("success outcomes use different outcome_id than failures", () => {
       const successPattern = new RegExp(
         `href="${REDIRECT_URI}\\?code=([^"&]+)&[^"]*">testing-journey success</a>`
       );
@@ -220,9 +222,18 @@ describe("buildAuthorizePage", () => {
       );
 
       expect(successCode.body.outcome_id).not.toBe(failureCode.body.outcome_id);
-      expect(successCode.body.actions[0].timestamp).not.toBe(
-        failureCode.body.actions[0].timestamp
+    });
+
+    test("actions include startedAt and completedAt timestamps", () => {
+      const hrefPattern = new RegExp(
+        `href="${REDIRECT_URI}\\?code=([^"&]+)&[^"]*">testing-journey success</a>`
       );
+      const match = html.match(hrefPattern);
+      expect(match).not.toBeNull();
+
+      const code = JSON.parse(decodeURIComponent(match![1]));
+      expect(code.body.actions[0].startedAt).toBe(1770630621788);
+      expect(code.body.actions[0].completedAt).toBe(1770630621788 + 300000);
     });
   });
 
