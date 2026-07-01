@@ -82,6 +82,27 @@ describe("buildAuthorizePage", () => {
       );
       expect(passkeyHtml).toContain(">passkey-create user signed out</a>");
       expect(passkeyHtml).toContain(">passkey-create user aborted journey</a>");
+      expect(passkeyHtml).toContain(
+        ">passkey-create account has interventions (blocked)</a>"
+      );
+      expect(passkeyHtml).toContain(
+        ">passkey-create account has interventions (blocked, no actions specified)</a>"
+      );
+      expect(passkeyHtml).toContain(
+        ">passkey-create account has interventions (suspended, no actions specified)</a>"
+      );
+      expect(passkeyHtml).toContain(
+        ">passkey-create account has interventions (suspended, no actions required)</a>"
+      );
+      expect(passkeyHtml).toContain(
+        ">passkey-create account has interventions (suspended, reset password required)</a>"
+      );
+      expect(passkeyHtml).toContain(
+        ">passkey-create account has interventions (suspended, reprove identity required)</a>"
+      );
+      expect(passkeyHtml).toContain(
+        ">passkey-create account has interventions (suspended, reset password and reprove identity required)</a>"
+      );
       expect(passkeyHtml).not.toContain(">testing-journey success</a>");
     });
 
@@ -140,6 +161,28 @@ describe("buildAuthorizePage", () => {
       expect(code.body.actions[0].details.error.description).toBe(
         "UserSignedOut"
       );
+    });
+
+    test("account interventions blocked link contains AccountHasInterventions error details", () => {
+      const passkeyHtml = buildAuthorizePage(
+        REDIRECT_URI,
+        STATE,
+        "passkey-create"
+      );
+      const hrefPattern = new RegExp(
+        `href="${REDIRECT_URI}\\?code=([^"&]+)&[^"]*">passkey-create account has interventions \\(blocked\\)</a>`
+      );
+      const match = passkeyHtml.match(hrefPattern);
+      expect(match).not.toBeNull();
+
+      const code = JSON.parse(decodeURIComponent(match![1]));
+      expect(code.body.actions[0].details.error.code).toBe(1004);
+      expect(code.body.actions[0].details.error.description).toBe(
+        "AccountHasInterventions"
+      );
+      expect(
+        code.body.actions[0].details.accountInterventionsStatus.state.blocked
+      ).toBe(true);
     });
 
     test("user aborted journey link contains UserAbortedJourney error details", () => {

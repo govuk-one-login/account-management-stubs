@@ -61,6 +61,80 @@ const userSignedOut = { error: { code: 1001, description: "UserSignedOut" } };
 const userAborted = {
   error: { code: 1002, description: "UserAbortedJourney" },
 };
+const accountHasInterventions_blocked = {
+  error: { code: 1004, description: "AccountHasInterventions" },
+  accountInterventionsStatus: {
+    state: {
+      blocked: true,
+      suspended: false,
+      reproveIdentity: false,
+      resetPassword: false,
+    },
+  },
+};
+const accountHasInterventions_blockedNoActionsSpecified = {
+  error: { code: 1004, description: "AccountHasInterventions" },
+  accountInterventionsStatus: {
+    state: {
+      blocked: true,
+      suspended: false,
+    },
+  },
+};
+const accountHasInterventions_suspendedNoActionsSpecified = {
+  error: { code: 1004, description: "AccountHasInterventions" },
+  accountInterventionsStatus: {
+    state: {
+      blocked: false,
+      suspended: true,
+    },
+  },
+};
+const accountHasInterventions_suspendedNoActionsRequired = {
+  error: { code: 1004, description: "AccountHasInterventions" },
+  accountInterventionsStatus: {
+    state: {
+      blocked: false,
+      suspended: true,
+      reproveIdentity: false,
+      resetPassword: false,
+    },
+  },
+};
+const accountHasInterventions_suspendedResetPasswordRequired = {
+  error: { code: 1004, description: "AccountHasInterventions" },
+  accountInterventionsStatus: {
+    state: {
+      blocked: false,
+      suspended: true,
+      reproveIdentity: false,
+      resetPassword: true,
+    },
+  },
+};
+const accountHasInterventions_suspendedReproveIdentityRequired = {
+  error: { code: 1004, description: "AccountHasInterventions" },
+  accountInterventionsStatus: {
+    state: {
+      blocked: false,
+      suspended: true,
+      reproveIdentity: true,
+      resetPassword: false,
+    },
+  },
+};
+const accountHasInterventions_suspendedResetPasswordAndReproveIdentityRequired =
+  {
+    error: { code: 1004, description: "AccountHasInterventions" },
+    accountInterventionsStatus: {
+      state: {
+        blocked: false,
+        suspended: true,
+        reproveIdentity: true,
+        resetPassword: true,
+      },
+    },
+  };
 
 const successLinks: JourneyOutcomeLink[] = [
   {
@@ -130,6 +204,90 @@ const successLinks: JourneyOutcomeLink[] = [
         action: "passkey-create",
         success: false,
         details: userAborted,
+      },
+    ]),
+    scope: "passkey-create",
+  },
+  {
+    label: "passkey-create account has interventions (blocked)",
+    code: journeyOutcome("passkey-create", false, [
+      {
+        action: "passkey-create",
+        success: false,
+        details: accountHasInterventions_blocked,
+      },
+    ]),
+    scope: "passkey-create",
+  },
+  {
+    label:
+      "passkey-create account has interventions (blocked, no actions specified)",
+    code: journeyOutcome("passkey-create", false, [
+      {
+        action: "passkey-create",
+        success: false,
+        details: accountHasInterventions_blockedNoActionsSpecified,
+      },
+    ]),
+    scope: "passkey-create",
+  },
+  {
+    label:
+      "passkey-create account has interventions (suspended, no actions specified)",
+    code: journeyOutcome("passkey-create", false, [
+      {
+        action: "passkey-create",
+        success: false,
+        details: accountHasInterventions_suspendedNoActionsSpecified,
+      },
+    ]),
+    scope: "passkey-create",
+  },
+  {
+    label:
+      "passkey-create account has interventions (suspended, no actions required)",
+    code: journeyOutcome("passkey-create", false, [
+      {
+        action: "passkey-create",
+        success: false,
+        details: accountHasInterventions_suspendedNoActionsRequired,
+      },
+    ]),
+    scope: "passkey-create",
+  },
+  {
+    label:
+      "passkey-create account has interventions (suspended, reset password required)",
+    code: journeyOutcome("passkey-create", false, [
+      {
+        action: "passkey-create",
+        success: false,
+        details: accountHasInterventions_suspendedResetPasswordRequired,
+      },
+    ]),
+    scope: "passkey-create",
+  },
+  {
+    label:
+      "passkey-create account has interventions (suspended, reprove identity required)",
+    code: journeyOutcome("passkey-create", false, [
+      {
+        action: "passkey-create",
+        success: false,
+        details: accountHasInterventions_suspendedReproveIdentityRequired,
+      },
+    ]),
+    scope: "passkey-create",
+  },
+  {
+    label:
+      "passkey-create account has interventions (suspended, reset password and reprove identity required)",
+    code: journeyOutcome("passkey-create", false, [
+      {
+        action: "passkey-create",
+        success: false,
+        details:
+          accountHasInterventions_suspendedResetPasswordAndReproveIdentityRequired,
       },
     ]),
     scope: "passkey-create",
