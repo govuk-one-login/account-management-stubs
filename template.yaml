@@ -1529,7 +1529,7 @@ Resources:
       MemorySize: 128
       ReservedConcurrentExecutions: 30
       Role: !GetAtt AmcLambdaRole.Arn
-      Timeout: 5
+      Timeout: 10
       Events:
         CatchAll:
           Type: Api
