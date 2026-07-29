@@ -31,12 +31,15 @@ describe("authorize", () => {
   };
 
   beforeEach(() => {
+    const nowInSeconds = Math.floor(Date.now() / 1000);
     const payload = {
       nonce: "67890",
       state: "AUTHENTICATE",
       redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
       code_challenge_method: "S256",
       code_challenge: "abc123",
+      jti: "test-jti-value",
+      exp: nowInSeconds + 3600,
     };
 
     requestJwt = buildJwt(payload);
@@ -353,6 +356,75 @@ describe("authorize", () => {
       expect(ttl).toBeLessThanOrEqual(nowInSeconds + 3600);
     });
 
+    test("redirects with error: invalid_request when jti claim is missing", async () => {
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      const payload = {
+        nonce: "67890",
+        state: "AUTHENTICATE",
+        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+        code_challenge_method: "S256",
+        code_challenge: "abc123",
+        exp: nowInSeconds + 3600,
+      };
+      requestJwt = buildJwt(payload);
+
+      const mockApiEvent: APIGatewayProxyEvent = {
+        body: `state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&request=${requestJwt}`,
+        queryStringParameters: {
+          request: requestJwt,
+        } as APIGatewayProxyEventQueryStringParameters,
+      } as never;
+      const result = await handler(mockApiEvent);
+      expect(result.statusCode).toEqual(302);
+      expect(result.headers.Location).toContain("error=invalid_request");
+    });
+
+    test("redirects with error: invalid_request when exp claim is missing", async () => {
+      const payload = {
+        nonce: "67890",
+        state: "AUTHENTICATE",
+        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+        code_challenge_method: "S256",
+        code_challenge: "abc123",
+        jti: "test-jti-value",
+      };
+      requestJwt = buildJwt(payload);
+
+      const mockApiEvent: APIGatewayProxyEvent = {
+        body: `state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&request=${requestJwt}`,
+        queryStringParameters: {
+          request: requestJwt,
+        } as APIGatewayProxyEventQueryStringParameters,
+      } as never;
+      const result = await handler(mockApiEvent);
+      expect(result.statusCode).toEqual(302);
+      expect(result.headers.Location).toContain("error=invalid_request");
+    });
+
+    test("redirects with error: invalid_request when exp claim is in the past", async () => {
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      const payload = {
+        nonce: "67890",
+        state: "AUTHENTICATE",
+        redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
+        code_challenge_method: "S256",
+        code_challenge: "abc123",
+        jti: "test-jti-value",
+        exp: nowInSeconds - 1,
+      };
+      requestJwt = buildJwt(payload);
+
+      const mockApiEvent: APIGatewayProxyEvent = {
+        body: `state=Authenticate&nonce=67890&redirectUri=https%3A%2F%2Fhome.dev.account.gov.uk%2Fauth%2Fcallback&request=${requestJwt}`,
+        queryStringParameters: {
+          request: requestJwt,
+        } as APIGatewayProxyEventQueryStringParameters,
+      } as never;
+      const result = await handler(mockApiEvent);
+      expect(result.statusCode).toEqual(302);
+      expect(result.headers.Location).toContain("error=invalid_request");
+    });
+
     test("logs an error if saving the code challenge fails but still returns a 302 response with error", async () => {
       const dynamoMock = mockClient(DynamoDBDocumentClient);
       dynamoMock.on(PutCommand).rejects(new Error("DynamoDB error"));
@@ -389,12 +461,15 @@ describe("authorize", () => {
     });
 
     test("returns 302 with authorization code when valid PKCE parameters are supplied", async () => {
+      const nowInSeconds = Math.floor(Date.now() / 1000);
       const payload = {
         nonce: "67890",
         state: "AUTHENTICATE",
         redirect_uri: "https://home.dev.account.gov.uk/auth/callback",
         code_challenge_method: "S256",
         code_challenge: "valid-challenge-abc123",
+        jti: "test-jti-value",
+        exp: nowInSeconds + 3600,
       };
 
       requestJwt = buildJwt(payload);

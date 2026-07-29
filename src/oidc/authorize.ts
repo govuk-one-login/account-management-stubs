@@ -52,7 +52,7 @@ const translateConfig = { marshallOptions };
 const dynamoClient = new DynamoDBClient({});
 const dynamoDocClient = DynamoDBDocumentClient.from(
   dynamoClient,
-  translateConfig
+  translateConfig,
 );
 
 const { AWS_REGION, TABLE_NAME, CODE_CHALLENGE_TABLE } = process.env;
@@ -78,7 +78,7 @@ const newTxmaEvent = (): TxmaEvent => ({
 
 export const sendSqsMessage = async (
   messageBody: string,
-  queueUrl: string | undefined
+  queueUrl: string | undefined,
 ): Promise<string | undefined> => {
   const message: SendMessageRequest = {
     QueueUrl: queueUrl,
@@ -92,7 +92,7 @@ export const writeNonce = async (
   code: string,
   nonce: string,
   userId = "F5CE808F-75AB-4ECD-BBFC-FF9DBF5330FA",
-  remove_at: number
+  remove_at: number,
 ): Promise<PutCommandOutput> => {
   const command = new PutCommand({
     TableName: TABLE_NAME,
@@ -107,13 +107,13 @@ export const writeNonce = async (
 };
 
 const getQueryParams = (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): APIGatewayProxyEventQueryStringParameters => {
   return event.queryStringParameters as APIGatewayProxyEventQueryStringParameters;
 };
 
 const getRequestObjectJwt = (
-  params: APIGatewayProxyEventQueryStringParameters
+  params: APIGatewayProxyEventQueryStringParameters,
 ): JWTPayload => {
   const { request } = params;
   assert(request, "no request object");
@@ -122,7 +122,7 @@ const getRequestObjectJwt = (
 
 const isValidCodeChallenge = (
   codeChallengeMethod: string,
-  codeChallenge: string | null | undefined
+  codeChallenge: string | null | undefined,
 ): boolean => {
   if (codeChallengeMethod !== SUPPORTED_CODE_CHALLENGE_METHOD) {
     return false;
@@ -131,7 +131,7 @@ const isValidCodeChallenge = (
 };
 
 const saveCodeChallenge = async (
-  codeChallenge: string
+  codeChallenge: string,
 ): Promise<PutCommandOutput> => {
   const removeAt = Math.floor(Date.now() / 1000) + CODE_CHALLENGE_TTL_SECONDS;
   const command = new PutCommand({
@@ -158,7 +158,7 @@ const validateAndSavePkce = async (jwtPayload: JWTPayload): Promise<void> => {
 
   if (!isValidCodeChallenge(codeChallengeMethod, codeChallenge)) {
     throw new PkceValidationError(
-      `Invalid PKCE parameters: method must be ${SUPPORTED_CODE_CHALLENGE_METHOD} with non-empty challenge`
+      `Invalid PKCE parameters: method must be ${SUPPORTED_CODE_CHALLENGE_METHOD} with non-empty challenge`,
     );
   }
 
@@ -191,7 +191,7 @@ const parseRequestBody = (body: string): AuthorizeRequestBody => {
 const createErrorResponse = (
   redirectUri: string,
   error: string,
-  errorDescription?: string
+  errorDescription?: string,
 ): Response => {
   const params = new URLSearchParams({ error });
   if (errorDescription) {
@@ -209,7 +209,7 @@ const createErrorResponse = (
 const createSuccessResponse = (
   redirectUri: string,
   state: string,
-  code: string
+  code: string,
 ): Response => {
   console.log("Sent Success Response");
   return {
@@ -254,13 +254,34 @@ export const selectScenarioHandler = async (event: APIGatewayProxyEvent) => {
 };
 
 export const handler = async (
-  event: APIGatewayProxyEvent
+  event: APIGatewayProxyEvent,
 ): Promise<Response> => {
   assert(event.body, "no body");
 
   const { nonce, state, redirectUri, request, scenario } = parseRequestBody(
-    event.body
+    event.body,
   );
+
+  const requestObjectJwt = getRequestObjectJwt({ request });
+
+  if (typeof requestObjectJwt?.jti !== "string") {
+    const errorMessage = `jti claim is not a string. Type of jti claim: ${typeof requestObjectJwt?.jti}`;
+    console.error(errorMessage);
+    return createErrorResponse(redirectUri, "invalid_request", errorMessage);
+  }
+
+  if (typeof requestObjectJwt?.exp !== "number") {
+    const errorMessage = `exp claim is not a number. Type of exp claim: ${typeof requestObjectJwt?.exp}`;
+    console.error(errorMessage);
+    return createErrorResponse(redirectUri, "invalid_request", errorMessage);
+  }
+
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  if (requestObjectJwt.exp < nowInSeconds) {
+    const errorMessage = `exp claim is in the past. Value of exp claim: ${requestObjectJwt.exp}. Now: ${nowInSeconds}.`;
+    console.error(errorMessage);
+    return createErrorResponse(redirectUri, "invalid_request", errorMessage);
+  }
 
   try {
     await validateAndSavePkce(getRequestObjectJwt({ request }));
@@ -271,7 +292,7 @@ export const handler = async (
       "invalid_request",
       error instanceof PkceValidationError
         ? error.message
-        : "Failed to process PKCE parameters"
+        : "Failed to process PKCE parameters",
     );
   }
 
