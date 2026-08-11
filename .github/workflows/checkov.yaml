@@ -12,10 +12,10 @@ jobs:
   checkov:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 
 
       - name: Checkov GitHub Action
-        uses: bridgecrewio/checkov-action@d9d1e5cdc53e3a91f0c4c58db7bc19ee31cac7e5 
+        uses: bridgecrewio/checkov-action@9b70310bcd306d11740313070b940167d6b23085 
         with:
           file: template.yaml
           framework: cloudformation
