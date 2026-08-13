@@ -1580,6 +1580,11 @@ Resources:
       Description: HTTP API to simulate the Account Interventions Service in non-prod environments
       StageName: !Ref Environment
       TracingEnabled: true
+      MethodSettings:
+        - CachingEnabled: true
+          CacheDataEncrypted: true
+          ResourcePath: "/*"
+          HttpMethod: "*"
       AccessLogSetting:
         DestinationArn: !GetAtt AccountInterventionsApiGatewayApiLogGroup.Arn
       Tags:
