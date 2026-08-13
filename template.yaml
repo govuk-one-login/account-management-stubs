@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: "A template to create the GOV.UK One login Account backend infrastructure."
 
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - E3724
+
 Parameters:
   Environment:
     Description: "The environment type"
@@ -1558,5 +1564,143 @@ Resources:
     UpdateReplacePolicy: Delete
     Properties:
       LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-amc"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  ######################################
+  # Account Interventions Service Stub
+  ######################################
+
+  AccountInterventionsStubsRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      AlwaysDeploy: true
+      PropagateTags: true
+      Name: account-interventions-api-stub
+      Description: HTTP API to simulate the Account Interventions Service in non-prod environments
+      StageName: !Ref Environment
+      TracingEnabled: true
+      CacheClusterEnabled: true
+      CacheClusterSize: "0.5"
+      AccessLogSetting:
+        DestinationArn: !GetAtt AccountInterventionsApiGatewayApiLogGroup.Arn
+      Tags:
+        FMSRegionalPolicy: false
+        CustomPolicy: true
+
+  AccountInterventionsApiGatewayApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/apigateway/${AccountInterventionsStubsRestApi}"
+      RetentionInDays: 30
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+
+  ######################################
+  # Account Interventions Stub Domain
+  ######################################
+  AccountInterventionsCustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Sub ais-stub.home.${Environment}.account.gov.uk
+      DomainNameConfigurations:
+        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/HostedZone/Certificate/Home/ARN}}"
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
+
+  AccountInterventionsApiRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref AccountInterventionsCustomDomain
+      Type: A
+      HostedZoneId: !Sub "{{resolve:ssm:/${Environment}/Platform/Route53/HostedZone/Home}}"
+      AliasTarget:
+        DNSName: !GetAtt AccountInterventionsCustomDomain.RegionalDomainName
+        HostedZoneId: !GetAtt AccountInterventionsCustomDomain.RegionalHostedZoneId
+        EvaluateTargetHealth: true
+
+  AccountInterventionsApiMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref AccountInterventionsCustomDomain
+      Stage: !Ref Environment
+      RestApiId: !Ref AccountInterventionsStubsRestApi
+    DependsOn:
+      - AccountInterventionsStubsRestApiStage
+
+  AccountInterventionsStubEndpoint:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: The API Gateway endpoint for the Account Interventions stub
+      Name: !Sub "/${AWS::StackName}/Stub/AccountInterventions"
+      Type: String
+      Value: !Sub ais-stub.home.${Environment}.account.gov.uk
+
+  # Lambda
+
+  AccountInterventionsLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+
+  AccountInterventionsApiStubFunction:
+    Type: AWS::Serverless::Function
+    # checkov:skip=CKV_AWS_116
+    DependsOn:
+      - AccountInterventionsApiStubFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${Environment}-${AWS::StackName}-account-interventions
+      Architectures: ["arm64"]
+      CodeUri: src
+      Handler: account-interventions.handler
+      KmsKeyArn: !GetAtt LambdaKMSKey.Arn
+      PackageType: Zip
+      MemorySize: 256
+      ReservedConcurrentExecutions: 30
+      Role: !GetAtt AccountInterventionsLambdaRole.Arn
+      Timeout: 5
+      Events:
+        GetInterventionStatus:
+          Type: Api
+          Properties:
+            Path: /v1/ais/{userId}
+            Method: GET
+            RestApiId:
+              Ref: AccountInterventionsStubsRestApi
+      VpcConfig:
+        SubnetIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdA
+          - Fn::ImportValue: !Sub ${VpcStackName}-PrivateSubnetIdB
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - account-interventions/account-interventions.ts
+
+  AccountInterventionsApiStubFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${Environment}-${AWS::StackName}-account-interventions"
       RetentionInDays: 30
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
