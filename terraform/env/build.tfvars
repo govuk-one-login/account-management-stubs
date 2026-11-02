@@ -1,0 +1,5 @@
+environment                        = "build"
+pipelineBuildNotificationStackName = "platform-alerting"
+pipelineSigningProfileArn          = "arn:aws:signer:eu-west-2:301577035144:/signing-profiles/SigningProfile_yPKkKGDvkzOL"
+pipelineSigningProfileVersionArn   = "arn:aws:signer:eu-west-2:301577035144:/signing-profiles/SigningProfile_yPKkKGDvkzOL/zB61DrvMj0"
+pipelineSlackNotificationType      = "Failures"

@@ -1,0 +1,5 @@
+environment                        = "dev"
+pipelineBuildNotificationStackName = "none"
+pipelineSigningProfileArn          = "arn:aws:signer:eu-west-2:985326104449:/signing-profiles/SigningProfile_vpuDZuASeOD0"
+pipelineSigningProfileVersionArn   = "arn:aws:signer:eu-west-2:985326104449:/signing-profiles/SigningProfile_vpuDZuASeOD0/KCAqQdGK8H"
+pipelineSlackNotificationType      = "None"
